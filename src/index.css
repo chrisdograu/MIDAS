@@ -1,0 +1,492 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 7%;
+    --foreground: 210 20% 92%;
+
+    --card: 220 18% 10%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 220 18% 10%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 170 80% 50%;
+    --primary-foreground: 220 20% 7%;
+
+    --secondary: 220 15% 16%;
+    --secondary-foreground: 210 20% 85%;
+
+    --muted: 220 15% 14%;
+    --muted-foreground: 215 15% 60%;
+
+    --accent: 270 65% 62%;
+    --accent-foreground: 210 20% 95%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 170 80% 50%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 220 18% 8%;
+    --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 170 80% 50%;
+    --sidebar-primary-foreground: 220 20% 7%;
+    --sidebar-accent: 220 15% 14%;
+    --sidebar-accent-foreground: 210 20% 85%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 170 80% 50%;
+
+    /* Custom tokens */
+    --glow-primary: 170 80% 50%;
+    --glow-accent: 270 65% 62%;
+    --surface-hover: 220 15% 13%;
+    --gradient-start: 170 80% 50%;
+    --gradient-end: 270 65% 62%;
+    --success: 142 71% 45%;
+    --success-foreground: 220 20% 7%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 20% 7%;
+    --price: 48 96% 53%;
+    --price-foreground: 220 20% 7%;
+    --gold: 45 90% 58%;
+    --seller: 28 92% 55%;
+    --seller-foreground: 220 20% 7%;
+    --overlay: 220 25% 4%;
+
+
+    /* Neon intensity tokens (Phase 7) — dark mode pode brilhar forte */
+    --neon-glow-strength: 0.32;
+    --neon-glow-spread: 0.12;
+    --neon-border-opacity: 1;
+    --neon-pill-bg: 0.7;
+    --neon-pill-shadow: 0.33;
+
+    /* Platform brand colors via tokens (semantic, theme-aware) */
+    --plat-ps: 200 78% 64%;
+    --plat-xbox: 122 70% 56%;
+    --plat-switch: 0 100% 67%;
+
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* ── Modo claro "Neon Glass" ────────────────────────────────────────────
+     Não é o claro corporativo genérico: o canvas é um cinza-azulado frio
+     (nunca branco puro) para o neon respirar, os cards são vidro branco
+     translúcido e a profundidade vem de sombras frias, não de brilho. */
+  .light {
+    --background: 218 25% 96%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Teal encorpado (#00A39A) — mantém a marca com contraste AA no claro */
+    --primary: 176 100% 30%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 218 22% 91%;
+    --secondary-foreground: 222 30% 20%;
+
+    --muted: 218 22% 93%;
+    --muted-foreground: 215 19% 35%;
+
+    /* Violeta elétrico (#7C3AED) levemente aprofundado p/ legibilidade */
+    --accent: 262 78% 46%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 74% 44%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 218 20% 84%;
+    --input: 218 20% 86%;
+    --ring: 176 100% 30%;
+
+    --sidebar-background: 218 28% 94%;
+    --sidebar-foreground: 222 30% 20%;
+    --sidebar-primary: 176 100% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 20% 89%;
+    --sidebar-accent-foreground: 222 30% 20%;
+    --sidebar-border: 218 20% 84%;
+    --sidebar-ring: 176 100% 30%;
+
+    /* Glow no claro: cor saturada, alcance curto (sombra fria faz o resto) */
+    --glow-primary: 176 100% 34%;
+    --glow-accent: 262 83% 52%;
+    --surface-hover: 218 22% 91%;
+    --gradient-start: 176 100% 30%;
+    --gradient-end: 262 78% 46%;
+    --success: 152 68% 30%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 92% 36%;
+    --warning-foreground: 0 0% 100%;
+    --price: 30 96% 32%;
+    --price-foreground: 0 0% 100%;
+    --gold: 38 85% 38%;
+    --seller: 24 88% 38%;
+    --seller-foreground: 0 0% 100%;
+    --overlay: 222 47% 14%;
+
+    /* Neon mais discreto no claro — evita "queimar" os olhos */
+    --neon-glow-strength: 0.2;
+    --neon-glow-spread: 0.08;
+    --neon-border-opacity: 0.9;
+    --neon-pill-bg: 0.92;
+    --neon-pill-shadow: 0.16;
+
+    /* Sombras frias reutilizáveis (substituem a escuridão do dark mode) */
+    --shadow-cool-sm: 0 1px 2px hsl(222 47% 11% / 0.06);
+    --shadow-cool-md: 0 10px 30px -10px hsl(222 47% 11% / 0.1);
+    --shadow-cool-lg: 0 20px 40px -15px hsl(222 47% 11% / 0.14);
+
+    --plat-ps: 208 80% 38%;
+    --plat-xbox: 122 60% 30%;
+    --plat-switch: 0 75% 42%;
+  }
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  /* Regra 8 (Etapa 3) — foco de teclado visível por padrão em TODO elemento
+     interativo, em vez de depender de `.focus-ring` colado tela por tela.
+     Componentes que precisam de foco diferente sobrescrevem com sua própria
+     classe `focus-visible:` (a especificidade da utility ganha da base). */
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role='button']:focus-visible,
+  [role='tab']:focus-visible,
+  [role='menuitem']:focus-visible,
+  [role='option']:focus-visible,
+  [role='switch']:focus-visible,
+  [role='checkbox']:focus-visible,
+  [role='radio']:focus-visible,
+  [tabindex]:not([tabindex='-1']):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring));
+  }
+  /* Disabled uniforme (Regra 8) */
+  button:disabled,
+  [aria-disabled='true'] {
+    @apply opacity-40 cursor-not-allowed;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Orbitron', sans-serif;
+  }
+  .glow-primary {
+    box-shadow:
+      0 0 20px hsl(var(--glow-primary) / var(--neon-glow-strength)),
+      0 0 60px hsl(var(--glow-primary) / var(--neon-glow-spread));
+  }
+  .glow-accent {
+    box-shadow:
+      0 0 20px hsl(var(--glow-accent) / var(--neon-glow-strength)),
+      0 0 60px hsl(var(--glow-accent) / var(--neon-glow-spread));
+  }
+  /* Rodada 26 · item 5 — economia de dados: glow perde o espalhamento
+     (box-shadow grande é custo de pintura) e vira só um contorno sólido,
+     mantendo a indicação de "ativo/selecionado" da Regra 5. */
+  html[data-data-saver='on'] .glow-primary {
+    box-shadow: inset 0 0 0 1px hsl(var(--glow-primary) / 0.55);
+  }
+  html[data-data-saver='on'] .glow-accent {
+    box-shadow: inset 0 0 0 1px hsl(var(--glow-accent) / 0.55);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glass {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  /* Regra 8 — foco de teclado visível e único em todo o app */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  /* Regra 5 — estado ativo de navegação: fonte única para web, mobile e desktop.
+     Ajustar aqui muda header web, bottom nav mobile e sidebar do backoffice. */
+  .nav-item {
+    @apply relative transition-colors focus-ring;
+  }
+  .nav-item-idle {
+    @apply text-muted-foreground hover:text-foreground;
+  }
+  .nav-item-active {
+    @apply text-primary bg-primary/10;
+    box-shadow:
+      0 0 20px hsl(var(--glow-primary) / var(--neon-glow-strength)),
+      0 0 60px hsl(var(--glow-primary) / var(--neon-glow-spread));
+  }
+  .light .nav-item-active {
+    box-shadow: 0 4px 14px -4px hsl(var(--glow-primary) / 0.35);
+  }
+  html[data-data-saver='on'] .nav-item-active {
+    box-shadow: inset 0 0 0 1px hsl(var(--glow-primary) / 0.55);
+  }
+  /* Marcador lateral usado pela sidebar do backoffice */
+  .nav-item-active-bar::before {
+    content: '';
+    @apply absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-primary;
+  }
+  /* Scrim padrão de sheets/modais (antes: bg-black/60 espalhado) */
+  .overlay-scrim {
+    background: hsl(var(--overlay) / 0.7);
+    backdrop-filter: blur(2px);
+  }
+  /* Texto sobre mídia/imagem — única fonte de branco puro permitido */
+  .text-on-media { color: hsl(0 0% 100%); }
+  .text-on-media-soft { color: hsl(0 0% 100% / 0.8); }
+  .fill-on-media { fill: hsl(0 0% 100%); }
+  .border-on-media { border-color: hsl(0 0% 100% / 0.4); }
+  /* Letterbox de vídeo/stream — preto real é intencional aqui */
+  .surface-video { background: hsl(0 0% 0%); }
+  /* Faixa de leitura sobre imagem — exceção documentada de contraste */
+  .image-scrim {
+    background: linear-gradient(to top, hsl(var(--overlay) / 0.85), transparent);
+  }
+
+  /* Platform pill tokens (semantic, brand-aware, theme-aware) */
+  .platform-pill {
+    @apply text-[10px] font-semibold px-1.5 py-0.5 rounded backdrop-blur-sm border;
+    background: hsl(var(--card) / var(--neon-pill-bg));
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--border) / 0.6);
+  }
+  .platform-ps {
+    color: hsl(var(--plat-ps));
+    border-color: hsl(var(--plat-ps) / 0.55);
+    box-shadow: 0 0 8px hsl(var(--plat-ps) / var(--neon-pill-shadow));
+  }
+  .platform-xbox {
+    color: hsl(var(--plat-xbox));
+    border-color: hsl(var(--plat-xbox) / 0.55);
+    box-shadow: 0 0 8px hsl(var(--plat-xbox) / var(--neon-pill-shadow));
+  }
+  .platform-switch {
+    color: hsl(var(--plat-switch));
+    border-color: hsl(var(--plat-switch) / 0.55);
+    box-shadow: 0 0 8px hsl(var(--plat-switch) / var(--neon-pill-shadow));
+  }
+  .platform-pc {
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.28);
+    box-shadow: 0 0 8px hsl(var(--primary) / var(--neon-pill-shadow));
+  }
+
+  /* Animated neon border on hover */
+  @keyframes neon-border-spin {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .neon-border-hover {
+    position: relative;
+    isolation: isolate;
+  }
+  .neon-border-hover::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--primary) / var(--neon-border-opacity)),
+      hsl(var(--accent) / var(--neon-border-opacity)),
+      hsl(var(--primary) / var(--neon-border-opacity)),
+      hsl(var(--accent) / var(--neon-border-opacity))
+    );
+    background-size: 200% 100%;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .neon-border-hover:hover::before {
+    opacity: 1;
+    animation: neon-border-spin 3s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .neon-border-hover:hover::before { animation: none; }
+  }
+
+  /* Chromatic pulse on selected text */
+  @keyframes chromatic-pulse {
+    0%, 100% { text-shadow: 0 0 0 transparent; }
+    50% { text-shadow: -1px 0 hsl(var(--primary) / 0.7), 1px 0 hsl(var(--accent) / 0.7); }
+  }
+  .chromatic-pulse { animation: chromatic-pulse 0.6s ease-out; }
+
+  /* Neon particle burst */
+  @keyframes particle-burst {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--px, 0), var(--py, 0)) scale(0); opacity: 0; }
+  }
+  .particle-burst { animation: particle-burst 0.7s ease-out forwards; }
+}
+
+/* ── Rodada 27 · polimento do tema claro ───────────────────────────────
+   No claro, superfícies translúcidas ficavam "lavadas" (card branco sobre
+   fundo quase branco, sem separação). Aqui o vidro vira superfície sólida
+   com borda real + sombra sutil, e chips/inputs ganham contraste mínimo. */
+@layer utilities {
+  /* Vidro branco do claro: 0.75 de opacidade + blur(16px) — mantém a
+     sensação de vidro do dark, sem "lavar" o conteúdo (borda real + sombra fria). */
+  .light .glass {
+    background: hsl(0 0% 100% / 0.75);
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 2px hsl(220 25% 10% / 0.05), 0 8px 24px -12px hsl(220 25% 10% / 0.12);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+  /* Orbitron com gradiente no claro: teal→violeta mais profundos, senão
+     o texto grande fica ilegível sobre o fundo azul-gelado. */
+  .light .gradient-text {
+    background: linear-gradient(135deg, hsl(176 100% 26%), hsl(262 78% 44%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .light .glow-primary {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.35),
+      0 4px 14px -4px hsl(var(--glow-primary) / 0.35);
+  }
+  .light .glow-accent {
+    box-shadow:
+      0 0 0 1px hsl(var(--accent) / 0.35),
+      0 4px 14px -4px hsl(var(--glow-accent) / 0.35);
+  }
+  /* Cartões e superfícies elevadas no claro precisam de sombra, não de brilho */
+  .light .bg-card,
+  .light .bg-popover {
+    box-shadow: 0 1px 2px hsl(220 25% 10% / 0.04);
+  }
+  .light .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.45);
+  }
+}
+
+/* ── Rodada 27 · contraste unificado do tema claro (web + mobile + desktop) ──
+   Problema raiz: quase todo tint da UI é uma cor semântica com alfa baixo
+   (`bg-primary/10`, `bg-secondary/40`, `bg-success/10`…). No escuro isso
+   aparece porque o fundo é preto; no claro o mesmo alfa desaparece e a tela
+   fica "lavada". Em vez de trocar classe por classe em ~200 arquivos, o tema
+   claro reforça aqui as mesmas famílias de tint — regra compartilhada pelas
+   três plataformas, sem cor hardcoded em componente (Regra 1 e 5). */
+@layer utilities {
+  /* Tints de superfície: piso mínimo de opacidade no claro */
+  .light [class*='bg-secondary/'],
+  .light [class*='bg-muted/'] {
+    background-color: hsl(var(--secondary) / 0.85);
+  }
+  .light [class*='bg-primary/1'],
+  .light [class*='bg-primary/2'] {
+    background-color: hsl(var(--primary) / 0.12);
+  }
+  .light [class*='bg-accent/1'],
+  .light [class*='bg-accent/2'] {
+    background-color: hsl(var(--accent) / 0.12);
+  }
+  .light [class*='bg-success/1'],
+  .light [class*='bg-success/2'] {
+    background-color: hsl(var(--success) / 0.14);
+  }
+  .light [class*='bg-warning/1'],
+  .light [class*='bg-warning/2'] {
+    background-color: hsl(var(--warning) / 0.16);
+  }
+  .light [class*='bg-destructive/1'],
+  .light [class*='bg-destructive/2'] {
+    background-color: hsl(var(--destructive) / 0.12);
+  }
+  .light [class*='bg-price/1'],
+  .light [class*='bg-price/2'] {
+    background-color: hsl(var(--price) / 0.14);
+  }
+
+  /* Bordas translúcidas: no claro precisam de linha real pra separar blocos */
+  .light [class*='border-border/'] {
+    border-color: hsl(var(--border));
+  }
+  .light [class*='border-primary/'] {
+    border-color: hsl(var(--primary) / 0.28);
+  }
+  .light [class*='border-accent/'] {
+    border-color: hsl(var(--accent) / 0.28);
+  }
+
+  /* Barras fixas (header web, bottom nav mobile, sidebar desktop):
+     separação por borda + sombra, nunca por brilho. */
+  .light header,
+  .light nav,
+  .light aside,
+  .light footer {
+    backdrop-filter: blur(10px);
+  }
+  .light header {
+    box-shadow: 0 1px 0 hsl(var(--border)), 0 4px 16px -12px hsl(220 25% 10% / 0.18);
+  }
+  .light nav[class*='fixed'],
+  .light nav[class*='bottom-0'] {
+    box-shadow: 0 -1px 0 hsl(var(--border)), 0 -6px 18px -14px hsl(220 25% 10% / 0.2);
+  }
+
+  /* Texto de apoio sobre tint claro: garante AA sem virar preto puro */
+  .light .text-muted-foreground {
+    color: hsl(220 14% 30%);
+  }
+  /* Skeletons/placeholders: cinza visível em vez de branco sobre branco */
+  .light .animate-pulse {
+    background-color: hsl(var(--secondary) / 0.9);
+  }
+  /* Divisores de tabela no backoffice */
+  .light [class*='divide-border'] > * + * {
+    border-color: hsl(var(--border));
+  }
+}
