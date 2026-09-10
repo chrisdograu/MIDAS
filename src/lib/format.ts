@@ -60,3 +60,20 @@ export function formatTime(date: string | number | Date | null | undefined): str
   const d = toDate(date as string);
   return d ? timeFmt.format(d) : '—';
 }
+
+/** "há 5 min", "há 2 h", "há 3 d" */
+export function formatRelativeTime(date: string | number | Date | null | undefined): string {
+  const d = toDate(date as string);
+  if (!d) return '—';
+  const diff = Date.now() - d.getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return 'agora';
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h} h`;
+  const dd = Math.floor(h / 24);
+  if (dd < 30) return `há ${dd} d`;
+  const m = Math.floor(dd / 30);
+  if (m < 12) return `há ${m} mês${m > 1 ? 'es' : ''}`;
+  return `há ${Math.floor(m / 12)} ano(s)`;
+}

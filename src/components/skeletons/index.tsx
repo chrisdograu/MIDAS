@@ -173,6 +173,10 @@ export function ProfileSkeleton({ size = 'md' }: { size?: Size }) {
   );
 }
 
+export function GameCardListSkeleton({ count = 6, size = 'md' }: { count?: number; size?: Size }) {
+  return <GameCardGridSkeleton count={count} size={size} />;
+}
+
 // Exportações padrão
 export default {
   GameCardSkeleton,
