@@ -16,6 +16,9 @@ export interface Game {
   stock: number;
   featured?: boolean;
   createdAt?: string;
+  type?: string;
+  trailer_url?: string | null;
+  systemRequirements?: Record<string, string> | null;
 }
 
 // Map database row to Game interface
