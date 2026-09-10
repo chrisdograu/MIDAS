@@ -127,22 +127,6 @@ export default function AvaliacoesJogos() {
 
   useEffect(() => { fetchAll(); }, []);
 
-  // GAP-D01: Paginação
-  const paginatedNotas = useMemo(() => {
-    const start = page * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
-    return notasFiltradas.slice(start, end);
-  }, [notasFiltradas, page]);
-
-  const paginatedCompletas = useMemo(() => {
-    const start = page * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
-    return completasFiltradas.slice(start, end);
-  }, [completasFiltradas, page]);
-
-  const totalNotasPages = Math.ceil(notasFiltradas.length / PAGE_SIZE);
-  const totalCompletasPages = Math.ceil(completasFiltradas.length / PAGE_SIZE);
-
   const notasFiltradas = useMemo(() => {
     const q = search.trim().toLowerCase();
     return notas.filter(n => {
@@ -170,6 +154,22 @@ export default function AvaliacoesJogos() {
       return true;
     });
   }, [completas, search, visibilityFilter]);
+
+  // GAP-D01: Paginação
+  const paginatedNotas = useMemo(() => {
+    const start = page * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    return notasFiltradas.slice(start, end);
+  }, [notasFiltradas, page]);
+
+  const paginatedCompletas = useMemo(() => {
+    const start = page * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    return completasFiltradas.slice(start, end);
+  }, [completasFiltradas, page]);
+
+  const totalNotasPages = Math.ceil(notasFiltradas.length / PAGE_SIZE);
+  const totalCompletasPages = Math.ceil(completasFiltradas.length / PAGE_SIZE);
 
   const toggleAprovacao = async (n: Nota) => {
     setBusy(n.id);

@@ -111,7 +111,7 @@ export default function Funcionarios() {
     
     const { data: authUsers } = await supabase.auth.admin.listUsers();
     const emailMap = new Map<string, string>();
-    authUsers?.users.forEach(u => { emailMap.set(u.id, u.email || ''); });
+    (authUsers as any)?.users?.forEach((u: any) => { emailMap.set(u.id, u.email || ''); });
 
     const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
