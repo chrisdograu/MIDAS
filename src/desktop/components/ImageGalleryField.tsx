@@ -17,7 +17,7 @@ interface Props {
   folder?: string;
   maxImages?: number;
   onBlur?: () => void;
-  validateImage?: (file: File) => string | null | Promise<string | null>;
+  validateImage?: (x: any) => any;
 }
 
 // GAP-D379: Tipos de arquivo permitidos

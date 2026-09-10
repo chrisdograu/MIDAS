@@ -90,7 +90,7 @@ export default function Pedidos() {
         is_active: true,
       };
       for (let i = 0; i < item.quantity; i++) {
-        addItem(game);
+        addItem(game as any);
         addedCount++;
       }
     }
