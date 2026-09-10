@@ -11,14 +11,13 @@ const ToggleGroupContext = React.createContext<VariantProps<typeof toggleVariant
 });
 
 // GAP-TG03: Suporte a múltipla seleção
-interface ToggleGroupProps
-  extends React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root>,
-    VariantProps<typeof toggleVariants> {
+type ToggleGroupProps = React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
+  VariantProps<typeof toggleVariants> & {
   /** GAP-TG03: Tipo de seleção */
   type?: "single" | "multiple";
   /** GAP-TG04: Desabilitar todo o grupo */
   disabled?: boolean;
-}
+};
 
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
@@ -31,7 +30,7 @@ const ToggleGroup = React.forwardRef<
   disabled = false,
   children, 
   ...props 
-}, ref) => {
+}: any, ref) => {
   // GAP-TG03: Forçar tipo multiple se não for single
   const actualType = type === "multiple" ? "multiple" : "single";
   

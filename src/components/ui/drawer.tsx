@@ -4,17 +4,18 @@ import { Drawer as DrawerPrimitive } from "vaul";
 import { cn } from "@/lib/utils";
 
 // GAP-DR01: Snap points
-interface DrawerProps extends React.ComponentProps<typeof DrawerPrimitive.Root> {
+type DrawerProps = React.ComponentProps<typeof DrawerPrimitive.Root> & {
+  shouldScaleBackground?: boolean;
   snapPoints?: number[];
   snapPoint?: number;
-}
+};
 
 const Drawer = ({ 
   shouldScaleBackground = true, 
   snapPoints,
   snapPoint,
   ...props 
-}: DrawerProps) => (
+}: any) => (
   <DrawerPrimitive.Root 
     shouldScaleBackground={shouldScaleBackground} 
     snapPoints={snapPoints}

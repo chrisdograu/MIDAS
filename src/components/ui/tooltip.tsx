@@ -22,24 +22,20 @@ const tooltipContentVariants = cva(
 );
 
 // GAP-TP01: Tooltip com delay customizado
-interface TooltipProviderProps extends React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Provider> {
+interface TooltipProviderProps extends React.ComponentProps<typeof TooltipPrimitive.Provider> {
   /** GAP-TP01: Delay para abrir em ms */
   delayDuration?: number;
   /** GAP-TP01: Delay para pular em ms */
   skipDelayDuration?: number;
 }
 
-const TooltipProvider = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Provider>,
-  TooltipProviderProps
->(({ delayDuration = 700, skipDelayDuration = 300, ...props }, ref) => (
+const TooltipProvider = ({ delayDuration = 700, skipDelayDuration = 300, ...props }: TooltipProviderProps) => (
   <TooltipPrimitive.Provider 
-    ref={ref}
     delayDuration={delayDuration}
     skipDelayDuration={skipDelayDuration}
     {...props} 
   />
-));
+);
 TooltipProvider.displayName = TooltipPrimitive.Provider.displayName;
 
 const Tooltip = TooltipPrimitive.Root;
