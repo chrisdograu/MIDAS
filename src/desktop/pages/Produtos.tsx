@@ -69,7 +69,7 @@ export default function Produtos() {
     const from = currentPage * ITEMS_PER_PAGE;
 
     try {
-      let query = supabase.from('produtos').select('*', { count: 'exact' }loadDevelopersAndPublishers();).order('title');
+      let query = supabase.from('produtos').select('*', { count: 'exact' }).order('title');
 
       // GAP-D212: Filtro por status
       if (activeFilter === 'active') {
@@ -108,10 +108,6 @@ export default function Produtos() {
     setFornecedores(forns || []);
   };
 
-  useEffect(() => { 
-    fetchAll(true); 
-    loadMetadata();
-  }
   const loadDevelopersAndPublishers = async () => {
     const [{ data: devs }, { data: pubs }] = await Promise.all([
       supabase.from('developers').select('id, name').order('name'),
@@ -119,7 +115,13 @@ export default function Produtos() {
     ]);
     setDevelopers(devs || []);
     setPublishers(pubs || []);
-  };, [activeFilter]);
+  };
+
+  useEffect(() => {
+    fetchAll(true);
+    loadMetadata();
+    loadDevelopersAndPublishers();
+  }, [activeFilter]);
 
   const resetForm = () => {
     setFTitle(''); setFDesc(''); setFCost(''); setFPrice(''); setFOriginalPrice(''); setFType('digital');
