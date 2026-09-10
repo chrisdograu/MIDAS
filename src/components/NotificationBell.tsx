@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { formatDateTime } from '@/lib/format';
 import { dbWrite } from '@/lib/dbWrite';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 interface Notif {
   id: string; title: string; body: string | null; type: string;

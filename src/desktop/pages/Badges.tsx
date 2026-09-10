@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDate } from '@/lib/format';
 import { adminLog } from '../lib/adminLog';
+import { Search } from 'lucide-react';
 
 // GAP-D28: Categorias com cores
 const CATEGORIES = [

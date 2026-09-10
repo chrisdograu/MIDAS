@@ -14,6 +14,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, XAx
 import { supabase } from '@/integrations/supabase/client';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { Input } from '@/components/ui/input';
 
 const PERIODO_DAYS: Record<string, number> = { semana: 7, mes: 30, trimestre: 90, ano: 365 };
 

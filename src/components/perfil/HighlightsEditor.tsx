@@ -261,7 +261,7 @@ export default function HighlightsEditor() {
         <div className="flex flex-col sm:flex-row gap-2">
           <SelectSimples
             value={newType}
-            onChange={v => { setNewType(v as HighlightType); setSearchQuery(''); setResults([]); }}
+            onChange={v => { setNewType(v as HighlightType); setSearchQuery(''); }}
             label="Tipo do destaque"
             className="sm:w-44"
             options={Object.entries(TYPE_LABEL).map(([k, v]) => ({ value: k, label: v }))}

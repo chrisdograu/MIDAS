@@ -18,6 +18,8 @@ import { adminLog } from '../lib/adminLog';
 import { useRealtimeRefresh } from '../hooks/useRealtimeRefresh';
 import { formatDateTime } from '@/lib/format';
 import EstadoVazio from '@/components/EstadoVazio';
+import { Search } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface SpecialNotif {
   id: string;

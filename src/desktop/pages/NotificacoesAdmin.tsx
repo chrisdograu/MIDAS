@@ -15,6 +15,7 @@ import EstadoVazio from '@/components/EstadoVazio';
 import { formatDate, formatDateTime } from '@/lib/format';
 import { adminLog } from '../lib/adminLog';
 import { useRealtimeRefresh } from '../hooks/useRealtimeRefresh';
+import { ChevronRight } from 'lucide-react';
 
 const typeLabels: Record<string, string> = {
   nova_mensagem: '💬 Mensagem',

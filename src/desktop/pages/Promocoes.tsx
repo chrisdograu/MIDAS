@@ -15,6 +15,8 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import SelectSimples from '@/components/SelectSimples';
 import { adminLog } from '../lib/adminLog';
 import { useRealtimeRefresh } from '../hooks/useRealtimeRefresh';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Produto { id: string; title: string; price: number; image_url: string | null; }
 interface Promo { id: string; product_id: string; discount_percent: number; starts_at: string; ends_at: string; is_active: boolean; }

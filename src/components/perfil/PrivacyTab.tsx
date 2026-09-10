@@ -9,6 +9,7 @@ import ContentVisibilityPanel from '@/components/perfil/ContentVisibilityPanel';
 import PersonalThemePanel from '@/components/perfil/PersonalThemePanel';
 import { dbWrite } from '@/lib/dbWrite';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 // Rodada 23 · item 2 — sem opção pública; 'nobody' é bloqueio total.
 type Visibility = 'friends' | 'nobody' | 'private';

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Sparkles, Lock, Trophy, Star, Check, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface TitleRow {
   id: string;

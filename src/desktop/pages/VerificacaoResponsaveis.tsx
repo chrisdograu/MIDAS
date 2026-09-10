@@ -16,6 +16,7 @@ import {
 import { ShieldCheck, ShieldX, ExternalLink, ShieldQuestion, Search, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { formatDateTime } from '@/lib/format';
 import { adminLog } from '../lib/adminLog';
+import { Loader2 } from 'lucide-react';
 
 type Row = {
   id: string; minor_id: string; guardian_cpf: string; guardian_phone: string;

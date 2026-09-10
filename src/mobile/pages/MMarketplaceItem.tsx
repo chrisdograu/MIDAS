@@ -14,6 +14,7 @@ import EstadoVazio from '@/components/EstadoVazio';
 import ErroCarregamento from '@/components/ErroCarregamento';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/format';
+import { Loader2 } from 'lucide-react';
 
 interface Ad {
   id: string; title: string; description: string | null; price: number; ad_type: string;

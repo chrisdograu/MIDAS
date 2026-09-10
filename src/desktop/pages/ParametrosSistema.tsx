@@ -1,3 +1,4 @@
+import EstadoVazio from '@/components/EstadoVazio';
 // Bloco B — Parâmetros do sistema. Regras de negócio antes fixas no código agora
 // vivem em site_settings.business_params, editáveis apenas pelo administrador pleno.
 // Toda alteração é registrada automaticamente em admin_logs (trigger no banco).
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ShieldAlert, Save, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type Params = Record<string, number>;
 
