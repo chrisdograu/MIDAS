@@ -51,7 +51,7 @@ export default function EmAlta() {
   // GAP-144: Compartilhar ranking
   const handleShare = async () => {
     setSharing(true);
-    const url = window.location.href;
+    const url = globalThis.location.href;
     try {
       if (navigator.share) {
         await navigator.share({

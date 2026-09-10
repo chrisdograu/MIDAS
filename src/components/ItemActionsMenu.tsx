@@ -193,7 +193,7 @@ export function ItemActionsMenu({
       doCopy(abs, 'Link copiado');
     }, shortcut: 'L' }] : []),
     ...(reportType && reportTargetId ? [{ label: 'Denunciar', icon: <Flag className="h-4 w-4" />, onClick: () => { close(); setReportOpen(true); }, shortcut: 'R', tone: 'destructive' as const }] : []),
-    ...(canDelete ? [{ label: 'Excluir', icon: <Trash2 className="h-4 w-4" />, onClick: handleDelete, shortcut: 'D', tone: 'destructive' }] : []),
+    ...(canDelete ? [{ label: 'Excluir', icon: <Trash2 className="h-4 w-4" />, onClick: handleDelete, shortcut: 'D', tone: 'destructive' as const }] : []),
   ];
 
   // GAP-IA04: Adicionar separadores

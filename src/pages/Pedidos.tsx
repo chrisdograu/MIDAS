@@ -110,7 +110,7 @@ export default function Pedidos() {
     setRefundModal(prev => ({ ...prev, loading: true }));
     
     try {
-      const { error } = await dbWrite(
+      const ok = await dbWrite(
         supabase
           .from('pedidos')
           .update({ 
