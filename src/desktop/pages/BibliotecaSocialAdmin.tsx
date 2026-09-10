@@ -482,7 +482,7 @@ export default function BibliotecaSocialAdmin() {
                         ))}
                       </TableBody>
                     </Table>
-                  </Card></Card>
+                  </CardContent></Card>
 
                   {/* Paginação */}
                   <div className="flex items-center justify-between">
