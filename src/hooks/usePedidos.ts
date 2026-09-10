@@ -56,6 +56,7 @@ export function usePedidos() {
       paymentMethod: string;
       installments: number;
       couponCode: string | null;
+      address?: any;
     }) => {
       if (!user) throw new Error('Not authenticated');
       const payload = items.map(it => ({

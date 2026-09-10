@@ -70,7 +70,7 @@ export default function MForumPost() {
         supabase.from('notifications').insert({
           user_id: post?.user_id,
           type: 'forum_reply',
-          title: `${user.display_name || 'Alguém'} respondeu seu post`,
+          title: `${(user as any).display_name || 'Alguém'} respondeu seu post`,
           body: content.slice(0, 100),
           reference_type: 'forum_post',
           reference_id: postId,
@@ -238,7 +238,7 @@ export default function MForumPost() {
         supabase.from('notifications').insert({
           user_id: post?.user_id,
           type: 'forum_reply',
-          title: `${user.display_name || 'Alguém'} respondeu seu post`,
+          title: `${(user as any).display_name || 'Alguém'} respondeu seu post`,
           body: content.slice(0, 100),
           reference_type: 'forum_post',
           reference_id: postId,

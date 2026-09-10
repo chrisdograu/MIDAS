@@ -57,7 +57,7 @@ export default function MSalvos() {
       console.error('Erro ao carregar salvos:', error);
       setSavedPosts([]);
     } else {
-      setSavedPosts(data || []);
+      setSavedPosts((data || []) as any);
     }
     setLoading(false);
   };

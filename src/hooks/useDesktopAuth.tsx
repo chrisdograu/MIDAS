@@ -271,7 +271,7 @@ export function DesktopAuthProvider({ children }: { children: ReactNode }) {
       signIn, 
       signOut, 
       canAccess,
-      refreshPermissions,
+      refreshPermissions: async () => { await refreshPermissions(); },
     }}>
       {children}
     </DesktopAuthContext.Provider>
