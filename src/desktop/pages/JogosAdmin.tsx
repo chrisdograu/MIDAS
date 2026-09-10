@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Gamepad2, Loader2, Plus, Search, Edit, Download, Star, Eye, ChevronLeft, ChevronRight, Category, Tag } from 'lucide-react';
+import { Gamepad2, Loader2, Plus, Search, Edit, Download, Star, Eye, ChevronLeft, ChevronRight, LayoutGrid as Category, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
