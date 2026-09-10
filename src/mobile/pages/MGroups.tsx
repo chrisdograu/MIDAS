@@ -18,14 +18,14 @@ interface Group {
 
 // GAP-1070: Arquivar/restaurar grupo
 async function toggleArchiveGroup(groupId: string, userId: string, archive: boolean): Promise<boolean> {
-  const { error } = await dbWrite(
+  const ok = await dbWrite(
     supabase
       .from('group_members')
       .update({ archived_at: archive ? new Date().toISOString() : null })
       .eq('group_id', groupId)
       .eq('user_id', userId)
   );
-  if (error) {
+  if (!ok) {
     toast.error(`Erro ao ${archive ? 'arquivar' : 'restaurar'} grupo`);
     return false;
   }

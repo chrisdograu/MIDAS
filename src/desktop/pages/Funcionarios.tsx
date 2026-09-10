@@ -111,7 +111,7 @@ export default function Funcionarios() {
     
     const { data: authUsers } = await supabase.auth.admin.listUsers();
     const emailMap = new Map<string, string>();
-    authUsers?.users.forEach(u => { emailMap.set(u.id, u.email || ''); });
+    (authUsers as any)?.users?.forEach((u: any) => { emailMap.set(u.id, u.email || ''); });
 
     const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
@@ -391,7 +391,7 @@ export default function Funcionarios() {
         <CardContent className="py-3 px-4">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Buscar funcionário..." className="pl-9" value={search} onChange={setSearch} />
+            <Input placeholder="Buscar funcionário..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
         </CardContent>
       </Card>

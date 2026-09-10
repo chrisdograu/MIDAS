@@ -163,6 +163,15 @@ function toast({ ...props }: Toast) {
   };
 }
 
+toast.success = (props: Omit<Toast, "variant"> | string) =>
+  toast(typeof props === "string" ? { description: props, variant: "success" } : { ...props, variant: "success" });
+toast.error = (props: Omit<Toast, "variant"> | string) =>
+  toast(typeof props === "string" ? { description: props, variant: "error" } : { ...props, variant: "error" });
+toast.warning = (props: Omit<Toast, "variant"> | string) =>
+  toast(typeof props === "string" ? { description: props, variant: "warning" } : { ...props, variant: "warning" });
+toast.info = (props: Omit<Toast, "variant"> | string) =>
+  toast(typeof props === "string" ? { description: props, variant: "info" } : { ...props, variant: "info" });
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState);
 

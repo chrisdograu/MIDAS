@@ -298,7 +298,7 @@ export default function Perfil() {
 
   // GAP-035: Verificar se pode alterar nome
   const nameChangeStatus = canChangeName(lastNameChange);
-  const isNameLocked = !nameChangeStatus.can && displayName === profile?.displayName;
+  const isNameLocked = !nameChangeStatus.can && displayName === profile?.display_name;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">

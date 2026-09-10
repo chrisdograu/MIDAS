@@ -189,7 +189,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
             animate="animate"
             exit="exit"
             variants={pageVariants}
-            transition={pageTransition}
+            transition={pageTransition as any}
             className="min-h-full"
           >
             {children ?? <Outlet />}

@@ -22,7 +22,7 @@ interface TimelineEvent {
 }
 
 interface GameTimelineProps {
-  userId: string;
+  userId?: string;
   filter?: EventType;
   deletedEvents?: Set<string>;
   onDeleteEvent?: (eventId: string, eventType: string) => void;

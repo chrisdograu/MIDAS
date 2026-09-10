@@ -37,7 +37,7 @@ async function fetchByIds(ids: string[]): Promise<Game[]> {
   return ids.map(id => map.get(id)).filter((g): g is Game => !!g);
 }
 
-export default function OpportunityCenter() {
+export default function OpportunityCenter(_props: { filter?: string } = {}) {
   const { user } = useAuth();
   const { data: radar = [] } = useRadarDelta(8);
   const { data: friendIds = [] } = useMutualFriends();

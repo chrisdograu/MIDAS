@@ -8,7 +8,7 @@ const SIZE_CLASSES = {
   lg: "h-12 px-4 text-base",
 };
 
-export interface InputProps extends React.ComponentProps<"input"> {
+export interface InputProps extends Omit<React.ComponentProps<"input">, "size"> {
   /** GAP-IN01: Ícone à esquerda */
   leftIcon?: React.ReactNode;
   /** GAP-IN01: Ícone à direita */

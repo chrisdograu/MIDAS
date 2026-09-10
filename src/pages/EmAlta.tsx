@@ -51,7 +51,7 @@ export default function EmAlta() {
   // GAP-144: Compartilhar ranking
   const handleShare = async () => {
     setSharing(true);
-    const url = window.location.href;
+    const url = globalThis.location.href;
     try {
       if (navigator.share) {
         await navigator.share({
@@ -161,7 +161,7 @@ export default function EmAlta() {
           icone={AlertTriangle}
           titulo="Não conseguimos carregar as tendências"
           descricao="Tente novamente em instantes."
-          acao={{ label: 'Tentar novamente', onClick: () => window.location.reload() }}
+          acao={{ label: 'Tentar novamente', onClick: () => globalThis.location.reload() }}
         />
       ) : items.length === 0 || filteredItems.length === 0 ? (
         <EstadoVazio

@@ -43,14 +43,14 @@ interface Row {
 
 // GAP-537: Arquivar conversa
 async function archiveConversation(convId: string, userId: string, archive: boolean): Promise<boolean> {
-  const { error } = await dbWrite(
+  const ok = await dbWrite(
     supabase
       .from('opinion_conversations')
       .update({ archived_at: archive ? new Date().toISOString() : null })
       .eq('id', convId)
       .or(`author_id.eq.${userId},responder_id.eq.${userId}`)
   );
-  if (error) {
+  if (!ok) {
     toast.error('Erro ao arquivar conversa');
     return false;
   }

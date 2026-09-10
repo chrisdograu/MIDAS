@@ -23,6 +23,7 @@ import { formatCurrency } from '@/lib/format';
 // GAP-D53: Galeria de imagens
 interface BundleImage {
   id: string;
+  bundle_id?: string;
   image_url: string;
   is_primary: boolean;
 }
@@ -114,7 +115,7 @@ export default function BundlesAdmin() {
       .select('product_id, produtos:product_id(price)')
       .eq('bundle_id', bundleId);
     if (!items || items.length === 0) return 0;
-    const totalPrice = items.reduce((acc, item) => acc + Number(item.produtos?.price || 0), 0);
+    const totalPrice = items.reduce((acc, item) => acc + Number((item.produtos as any)?.price || 0), 0);
     const bundle = bundles.find(b => b.id === bundleId);
     if (!bundle) return 0;
     const discount = totalPrice > 0 ? ((totalPrice - Number(bundle.price)) / totalPrice) * 100 : 0;
@@ -141,7 +142,7 @@ export default function BundlesAdmin() {
       .select('product_id, produtos:product_id(price)')
       .eq('bundle_id', bundleId);
     if (!items || items.length === 0) return true;
-    const totalPrice = items.reduce((acc, item) => acc + Number(item.produtos?.price || 0), 0);
+    const totalPrice = items.reduce((acc, item) => acc + Number((item.produtos as any)?.price || 0), 0);
     if (price >= totalPrice) {
       toast.error(`O preço do bundle (${formatCurrency(price)}) deve ser menor que a soma dos itens (${formatCurrency(totalPrice)})`);
       return false;

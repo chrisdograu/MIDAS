@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-type SettingsKey = 'store_info' | 'sale_policies' | 'email_notifications' | 'marketplace' | 'security';
+type SettingsKey = 'store_info' | 'sale_policies' | 'email_notifications' | 'marketplace' | 'security' | 'experimental';
 
 export function useSiteSettings<T extends Record<string, any>>(key: SettingsKey) {
   const [value, setValue] = useState<T | null>(null);

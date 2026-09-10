@@ -106,7 +106,7 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
       return (
         <span className="inline-flex items-center gap-1.5">
           {iconPosition === 'left' && iconElement}
-          {children}
+          {children as React.ReactNode}
           {badgeElement}
           {iconPosition === 'right' && iconElement}
         </span>

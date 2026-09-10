@@ -90,7 +90,7 @@ export default function Pedidos() {
         is_active: true,
       };
       for (let i = 0; i < item.quantity; i++) {
-        addItem(game);
+        addItem(game as any);
         addedCount++;
       }
     }
@@ -110,7 +110,7 @@ export default function Pedidos() {
     setRefundModal(prev => ({ ...prev, loading: true }));
     
     try {
-      const { error } = await dbWrite(
+      const ok = await dbWrite(
         supabase
           .from('pedidos')
           .update({ 
@@ -121,7 +121,7 @@ export default function Pedidos() {
           .eq('id', refundModal.pedido.id)
       );
       
-      if (error) throw error;
+      if (!ok) return;
       
       toast.success('Reembolso solicitado com sucesso!');
       setRefundModal({ open: false, pedido: null, loading: false });

@@ -24,7 +24,7 @@ export default function XPMobile() {
         // Buscar total de XP mobile
         const { data: xpData } = await supabase
           .from('user_xp_log')
-          .select('xp, action')
+          .select('xp, action, user_id')
           .in('action', MOBILE_ACTIONS);
 
         const totalXp = (xpData || []).reduce((acc, curr) => acc + (curr.xp || 0), 0);

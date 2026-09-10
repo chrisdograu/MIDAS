@@ -15,6 +15,8 @@ export interface RadarPessoalItem {
   score: number;
   evidence: string;
   friends: number;
+  source?: 'friends' | 'genres' | 'trending' | string;
+  recent_date?: number;
 }
 
 const W = { view: 1, like: 2, review: 4, post: 6 } as const;

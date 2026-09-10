@@ -293,19 +293,19 @@ export default function PublicProfile() {
   // GAP-578: Amigos em comum
   const { data: mutualFriends = [] } = useQuery({
     queryKey: ['mutual-friends', userId, user?.id],
-    queryFn: () => {
+    queryFn: async (): Promise<any[]> => {
       if (!userId || !user || user.id === userId) return Promise.resolve([]);
       
       const targetVisibility = (profile as any)?.friend_list_visibility || 'friends';
       // Buscar a visibilidade do usuário atual
-      return supabase
+      return await supabase
         .from('profiles')
         .select('friend_list_visibility')
         .eq('id', user.id)
         .maybeSingle()
-        .then(({ data: myProfile }) => {
+        .then(async ({ data: myProfile }) => {
           const myVisibility = (myProfile as any)?.friend_list_visibility || 'friends';
-          return getMutualFriends(
+          return (await getMutualFriends(
             userId,
             user.id,
             targetVisibility,
@@ -313,7 +313,7 @@ export default function PublicProfile() {
             isFriend,
             isCloseFriend,
             hasException
-          );
+          )) as any[];
         });
     },
     enabled: !!userId && !!user && user.id !== userId,

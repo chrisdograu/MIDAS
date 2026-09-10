@@ -26,7 +26,7 @@ export default function XPWeb() {
         // Buscar total de XP web
         const { data: xpData } = await supabase
           .from('user_xp_log')
-          .select('xp, action')
+          .select('xp, action, user_id')
           .in('action', WEB_ACTIONS);
 
         const totalXp = (xpData || []).reduce((acc, curr) => acc + (curr.xp || 0), 0);

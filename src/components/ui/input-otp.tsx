@@ -5,14 +5,14 @@ import { Dot } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // GAP-IO01: Adicionar autoFocus
-interface InputOTPProps extends React.ComponentPropsWithoutRef<typeof OTPInput> {
+type InputOTPProps = React.ComponentPropsWithoutRef<typeof OTPInput> & {
   autoFocus?: boolean;
   /** GAP-IO03: Função de validação */
   validate?: (value: string) => boolean;
-}
+};
 
 const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, InputOTPProps>(
-  ({ className, containerClassName, autoFocus, validate, onChange, ...props }, ref) => {
+  ({ className, containerClassName, autoFocus, validate, onChange, ...props }: any, ref) => {
     const handleChange = (value: string) => {
       if (validate && !validate(value)) {
         return;
@@ -22,6 +22,7 @@ const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, InputOTPPro
 
     return (
       <OTPInput
+        maxLength={props.maxLength ?? 6}
         ref={ref}
         containerClassName={cn("flex items-center gap-2 has-[:disabled]:opacity-50", containerClassName)}
         className={cn("disabled:cursor-not-allowed", className)}

@@ -291,7 +291,7 @@ const SidebarSubMenu = React.forwardRef<HTMLDivElement, SidebarSubMenuProps>(
         <AnimatePresence initial={false}>
           {isOpen && (
             <motion.div
-              variants={menuVariants}
+              variants={menuVariants as any}
               initial="closed"
               animate="open"
               exit="closed"

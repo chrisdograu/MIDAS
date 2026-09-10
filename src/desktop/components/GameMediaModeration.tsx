@@ -33,7 +33,7 @@ const VIS_LABEL: Record<string, string> = {
 
 const ITEMS_PER_PAGE = 20;
 
-export default function GameMediaModeration({ kind }: { kind: Kind }) {
+export default function GameMediaModeration({ kind }: { kind: Kind; showSearch?: boolean; showPagination?: boolean; showActions?: boolean }) {
   const { toast } = useToast();
   const [motivo, setMotivo] = useState('');
   const [rows, setRows] = useState<Row[] | null>(null);

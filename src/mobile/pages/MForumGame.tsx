@@ -126,7 +126,7 @@ export default function MForumGame() {
       supabase.from('notifications').insert({
         user_id: postUserId,
         type: 'forum_reply',
-        title: `${user.display_name || 'Alguém'} respondeu seu post no fórum`,
+        title: `${(user as any).display_name || 'Alguém'} respondeu seu post no fórum`,
         body: content.slice(0, 100),
         reference_type: 'forum_post',
         reference_id: postId,

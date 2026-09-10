@@ -86,7 +86,7 @@ export default function RadarPessoalSection({ limit = 6 }: { limit?: number }) {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {sortedItems.map(item => {
           // GAP-RP01: Fonte da recomendação
-          const sourceIcon = item.source === 'friends' ? Users : 
+          const SourceIcon = item.source === 'friends' ? Users : 
                              item.source === 'genres' ? Gamepad2 : 
                              item.source === 'trending' ? TrendingUp : Sparkles;
           
@@ -98,12 +98,12 @@ export default function RadarPessoalSection({ limit = 6 }: { limit?: number }) {
                   : <div className="w-full h-full flex items-center justify-center"><Gamepad2 className="h-8 w-8 text-muted-foreground/40" /></div>}
                 {/* GAP-RP01: Badge da fonte */}
                 <div className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5">
-                  <sourceIcon className="h-3 w-3 text-primary" />
+                  <SourceIcon className="h-3 w-3 text-primary" />
                 </div>
               </div>
               <p className="text-xs font-semibold text-foreground mt-1.5 line-clamp-1">{item.title}</p>
               <p className="text-[10px] text-muted-foreground line-clamp-2 leading-tight mt-0.5 flex items-center gap-1">
-                <sourceIcon className="h-2.5 w-2.5 text-primary/60" />
+                <SourceIcon className="h-2.5 w-2.5 text-primary/60" />
                 {item.evidence}
               </p>
             </Link>

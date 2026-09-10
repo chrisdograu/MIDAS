@@ -211,7 +211,7 @@ export default function GameDetail() {
   const outOfStock = game.stock <= 0;
 
   // GAP-020, GAP-110: Extrair requisitos de sistema do game
-  const systemRequirements = game.systemRequirements as SystemRequirements | null;
+  const systemRequirements = game.systemRequirements as unknown as SystemRequirements | null;
 
   const handleAdd = () => {
     if (outOfStock) {

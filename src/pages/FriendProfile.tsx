@@ -119,7 +119,6 @@ export default function FriendProfile() {
         .in('id', mutual.slice(0, 6));
       return profiles || [];
     },
-    enabled: !!userId && !!user && user.id !== userId && isMutual,
   });
 
   // GAP-493: Verificar se está silenciado

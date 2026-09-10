@@ -17,7 +17,7 @@ type ToastPosition =
   | "bottom-right";
 
 // GAP-TO04: Variantes de cor
-type ToastVariant = "default" | "success" | "error" | "warning" | "info";
+type ToastVariant = "default" | "destructive" | "success" | "error" | "warning" | "info";
 
 // Mapeamento de ícones por variante
 const variantIcons = {
@@ -25,6 +25,7 @@ const variantIcons = {
   error: AlertCircle,
   warning: AlertTriangle,
   info: Info,
+  destructive: AlertCircle,
   default: null,
 };
 
@@ -34,6 +35,7 @@ const variantColors = {
   error: "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300",
   warning: "border-yellow-500/30 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300",
   info: "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+  destructive: "border-destructive/30 bg-destructive/10 text-destructive",
   default: "border bg-background text-foreground",
 };
 
@@ -56,6 +58,7 @@ const ToastIcon = ({ variant = "default", icon }: ToastIconProps) => {
     error: "text-red-500",
     warning: "text-yellow-500",
     info: "text-blue-500",
+    destructive: "text-destructive",
     default: "text-foreground",
   };
 
@@ -76,6 +79,7 @@ const toastVariants = cva(
         error: variantColors.error,
         warning: variantColors.warning,
         info: variantColors.info,
+        destructive: variantColors.destructive,
       },
     },
     defaultVariants: {
@@ -85,8 +89,7 @@ const toastVariants = cva(
 );
 
 interface ToastProps
-  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
-    VariantProps<typeof toastVariants> {
+  extends Omit<React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>, "variant"> {
   /** GAP-TO03: Ícone do toast */
   icon?: React.ReactNode;
   /** GAP-TO02: Duração em ms */
@@ -102,7 +105,7 @@ const Toast = React.forwardRef<
   return (
     <ToastPrimitives.Root 
       ref={ref} 
-      className={cn(toastVariants({ variant }), className)} 
+      className={cn(toastVariants({ variant: variant as any }), className)} 
       {...props}
     >
       <div className="flex items-start gap-3 w-full">

@@ -72,7 +72,7 @@ export default function PostVisibilitySelect({ value, onChange, className, showC
     if (!user) return 0;
     if (val === VISIBILITY_DEFAULT) return 0; // depende da configuração do perfil
     if (val === 'friends') return friends.length;
-    if (val === 'favorites') return friends.filter(f => f.is_favorite).length;
+    if (val === 'favorites') return friends.filter((f: any) => f.is_favorite).length;
     if (val === 'private') return 0;
     if (val === 'nobody') return 0;
     if (val.startsWith('user:')) return 1;

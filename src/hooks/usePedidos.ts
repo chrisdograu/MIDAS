@@ -13,6 +13,8 @@ export interface Pedido {
   installments: number | null;
   coupon_code: string | null;
   created_at: string;
+  updated_at?: string | null;
+  delivered_at?: string | null;
   itens_pedido?: {
     id: string;
     product_id: string;
@@ -54,6 +56,7 @@ export function usePedidos() {
       paymentMethod: string;
       installments: number;
       couponCode: string | null;
+      address?: any;
     }) => {
       if (!user) throw new Error('Not authenticated');
       const payload = items.map(it => ({
@@ -74,5 +77,5 @@ export function usePedidos() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pedidos'] }),
   });
 
-  return { pedidos, criarPedido, isLoading: query.isLoading };
+  return { pedidos, criarPedido, isLoading: query.isLoading, refetch: query.refetch };
 }

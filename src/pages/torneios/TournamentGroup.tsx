@@ -11,7 +11,7 @@ import { formatTime } from '@/lib/format';
 import { dbWrite } from '@/lib/dbWrite';
 import { stripImageExif } from '@/lib/stripImageExif';
 
-interface Msg { id: string; sender_id: string; content: string; created_at: string; reactions?: Record<string, string>; image_url?: string | null; }
+interface Msg { id: string; sender_id: string; content: string; created_at: string; reactions?: Record<string, string>; image_url?: string | null; read_at?: string | null; }
 interface Profile { id: string; display_name: string | null; avatar_url: string | null; }
 
 // GAP-1119: Tipos de reação

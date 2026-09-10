@@ -148,11 +148,11 @@ function DashboardContent() {
 
       // GAP-D110: Atividade recente (simulada)
       const activities = [
-        { type: 'pedido', message: 'Novo pedido #1234 confirmado', time: '5 min' },
-        { type: 'usuario', message: 'João Gamer se cadastrou', time: '15 min' },
-        { type: 'review', message: 'Nova review de Elden Ring', time: '25 min' },
-        { type: 'torneio', message: 'Inscrições abertas para Copa MIDIAS', time: '1 hora' },
-        { type: 'denuncia', message: 'Nova denúncia de anúncio', time: '2 horas' },
+        { id: '1', type: 'pedido', message: 'Novo pedido #1234 confirmado', time: '5 min' },
+        { id: '2', type: 'usuario', message: 'João Gamer se cadastrou', time: '15 min' },
+        { id: '3', type: 'review', message: 'Nova review de Elden Ring', time: '25 min' },
+        { id: '4', type: 'torneio', message: 'Inscrições abertas para Copa MIDIAS', time: '1 hora' },
+        { id: '5', type: 'denuncia', message: 'Nova denúncia de anúncio', time: '2 horas' },
       ];
       setRecentActivity(activities);
 
