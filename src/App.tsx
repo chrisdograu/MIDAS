@@ -29,26 +29,6 @@ import Comparador from '@/pages/Comparador';
 import Backlog from '@/pages/Backlog';
 import PoliticaPrivacidade from '@/pages/PoliticaPrivacidade';
 import Equipe from '@/pages/Equipe';
-import DeveloperProfile from '@/pages/DeveloperProfile';
-import DevelopersList from '@/pages/DevelopersList';
-import GenrePage from '@/pages/GenrePage';
-import PublisherProfile from '@/pages/PublisherProfile';
-import ListasCuradas from '@/pages/ListasCuradas';
-import ListaDetalhe from '@/pages/ListaDetalhe';
-import Comparador from '@/pages/Comparador';
-import Backlog from '@/pages/Backlog';
-import PoliticaPrivacidade from '@/pages/PoliticaPrivacidade';
-import Equipe from '@/pages/Equipe';
-import DeveloperProfile from '@/pages/DeveloperProfile';
-import DevelopersList from '@/pages/DevelopersList';
-import GenrePage from '@/pages/GenrePage';
-import PublisherProfile from '@/pages/PublisherProfile';
-import ListasCuradas from '@/pages/ListasCuradas';
-import ListaDetalhe from '@/pages/ListaDetalhe';
-import Comparador from '@/pages/Comparador';
-import Backlog from '@/pages/Backlog';
-import PoliticaPrivacidade from '@/pages/PoliticaPrivacidade';
-import Equipe from '@/pages/Equipe';
 
 // GAP-AP02: Analytics tracking
 function AnalyticsTracker() {
