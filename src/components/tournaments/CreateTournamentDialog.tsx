@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { dbWrite } from '@/lib/dbWrite';
 import SelectSimples from '@/components/SelectSimples';
 import { cn } from '@/lib/utils';
+import { Users } from 'lucide-react';
 
 export default function CreateTournamentDialog({ onCreated }: { onCreated?: () => void }) {
   const { user } = useAuth();

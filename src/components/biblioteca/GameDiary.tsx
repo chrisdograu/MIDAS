@@ -14,6 +14,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { exportCsv } from "@/desktop/lib/adminLog";
+import { AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Entry {
   id: string;

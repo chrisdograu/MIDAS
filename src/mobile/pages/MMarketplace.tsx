@@ -10,6 +10,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import DataSaverImage from '@/components/DataSaverImage';
 import { formatCurrency } from '@/lib/format';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Ad {
   id: string; title: string; price: number; ad_type: string; condition: string;

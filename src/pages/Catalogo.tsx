@@ -14,6 +14,7 @@ import ErroCarregamento from "@/components/ErroCarregamento";
 import { useAuth } from "@/hooks/useAuth";
 import { dbWrite } from '@/lib/dbWrite';
 import SelectSimples from '@/components/SelectSimples';
+import { Link } from 'react-router-dom';
 
 const PRICE_MIN = 0;
 const PRICE_MAX = 500;

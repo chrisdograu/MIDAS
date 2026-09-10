@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { dbWrite } from '@/lib/dbWrite';
+import { CheckCircle2 } from 'lucide-react';
 
 /**
  * Página de criação/edição do perfil vendedor ($).

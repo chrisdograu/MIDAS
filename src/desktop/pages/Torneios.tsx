@@ -16,6 +16,8 @@ import { adminLog } from '../lib/adminLog';
 import { useRealtimeRefresh } from '../hooks/useRealtimeRefresh';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDate, formatDateTime } from '@/lib/format';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface T {
   id: string; title: string; description: string | null; type: string; status: string;

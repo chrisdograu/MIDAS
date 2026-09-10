@@ -6,6 +6,7 @@ import { Upload, Trash2, Loader2, ImagePlus, Link2, GripVertical } from 'lucide-
 import { toast } from 'sonner';
 import { dbWrite } from '@/lib/dbWrite';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { cn } from '@/lib/utils';
 
 interface Img { id: string; image_url: string; position: number; }
 

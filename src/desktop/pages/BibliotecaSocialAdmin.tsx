@@ -15,6 +15,7 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { formatDateTime, formatDate } from '@/lib/format';
 import EstadoVazio from '@/components/EstadoVazio';
 import { adminLog } from '../lib/adminLog';
+import { Label } from '@/components/ui/label';
 
 const PAGE_SIZE = 20;
 

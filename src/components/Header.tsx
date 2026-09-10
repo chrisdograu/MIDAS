@@ -13,6 +13,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePrefetchRoute } from '@/hooks/usePrefetchRoute';
 import { escapeIlikeTerm } from '@/lib/escapeIlike';
 import { formatDate } from '@/lib/format';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { ListChecks } from 'lucide-react';
 
 // GAP-HE04: Atalhos globais
 const SHORTCUTS = [

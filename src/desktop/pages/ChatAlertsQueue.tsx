@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Check, AlertTriangle, ShieldAlert, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatDateTime } from '@/lib/format';
+import { Loader2 } from 'lucide-react';
 
 type Row = {
   id: string; kind: string; severity: 'low' | 'medium' | 'high' | 'critical';

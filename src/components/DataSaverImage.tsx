@@ -4,6 +4,7 @@
 // no HTML. Se a transformação falhar, cai de volta na URL original.
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useDataSaver } from "@/hooks/useDataSaver";
+import { cn } from '@/lib/utils';
 
 const OBJECT_PUBLIC = "/storage/v1/object/public/";
 const RENDER_PUBLIC = "/storage/v1/render/image/public/";

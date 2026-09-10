@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { X, Sparkles, Loader2, CheckCircle2, RotateCcw, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 const PAGE_SLOTS: { slot: string; label: string; kinds: RewardKind[]; icon: string }[] = [
   { slot: 'banner', label: 'Banner da página', kinds: ['profile_banner', 'game_page_theme'], icon: '🖼️' },

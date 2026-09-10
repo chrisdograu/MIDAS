@@ -21,6 +21,8 @@ import { formatCurrency, formatDateTime, formatRelativeTime } from '@/lib/format
 
 // GAP-D112: Hook para dados em tempo real
 import { useRealtimeRefresh } from '../hooks/useRealtimeRefresh';
+import { Link } from 'react-router-dom';
+import { LifeBuoy } from 'lucide-react';
 
 function DashboardContent() {
   const [loading, setLoading] = useState(true);
