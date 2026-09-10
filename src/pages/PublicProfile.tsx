@@ -291,9 +291,9 @@ export default function PublicProfile() {
   };
 
   // GAP-578: Amigos em comum
-  const { data: mutualFriends = [] } = useQuery<any[]>({
+  const { data: mutualFriends = [] } = useQuery({
     queryKey: ['mutual-friends', userId, user?.id],
-    queryFn: () => {
+    queryFn: (): Promise<any[]> => {
       if (!userId || !user || user.id === userId) return Promise.resolve([]);
       
       const targetVisibility = (profile as any)?.friend_list_visibility || 'friends';
