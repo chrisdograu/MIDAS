@@ -81,7 +81,7 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
           clearTimeout(toastTimer);
           
           // GAP-M040: Agrupar unlocks em uma única notificação após 500ms
-          toastTimer = setTimeout(() => {
+          toastTimer = setTimeout(async () => {
             const count = pendingUnlocks.length;
             const first = pendingUnlocks[0];
             
