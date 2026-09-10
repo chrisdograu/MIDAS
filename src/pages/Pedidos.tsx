@@ -23,8 +23,7 @@ interface TrackingInfo {
 }
 
 export default function Pedidos() {
-  const { pedidos, isLoading } = usePedidos();
-  const refetch = () => {};
+  const { pedidos, isLoading, refetch } = usePedidos();
   const { addItem } = useCart();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<any | null>(null);

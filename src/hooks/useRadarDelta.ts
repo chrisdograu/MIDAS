@@ -9,6 +9,8 @@ export interface RadarItem {
   count_72h: number;
   score: number;
   evidence: string;
+  platform?: string | null;
+  category?: string | null;
 }
 
 const HOUR = 3600_000;
