@@ -16,6 +16,8 @@ interface Props {
   /** Pasta dentro do bucket product-images. */
   folder?: string;
   maxImages?: number;
+  onBlur?: () => void;
+  validateImage?: (file: File) => string | null | Promise<string | null>;
 }
 
 // GAP-D379: Tipos de arquivo permitidos

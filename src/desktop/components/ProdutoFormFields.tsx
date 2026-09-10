@@ -47,6 +47,7 @@ interface Props {
   multipleCategories?: boolean;
   /** GAP-D393: Validação em tempo real */
   showValidation?: boolean;
+  onBlur?: () => void;
 }
 
 export function ProdutoFormFields({ 
