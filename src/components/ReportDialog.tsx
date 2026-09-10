@@ -89,7 +89,7 @@ function ReportHistory({ targetId, targetType }: { targetId: string; targetType:
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useState(() => {
+  useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase

@@ -75,7 +75,7 @@ export default function FriendIdentityPanel({ userId }: Props) {
   });
 
   // GAP-FI04: Jogos em comum
-  const { data: commonGames = [] } = useQuery({
+  const { data: commonGames } = useQuery({
     queryKey: ['fi-common', userId, user?.id],
     enabled: !!user && user.id !== userId,
     queryFn: async () => {

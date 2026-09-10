@@ -80,7 +80,7 @@ export default function LoginHistoryList({ compact }: { compact?: boolean }) {
     
     // GAP-LH02: Buscar sessão atual
     const { data: session } = await supabase.auth.getSession();
-    const currentIP = session?.session?.user?.ip_address || null;
+    const currentIP = (session?.session?.user as any)?.ip_address || null;
     
     const { data, error } = await supabase
       .from('login_history')
