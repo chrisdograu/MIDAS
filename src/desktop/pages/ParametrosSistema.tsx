@@ -151,9 +151,6 @@ export default function ParametrosSistema() {
           </CardContent>
         </Card>
       </div>
-          <Button variant="outline" size="sm" onClick={openHistory}>
-            <History className="h-4 w-4 mr-1" /> Histórico
-          </Button>
     );
   }
 
