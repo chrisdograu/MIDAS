@@ -212,11 +212,13 @@ export default function BadgesAdmin() {
   const assignBadgeBulk = async () => {
     if (!assignOpen || selectedUsers.size === 0) return;
     const userIds = Array.from(selectedUsers);
+    const currentUserId = (await supabase.auth.getUser()).data.user?.id;
     const inserts = userIds.map(user_id => ({
       user_id,
       badge_id: assignOpen.id,
-      assigned_by: (await supabase.auth.getUser()).data.user?.id,
+      assigned_by: currentUserId,
     }));
+    
     
     const { error } = await supabase.from('user_badges').insert(inserts);
     if (error) return toast.error(error.message);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings, Store, Bell, Shield, Globe, Palette, Sun, Moon, User, Loader2, Flask, History } from 'lucide-react';
+import { Settings, Store, Bell, Shield, Globe, Palette, Sun, Moon, User, Loader2, FlaskConical as Flask, History } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,21 +23,6 @@ export default function Configuracoes() {
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [newPassword, setNewPassword] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [historyData, setHistoryData] = useState([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-
-  const openHistory = async () => {
-    setHistoryOpen(true);
-    setLoadingHistory(true);
-    const { data } = await supabase
-      .from('config_history')
-      .select('*, profiles!changed_by(display_name)')
-      .order('changed_at', { ascending: false })
-      .limit(50);
-    setHistoryData(data || []);
-    setLoadingHistory(false);
-  };
   const [savingPassword, setSavingPassword] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
@@ -159,9 +144,6 @@ export default function Configuracoes() {
           </h1>
           <p className="text-muted-foreground text-sm">Configurações gerais do sistema e conta</p>
         </div>
-          <Button variant="outline" size="sm" onClick={openHistory}>
-            <History className="h-4 w-4 mr-1" /> Histórico de Configurações
-          </Button>
         <Button variant="outline" size="sm" onClick={openHistory}>
           <History className="h-4 w-4 mr-1" /> Histórico
         </Button>
@@ -283,7 +265,7 @@ export default function Configuracoes() {
           {loadingHistory ? (
             <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
           ) : historyLogs.length === 0 ? (
-            <EstadoVazio titulo="Nenhuma alteração registrada" />
+            <p className="text-sm text-muted-foreground py-8 text-center">Nenhuma alteração registrada</p>
           ) : (
             <ScrollArea className="h-[500px] pr-3">
               <div className="space-y-2">
@@ -309,38 +291,6 @@ export default function Configuracoes() {
           )}
         </DialogContent>
       </Dialog>
-    
-      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-5 w-5 text-primary" /> Histórico de Configurações
-            </DialogTitle>
-          </DialogHeader>
-          {loadingHistory ? (
-            <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : historyData.length === 0 ? (
-            <EstadoVazio titulo="Nenhuma alteração registrada" />
-          ) : (
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-              {historyData.map((h) => (
-                <div key={h.id} className="bg-card border border-border rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{h.config_key}</p>
-                    <span className="text-xs text-muted-foreground">{h.changed_by?.display_name || 'Sistema'}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{new Date(h.changed_at).toLocaleString('pt-BR')}</p>
-                  <details className="mt-1">
-                    <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">Ver detalhes</summary>
-                    <pre className="text-xs bg-muted p-2 rounded mt-1 overflow-x-auto">
-                      {JSON.stringify({ old: h.old_value, new: h.new_value }, null, 2)}
-                    </pre>
-                  </details>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog></div>
+    </div>
   );
 }

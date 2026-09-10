@@ -166,6 +166,14 @@ export const RARITY_COLOR: Record<RewardRarity, string> = {
   mythic: 'border-pink-500 text-pink-300',
 };
 
+export const RARITY_ORDER: Record<RewardRarity, number> = {
+  common: 1,
+  rare: 2,
+  epic: 3,
+  legendary: 4,
+  mythic: 5,
+};
+
 export const KIND_LABEL: Record<RewardKind, string> = {
   avatar_frame: 'Moldura de avatar',
   profile_banner: 'Banner de perfil',

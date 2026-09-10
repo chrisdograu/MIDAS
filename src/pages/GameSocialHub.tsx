@@ -9,7 +9,7 @@ import { HalfStarDisplay } from '@/components/HalfStarRating';
 import {
   ArrowLeft, Users, Library, Star, MessageSquare, Film, Lock, Loader2, Clock,
   Image as ImageIcon, BookOpen, History, Sparkles, TrendingUp, Heart, Filter,
-  ThumbsUp, Laugh, Smile, Sad, Angry,
+  ThumbsUp, Laugh, Smile, Frown as Sad, Angry,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import MediaLightbox, { LightboxItem } from '@/components/social/MediaLightbox';
