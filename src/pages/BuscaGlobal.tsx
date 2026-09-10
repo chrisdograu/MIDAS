@@ -590,7 +590,7 @@ export default function BuscaGlobal() {
           {/* GAP-140: Filtro por data */}
           <div className="h-px bg-border/70" />
           <FilterChipGroup label="Período">
-            {[
+            {([
               ['all', 'Todos'],
               ['7d', 'Últimos 7 dias'],
               ['30d', 'Últimos 30 dias'],

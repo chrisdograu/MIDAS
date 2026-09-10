@@ -57,19 +57,8 @@ const registerServiceWorker = async () => {
   }
 };
 
-// GAP-MA02: Core Web Vitals
-const reportWebVitals = () => {
-  if (import.meta.env.PROD && 'webVitals' in window) {
-    // Carregar dinamicamente web-vitals
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS(console.debug);
-      getFID(console.debug);
-      getFCP(console.debug);
-      getLCP(console.debug);
-      getTTFB(console.debug);
-    });
-  }
-};
+// GAP-MA02: Core Web Vitals (desativado: dependência opcional não instalada)
+const reportWebVitals = () => {};
 
 // GAP-MA02: Performance marks
 const markPerformance = () => {

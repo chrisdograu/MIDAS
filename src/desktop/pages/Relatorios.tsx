@@ -189,7 +189,7 @@ export default function Relatorios() {
               <SelectItem value="trimestre">Último Trimestre</SelectItem>
               <SelectItem value="ano">Último Ano</SelectItem>
               <SelectItem value="custom">Personalizado</SelectItem>
-            </Select>
+            </SelectContent>
           </Select>
           {periodo === 'custom' && (
             <>

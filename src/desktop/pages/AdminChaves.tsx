@@ -105,8 +105,7 @@ export default function AdminChaves() {
     }
 
     const lines = csvText
-      .split('
-')
+      .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
 
