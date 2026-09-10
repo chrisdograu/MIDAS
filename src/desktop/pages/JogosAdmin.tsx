@@ -65,7 +65,7 @@ export default function JogosAdmin() {
     const { data: categories } = catIds.length
       ? await supabase.from('categorias').select('id, name').in('id', catIds)
       : { data: [] as any[] };
-    const catMap = new Map(categories?.map(c => [c.id, c.name]) || []);
+    const catMap = new Map<string, string>(((categories as any[]) || []).map((c: any) => [c.id, c.name]));
     
     setJogos((data || []).map((p: any) => ({
       ...p,

@@ -23,6 +23,7 @@ import { formatCurrency } from '@/lib/format';
 // GAP-D53: Galeria de imagens
 interface BundleImage {
   id: string;
+  bundle_id?: string;
   image_url: string;
   is_primary: boolean;
 }

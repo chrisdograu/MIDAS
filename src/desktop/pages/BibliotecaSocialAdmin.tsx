@@ -37,7 +37,7 @@ interface LibraryItem {
 }
 
 interface PrivacyLog {
-  id: string; action: string; details: any; created_at: string;
+  id: string; action: string; details: any; created_at: string; reason?: string | null;
 }
 
 export default function BibliotecaSocialAdmin() {
