@@ -15,6 +15,7 @@ export interface Game {
   tags: string[];
   stock: number;
   featured?: boolean;
+  createdAt?: string;
 }
 
 // Map database row to Game interface

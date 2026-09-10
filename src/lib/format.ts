@@ -77,3 +77,6 @@ export function formatRelativeTime(date: string | number | Date | null | undefin
   if (m < 12) return `há ${m} mês${m > 1 ? 'es' : ''}`;
   return `há ${Math.floor(m / 12)} ano(s)`;
 }
+
+
+export const timeAgo = formatRelativeTime;

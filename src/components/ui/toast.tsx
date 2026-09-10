@@ -17,7 +17,7 @@ type ToastPosition =
   | "bottom-right";
 
 // GAP-TO04: Variantes de cor
-type ToastVariant = "default" | "success" | "error" | "warning" | "info";
+type ToastVariant = "default" | "destructive" | "success" | "error" | "warning" | "info";
 
 // Mapeamento de ícones por variante
 const variantIcons = {
