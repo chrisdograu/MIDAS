@@ -58,7 +58,7 @@ export default function DeveloperProfile() {
   }, [id]);
 
   const getPlatforms = () => {
-    const platforms = new Set();
+    const platforms = new Set<string>();
     games.forEach(g => {
       if (g.platform) {
         g.platform.forEach(p => platforms.add(p));

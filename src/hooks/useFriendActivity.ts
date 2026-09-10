@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 import { useEffect } from 'react';
 
 export type ActivityState = 'new' | 'seen' | 'liked' | 'saved' | 'hidden';
-export type ActivityType = 'library' | 'review' | 'post';
+export type ActivityType = 'library' | 'review' | 'post' | 'tournament';
 
 export interface FriendActivityItem {
   id: string;            // stable key (activity_ref_id)

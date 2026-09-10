@@ -512,7 +512,7 @@ export default function PrivacidadeCentral() {
                   <button 
                     onClick={sendDeleteConfirmation}
                     className="text-xs text-primary hover:underline"
-                    disabled={emailConfirmStep === 'sending'}
+                    disabled={(emailConfirmStep as string) === 'sending'}
                   >
                     Reenviar código
                   </button>
