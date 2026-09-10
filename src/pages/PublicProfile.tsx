@@ -291,7 +291,7 @@ export default function PublicProfile() {
   };
 
   // GAP-578: Amigos em comum
-  const { data: mutualFriends = [] } = useQuery({
+  const { data: mutualFriends = [] } = useQuery<any[]>({
     queryKey: ['mutual-friends', userId, user?.id],
     queryFn: () => {
       if (!userId || !user || user.id === userId) return Promise.resolve([]);
