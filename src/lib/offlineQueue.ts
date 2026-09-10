@@ -56,24 +56,68 @@ async function runAction(a: OfflineAction) {
 
 let flushing = false;
 
+/** Limpa a fila de ações pendentes. */
+export function clearQueue() {
+  writeQueue([]);
+}
+
+export type FlushOptions = {
+  onProgress?: (current: number, total: number) => void;
+  onError?: (error: unknown, action: OfflineAction) => void;
+  shouldCancel?: () => boolean;
+};
+
+export type FlushResult = {
+  sent: number;
+  failed: number;
+  synced: number;
+  total: number;
+  success: boolean;
+  errors: unknown[];
+};
+
 /** Reenvia tudo que está pendente. Mantém na fila o que continuar falhando. */
-export async function flushQueue(): Promise<{ sent: number; failed: number }> {
-  if (flushing || !navigator.onLine) return { sent: 0, failed: 0 };
+export async function flushQueue(options: FlushOptions = {}): Promise<FlushResult> {
+  const empty: FlushResult = { sent: 0, failed: 0, synced: 0, total: 0, success: true, errors: [] };
+  if (flushing || !navigator.onLine) return empty;
   flushing = true;
   const items = readQueue();
   const remaining: OfflineAction[] = [];
+  const errors: unknown[] = [];
   let sent = 0;
+  let index = 0;
   for (const item of items) {
+    if (options.shouldCancel?.()) {
+      remaining.push(item);
+      continue;
+    }
     try {
       const { error } = (await runAction(item)) as { error: unknown };
-      if (error) remaining.push(item); else sent += 1;
-    } catch {
+      if (error) {
+        remaining.push(item);
+        errors.push(error);
+        options.onError?.(error, item);
+      } else {
+        sent += 1;
+      }
+    } catch (error) {
       remaining.push(item);
+      errors.push(error);
+      options.onError?.(error, item);
     }
+    index += 1;
+    options.onProgress?.(index, items.length);
   }
   writeQueue(remaining);
   flushing = false;
-  return { sent, failed: remaining.length };
+  return {
+    sent,
+    failed: remaining.length,
+    synced: sent,
+    total: items.length,
+    success: remaining.length === 0,
+    errors,
+  };
 }
 
 /** Executa online; se estiver sem rede, enfileira e devolve `queued: true`. */
