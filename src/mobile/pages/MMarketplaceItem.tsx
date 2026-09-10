@@ -311,7 +311,7 @@ export default function MMarketplaceItem() {
         <div className="flex flex-wrap gap-1.5">
           {ad.certificate_type !== 'sem_certificado' && <MobileBadge tone="success"><ShieldCheck className="h-3 w-3" />Protegido pela loja</MobileBadge>}
           {ad.ad_type === 'troca' && <MobileBadge tone="accent"><ArrowLeftRight className="h-3 w-3" />Troca</MobileBadge>}
-          <MobileBadge tone="muted">({({ novo: '✨ Novo', seminovo: '🌟 Seminovo', usado: '📦 Usado', recondicionado: '🔧 Recondicionado' } as Record<string, string>)[ad.condition] || ad.condition)</MobileBadge>
+          <MobileBadge tone="muted">{({ novo: '✨ Novo', seminovo: '🌟 Seminovo', usado: '📦 Usado', recondicionado: '🔧 Recondicionado' } as Record<string, string>)[ad.condition] || ad.condition}</MobileBadge>
           {ad.accepts_counteroffer && <MobileBadge tone="warning">💬 Aceita contraoferta</MobileBadge>}
         </div>
 
