@@ -1,3 +1,4 @@
+import EstadoVazio from '@/components/EstadoVazio';
 // Bloco B — Parâmetros do sistema. Regras de negócio antes fixas no código agora
 // vivem em site_settings.business_params, editáveis apenas pelo administrador pleno.
 // Toda alteração é registrada automaticamente em admin_logs (trigger no banco).

@@ -162,7 +162,6 @@ export default function BibliotecaSocialAdmin() {
         .from('biblioteca_usuario')
         .select('product_id, produtos:product_id(title, image_url)')
         .eq('user_id', adminUser.user.id)
-        .in('product_id', (libStats || []).map(item => item.product_id))
         .limit(10);
       setCommonGames(common || []);
     }

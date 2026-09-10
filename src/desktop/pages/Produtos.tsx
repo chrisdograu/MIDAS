@@ -31,6 +31,10 @@ export default function Produtos() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<{ id: string; name: string }[]>([]);
   const [fornecedores, setFornecedores] = useState<{ id: string; name: string }[]>([]);
+  const [developers, setDevelopers] = useState<{ id: string; name: string }[]>([]);
+  const [publishers, setPublishers] = useState<{ id: string; name: string }[]>([]);
+  const [fDeveloperId, setFDeveloperId] = useState('');
+  const [fPublisherId, setFPublisherId] = useState('');
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);

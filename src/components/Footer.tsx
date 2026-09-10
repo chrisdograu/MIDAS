@@ -1,6 +1,6 @@
 import { Gamepad2, Mail, Phone, CreditCard, QrCode, Landmark, ArrowUp, Github, Twitter, Youtube, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { toast } from 'sonner';
@@ -61,7 +61,7 @@ const NewsletterSection = () => {
 const ScrollToTop = () => {
   const [visible, setVisible] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setVisible(window.scrollY > 300);
     };
