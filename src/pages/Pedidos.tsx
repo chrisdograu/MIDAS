@@ -23,7 +23,8 @@ interface TrackingInfo {
 }
 
 export default function Pedidos() {
-  const { pedidos, isLoading, refetch } = usePedidos();
+  const { pedidos, isLoading } = usePedidos();
+  const refetch = () => {};
   const { addItem } = useCart();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<any | null>(null);
@@ -121,7 +122,7 @@ export default function Pedidos() {
           .eq('id', refundModal.pedido.id)
       );
       
-      if (error) throw error;
+      if (!ok) return;
       
       toast.success('Reembolso solicitado com sucesso!');
       setRefundModal({ open: false, pedido: null, loading: false });

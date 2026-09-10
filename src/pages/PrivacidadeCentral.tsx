@@ -73,7 +73,7 @@ function exportAsCSV(data: any[], filename: string) {
 // GAP-574: Esquecimento de dados (GDPR)
 async function requestDataForget(userId: string): Promise<void> {
   // Marca a conta para esquecimento em 30 dias (período de carência)
-  const { error } = await dbWrite(
+  const ok = await dbWrite(
     supabase
       .from('profiles')
       .update({ 
@@ -82,7 +82,7 @@ async function requestDataForget(userId: string): Promise<void> {
       })
       .eq('id', userId)
   );
-  if (error) throw error;
+  if (!ok) throw new Error('forget failed');
 }
 
 export default function PrivacidadeCentral() {
