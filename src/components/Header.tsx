@@ -382,19 +382,6 @@ export default function Header() {
                           <Link to="/biblioteca" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors">
                             <Library className="h-4 w-4" /> Minha Biblioteca
                           </Link>
-            <Link to="/backlog" className="dropdown-item">
-              <span className="flex items-center gap-2">
-                <span className="text-base">📋</span> Meu Backlog
-              </span>
-            </Link>
-            <Link to="/backlog" className="dropdown-item">
-              <span className="flex items-center gap-2">
-                <span className="text-base">📋</span> Meu Backlog
-              </span>
-            </Link>
-            <Link to="/backlog" className="dropdown-item">
-              <ListChecks className="h-4 w-4 mr-2" /> Meu Backlog
-            </Link>
                           <Link to="/pedidos" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors">
                             <Package className="h-4 w-4" /> Meus Pedidos
                           </Link>

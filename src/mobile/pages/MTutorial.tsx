@@ -1,6 +1,6 @@
 // Mobile tutorial passo-a-passo com mini-playground interativo e link "Ir para o real".
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Star, Heart, Send, Search, ShoppingBag, Trophy, MessageCircle, User, Gamepad2, Palette, Camera, Plus, Bell, ShieldCheck, FastForward, AlertTriangle } from 'lucide-react';
 import { TUTORIALS, TutorialKey, useTutorial } from '@/components/tutorial/TutorialContext';
 import { toast } from 'sonner';
@@ -204,11 +204,26 @@ export default function MTutorial() {
   // GAP-1131: Pular tutorial
   const [skipDialog, setSkipDialog] = useState(false);
 
-  if (!meta || !data || data.steps.length === 0) {
+  // Tutoriais de web não têm playground mobile: abrir a versão web equivalente.
+  const isWeb = meta?.area === 'web';
+  useEffect(() => {
+    if (meta && isWeb) navigate(`/tutorial/${meta.key}`, { replace: true });
+  }, [meta, isWeb, navigate]);
+
+  if (!meta) {
     return (
       <div className="px-4 py-8 text-center space-y-3">
-        <p className="text-sm text-muted-foreground">Tutorial não disponível na versão mobile.</p>
+        <p className="text-sm text-muted-foreground">Tutorial não encontrado.</p>
         <Link to="/m/tutoriais" className="text-primary text-sm">Voltar à lista</Link>
+      </div>
+    );
+  }
+
+  if (isWeb || !data || data.steps.length === 0) {
+    return (
+      <div className="px-4 py-8 text-center space-y-3">
+        <p className="text-sm text-muted-foreground">Abrindo a versão completa deste tutorial…</p>
+        <Link to={`/tutorial/${meta.key}`} className="text-primary text-sm">Abrir agora</Link>
       </div>
     );
   }

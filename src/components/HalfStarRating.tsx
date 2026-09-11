@@ -1,5 +1,5 @@
 import { Star, StarHalf } from 'lucide-react';
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface HalfStarRatingProps {
@@ -12,15 +12,15 @@ interface HalfStarRatingProps {
   emptyColor?: string;
 }
 
-export function HalfStarDisplay({ 
+export const HalfStarDisplay = forwardRef<HTMLDivElement, HalfStarRatingProps>(function HalfStarDisplay({ 
   rating, 
   size = 16, 
   className = '',
   filledColor = 'text-price fill-price',
   emptyColor = 'text-muted-foreground'
-}: HalfStarRatingProps) {
+}, ref) {
   return (
-    <div className={cn("flex items-center gap-0.5", className)}>
+    <div ref={ref} className={cn("flex items-center gap-0.5", className)}>
       {Array.from({ length: 5 }).map((_, i) => {
         const starValue = i + 1;
         if (rating >= starValue) {
@@ -38,7 +38,7 @@ export function HalfStarDisplay({
       })}
     </div>
   );
-}
+});
 
 interface InteractiveHalfStarProps {
   value: number;
