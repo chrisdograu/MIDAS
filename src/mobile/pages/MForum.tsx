@@ -435,13 +435,44 @@ export default function MForum() {
         </button>
       </div>
 
-      <button onClick={() => setFilterOpen(true)} className="w-full flex items-center justify-between px-3 py-2 bg-card border border-border rounded-lg text-xs">
-        <span className="flex items-center gap-1.5 text-muted-foreground">
-          <Newspaper className="h-3.5 w-3.5" />
-          {SORTS.find(s => s.id === sort)?.label} · {PERIOD_OPTIONS.find(p => p.id === period)?.label}
-        </span>
-        <span className="text-primary font-semibold">Filtros</span>
-      </button>
+      {/* Filtros sempre visíveis: ordenar + período em linhas roláveis */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5">
+          <span className="text-[10px] uppercase tracking-wide text-muted-foreground shrink-0 pr-1">Ordenar</span>
+          {SORTS.map(s => {
+            const Icon = s.icon;
+            return (
+              <button
+                key={s.id}
+                onClick={() => setSort(s.id)}
+                className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${sort === s.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border'}`}
+              >
+                <Icon className="h-3 w-3" /> {s.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5">
+          <span className="text-[10px] uppercase tracking-wide text-muted-foreground shrink-0 pr-1">Período</span>
+          {PERIOD_OPTIONS.map(p => (
+            <button
+              key={p.id}
+              onClick={() => setPeriod(p.id)}
+              className={`shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${period === p.id ? 'bg-accent text-accent-foreground border-accent' : 'bg-card text-muted-foreground border-border'}`}
+            >
+              {p.label}
+            </button>
+          ))}
+          {(sort !== 'popular' || period !== 'week' || query) && (
+            <button
+              onClick={() => { setSort('popular'); setPeriod('week'); setQuery(''); }}
+              className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium border border-border bg-secondary/60 text-muted-foreground"
+            >
+              <X className="h-3 w-3" /> Limpar
+            </button>
+          )}
+        </div>
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
