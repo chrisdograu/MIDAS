@@ -83,7 +83,12 @@ export default function Auth() {
       if (error) throw error;
       // O redirecionamento é automático
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer login com Google');
+      const msg = String(error?.message || '');
+      toast.error(
+        msg.includes('provider is not enabled')
+          ? 'A entrada com Google ainda não está ativada. Use seu e-mail e senha.'
+          : 'Não foi possível entrar com o Google. Tente pelo e-mail e senha.'
+      );
       setGoogleLoading(false);
     }
   };
