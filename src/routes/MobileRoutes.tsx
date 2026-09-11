@@ -28,6 +28,7 @@ const MGroupInfo = lazy(() => import("@/mobile/pages/MGroupInfo"));
 const MChatInfo = lazy(() => import("@/mobile/pages/MChatInfo"));
 const MTournamentGroup = lazy(() => import("@/mobile/pages/MTournamentGroup"));
 const MTutoriais = lazy(() => import("@/mobile/pages/MTutoriais"));
+const MNotificacoes = lazy(() => import("@/mobile/pages/MNotificacoes"));
 const MTutorial = lazy(() => import("@/mobile/pages/MTutorial"));
 const MForumComunidade = lazy(() => import("@/mobile/pages/MForumComunidade"));
 const MNotFound = lazy(() => import("@/mobile/pages/MNotFound"));
@@ -67,6 +68,8 @@ export const mobileRoutes = (
     <Route path="/m/biblioteca-social" element={wrap(protect(<MSocialLibrary />))} />
     <Route path="/m/tutoriais" element={wrap(protect(<MTutoriais />))} />
     <Route path="/m/tutorial/:key" element={wrap(protect(<MTutorial />))} />
+    <Route path="/m/notificacoes" element={wrap(protect(<MNotificacoes />))} />
+    <Route path="/m/notificacoes/:id" element={wrap(protect(<MNotificacoes />))} />
     <Route path="/m/forum-comunidade" element={wrap(<MForumComunidade />)} />
     <Route path="/m/forum-comunidade/:slug" element={wrap(<MForumComunidade />)} />
     <Route path="/m/vendedor" element={wrap(protect(<VendedorConfig />))} />
