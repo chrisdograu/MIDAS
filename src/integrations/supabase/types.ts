@@ -1057,6 +1057,66 @@ export type Database = {
         }
         Relationships: []
       }
+      curated_lists: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          banner_image: string | null
+          category: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_featured: boolean | null
+          is_official: boolean | null
+          is_public: boolean | null
+          long_description: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          banner_image?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_official?: boolean | null
+          is_public?: boolean | null
+          long_description?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          banner_image?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_official?: boolean | null
+          is_public?: boolean | null
+          long_description?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       daily_pick_overrides: {
         Row: {
           created_at: string
@@ -1149,6 +1209,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      developers: {
+        Row: {
+          banner_url: string | null
+          bio: string | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          employees: number | null
+          founded_year: number | null
+          headquarters: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          notable_games: string[] | null
+          parent_company: string | null
+          slug: string
+          social_links: Json | null
+          updated_at: string | null
+          website: string | null
+          wiki_data: Json | null
+          wikipedia_url: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          employees?: number | null
+          founded_year?: number | null
+          headquarters?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          notable_games?: string[] | null
+          parent_company?: string | null
+          slug: string
+          social_links?: Json | null
+          updated_at?: string | null
+          website?: string | null
+          wiki_data?: Json | null
+          wikipedia_url?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          employees?: number | null
+          founded_year?: number | null
+          headquarters?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          notable_games?: string[] | null
+          parent_company?: string | null
+          slug?: string
+          social_links?: Json | null
+          updated_at?: string | null
+          website?: string | null
+          wiki_data?: Json | null
+          wikipedia_url?: string | null
+        }
+        Relationships: []
       }
       device_tokens: {
         Row: {
@@ -3186,6 +3315,7 @@ export type Database = {
           cost_price: number | null
           created_at: string
           description: string | null
+          developer_id: string | null
           discount: number
           estado_publicacao: Database["public"]["Enums"]["produto_estado"]
           featured: boolean
@@ -3197,6 +3327,7 @@ export type Database = {
           price: number
           product_type: Database["public"]["Enums"]["product_type"]
           publisher: string | null
+          publisher_id: string | null
           rating: number | null
           release_date: string | null
           stock: number
@@ -3215,6 +3346,7 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          developer_id?: string | null
           discount?: number
           estado_publicacao?: Database["public"]["Enums"]["produto_estado"]
           featured?: boolean
@@ -3226,6 +3358,7 @@ export type Database = {
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
           publisher?: string | null
+          publisher_id?: string | null
           rating?: number | null
           release_date?: string | null
           stock?: number
@@ -3244,6 +3377,7 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          developer_id?: string | null
           discount?: number
           estado_publicacao?: Database["public"]["Enums"]["produto_estado"]
           featured?: boolean
@@ -3255,6 +3389,7 @@ export type Database = {
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
           publisher?: string | null
+          publisher_id?: string | null
           rating?: number | null
           release_date?: string | null
           stock?: number
@@ -3518,6 +3653,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      publishers: {
+        Row: {
+          banner_url: string | null
+          bio: string | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          employees: number | null
+          founded_year: number | null
+          headquarters: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          notable_games: string[] | null
+          parent_company: string | null
+          slug: string
+          social_links: Json | null
+          updated_at: string | null
+          website: string | null
+          wiki_data: Json | null
+          wikipedia_url: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          employees?: number | null
+          founded_year?: number | null
+          headquarters?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          notable_games?: string[] | null
+          parent_company?: string | null
+          slug: string
+          social_links?: Json | null
+          updated_at?: string | null
+          website?: string | null
+          wiki_data?: Json | null
+          wikipedia_url?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          employees?: number | null
+          founded_year?: number | null
+          headquarters?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          notable_games?: string[] | null
+          parent_company?: string | null
+          slug?: string
+          social_links?: Json | null
+          updated_at?: string | null
+          website?: string | null
+          wiki_data?: Json | null
+          wikipedia_url?: string | null
+        }
+        Relationships: []
       }
       rate_limits: {
         Row: {
@@ -3962,6 +4166,54 @@ export type Database = {
           content_type?: string
           created_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          banner_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          long_description: string | null
+          name: string
+          photo_url: string | null
+          role: string
+          slug: string
+          social_links: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          long_description?: string | null
+          name: string
+          photo_url?: string | null
+          role: string
+          slug: string
+          social_links?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          long_description?: string | null
+          name?: string
+          photo_url?: string | null
+          role?: string
+          slug?: string
+          social_links?: Json | null
+          updated_at?: string | null
         }
         Relationships: []
       }
