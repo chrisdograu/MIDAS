@@ -51,11 +51,10 @@ export default function Auth() {
   // GAP-393: Login com Google
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Redirect if already logged in
-  if (user) {
-    navigate('/');
-    return null;
-  }
+  // Redirect if already logged in (dentro de efeito: navegar durante o render quebra o React)
+  useEffect(() => {
+    if (user) navigate('/', { replace: true });
+  }, [user, navigate]);
 
   // GAP-392: Força da senha
   const passwordStrength = getPasswordStrength(password);
@@ -84,7 +83,12 @@ export default function Auth() {
       if (error) throw error;
       // O redirecionamento é automático
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer login com Google');
+      const msg = String(error?.message || '');
+      toast.error(
+        msg.includes('provider is not enabled')
+          ? 'A entrada com Google ainda não está ativada. Use seu e-mail e senha.'
+          : 'Não foi possível entrar com o Google. Tente pelo e-mail e senha.'
+      );
       setGoogleLoading(false);
     }
   };
