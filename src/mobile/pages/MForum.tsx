@@ -61,7 +61,7 @@ async function toggleReviewLike(reviewId: string, userId: string): Promise<boole
 
 export default function MForum() {
   const [tab, setTab] = useState<Tab>('tudo');
-  const [filterOpen, setFilterOpen] = useState(false);
+  
   const [sort, setSort] = useState<Sort>('popular');
   const [period, setPeriod] = useState<Period>('week');
   const [query, setQuery] = useState('');
@@ -527,29 +527,6 @@ export default function MForum() {
         </button>
       )}
 
-      {filterOpen && (
-        <div className="fixed inset-0 z-50 overlay-scrim flex items-end" onClick={() => setFilterOpen(false)}>
-          <div className="w-full bg-card rounded-t-2xl p-5 space-y-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold">Filtros</h3>
-              <button onClick={() => setFilterOpen(false)} className="p-1 rounded-lg bg-secondary"><X className="h-4 w-4" /></button>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">Ordenar por</p>
-              <div className="flex gap-1.5 flex-wrap">
-                {SORTS.map(s => <MobileChip key={s.id} active={sort === s.id} onClick={() => setSort(s.id)}>{s.label}</MobileChip>)}
-              </div>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">Período</p>
-              <div className="flex gap-1.5 flex-wrap">
-                {PERIOD_OPTIONS.map(p => <MobileChip key={p.id} active={period === p.id} onClick={() => setPeriod(p.id)}>{p.label}</MobileChip>)}
-              </div>
-            </div>
-            <button onClick={() => setFilterOpen(false)} className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm">Aplicar</button>
-          </div>
-        </div>
-      )}
 
       {suggestOpen && (
         <div className="fixed inset-0 z-50 overlay-scrim flex items-end" onClick={() => setSuggestOpen(false)}>
