@@ -51,11 +51,10 @@ export default function Auth() {
   // GAP-393: Login com Google
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Redirect if already logged in
-  if (user) {
-    navigate('/');
-    return null;
-  }
+  // Redirect if already logged in (dentro de efeito: navegar durante o render quebra o React)
+  useEffect(() => {
+    if (user) navigate('/', { replace: true });
+  }, [user, navigate]);
 
   // GAP-392: Força da senha
   const passwordStrength = getPasswordStrength(password);
