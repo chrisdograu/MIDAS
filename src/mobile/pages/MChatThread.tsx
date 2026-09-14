@@ -118,21 +118,17 @@ export default function MChatThread() {
     await supabase.from('mensagens').update({ is_read: true }).eq('receiver_id', user.id).eq('sender_id', otherId).eq('is_read', false);
   };
 
-  const upsertMessage = (message: Msg, isNew: boolean = false) => {
+  const upsertMessage = (message: Msg) => {
     setMsgs((current) => {
       const next = [...current];
       const index = next.findIndex((item) => item.id === message.id);
       if (index >= 0) next[index] = message;
       else next.push(message);
-      next.sort((a, b) => {
-        const diff = +new Date(a.created_at) - +new Date(b.created_at);
-        if (diff !== 0) return diff;
-        return a.id.localeCompare(b.id);
-      });
+      next.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at));
       return next;
     });
-    // GAP-1020: Notificação APENAS para INSERT de outros (não em UPDATE)
-    if (isNew && message.sender_id !== user?.id) {
+    // GAP-1020: Notificação para novas mensagens de outros
+    if (message.sender_id !== user?.id) {
       setNewMsgCount(prev => prev + 1);
       toast.info(`📩 Nova mensagem de ${other?.display_name || 'alguém'}`, {
         duration: 5000,
@@ -154,13 +150,13 @@ export default function MChatThread() {
         const message = payload.new as Msg;
         const messageParticipants = [message.sender_id, message.receiver_id].sort();
         if (participantIds[0] !== messageParticipants[0] || participantIds[1] !== messageParticipants[1]) return;
-        upsertMessage(message, true);
+        upsertMessage(message);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mensagens' }, (payload) => {
         const message = payload.new as Msg;
         const messageParticipants = [message.sender_id, message.receiver_id].sort();
         if (participantIds[0] !== messageParticipants[0] || participantIds[1] !== messageParticipants[1]) return;
-        upsertMessage(message, false);
+        upsertMessage(message);
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, (payload: any) => {
         const row = (payload.new || payload.old) as Reaction;
@@ -217,17 +213,21 @@ export default function MChatThread() {
     if (!text.trim() || !user || !other || sending) return;
     setSending(true);
     const content = text.trim().slice(0, 1000);
+    setText('');
+    const last = msgs[msgs.length - 1];
+    if (last && last.sender_id === user.id && last.content === content && Date.now() - +new Date(last.created_at) < 3000) {
+      setSending(false);
+      toast.info('Mensagem duplicada ignorada');
+      return;
+    }
     const { data: inserted, error } = await supabase.from('mensagens').insert({
       sender_id: user.id, receiver_id: other.id, content,
       anuncio_id: conv?.anuncio_id || null, message_type: 'text',
       reply_to_id: replyTo?.id || null,
     } as any).select('id, sender_id, receiver_id, content, created_at, is_read, message_type, payload, image_url, reply_to_id, edited_at').single();
-    if (error) {
-      toast.error('Erro ao enviar');
-    } else if (inserted) {
-      // Limpa o input só APÓS o sucesso
-      setText('');
-      upsertMessage(inserted as Msg, true);
+    if (error) toast.error('Erro ao enviar');
+    else if (inserted) {
+      upsertMessage(inserted as Msg);
       if (conv) await supabase.from('conversas').update({ last_message: content, last_message_at: new Date().toISOString() }).eq('id', conv.id);
     }
     setReplyTo(null);
@@ -299,8 +299,6 @@ export default function MChatThread() {
 
   const respondOffer = async (msg: Msg, accepted: boolean) => {
     if (!user) return;
-    // Só quem NÃO enviou a contraoferta pode responder
-    if (msg.sender_id === user.id) return;
     const newPayload = { ...msg.payload, status: accepted ? 'accepted' : 'rejected' };
     await supabase.from('mensagens').update({ payload: newPayload }).eq('id', msg.id);
     await supabase.from('mensagens').insert({

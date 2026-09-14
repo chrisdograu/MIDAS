@@ -42,7 +42,6 @@ export default function MGroups() {
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
-    let cancelled = false;
     (async () => {
       const { data: mems } = await supabase
         .from('group_members').select('group_id, role, archived_at').eq('user_id', user.id);
@@ -67,11 +66,9 @@ export default function MGroups() {
         last_message_at: lastMap.get(g.id)?.created_at || null,
         is_archived: archivedMap.get(g.id) || false,
       })).sort((a, b) => +new Date(b.last_message_at || 0) - +new Date(a.last_message_at || 0));
-      if (cancelled) return;
       setGroups(merged);
       setLoading(false);
     })();
-    return () => { cancelled = true; };
   }, [user?.id]);
 
   if (!user) return <Navigate to="/m/auth" replace />;
@@ -88,13 +85,10 @@ export default function MGroups() {
 
   // GAP-1070: Arquivar/restaurar
   const handleArchive = async (groupId: string, currentStatus: boolean) => {
-    // Optimistic: aplica imediatamente
-    setGroups(prev => prev.map(g => g.id === groupId ? { ...g, is_archived: !currentStatus } : g));
-    const ok = await toggleArchiveGroup(groupId, user.id, !currentStatus);
-    if (!ok) {
-      // Rollback
-      setGroups(prev => prev.map(g => g.id === groupId ? { ...g, is_archived: currentStatus } : g));
-    }
+    await toggleArchiveGroup(groupId, user.id, !currentStatus);
+    setGroups(prev => prev.map(g => 
+      g.id === groupId ? { ...g, is_archived: !currentStatus } : g
+    ));
   };
 
   return (

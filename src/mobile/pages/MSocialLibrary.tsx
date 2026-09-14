@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   useMutualFriends, useFriendActivityStates, useSetActivityState, useRealtimeActivityStates,
   type ActivityState, type ActivityType, type FriendActivityItem,
@@ -38,7 +37,6 @@ async function markAllAsSeen(userId: string, items: FriendActivityItem[]) {
 
 export default function MSocialLibrary() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   useDocumentMeta({
     title: 'Biblioteca social — MIDIAS',
     description: 'Veja o que seus amigos estão jogando, avaliando e comentando.',
@@ -145,13 +143,14 @@ export default function MSocialLibrary() {
       toast.info('Nenhuma atividade nova para marcar');
       return;
     }
-
+    
     setMarkingAll(true);
     try {
       await markAllAsSeen(user!.id, withState);
-      queryClient.invalidateQueries({ queryKey: ['friend-activity-states'] });
-      // Invalidação única em vez de N mutations
-      // O hook useRealtimeActivityStates escuta mudanças e atualiza sozinho.
+      // Atualizar estado local
+      newItems.forEach(item => {
+        setState.mutate({ type: item.type, refId: item.id, friendId: item.friend_id, state: 'seen' });
+      });
       toast.success(`${newItems.length} atividade(s) marcadas como vistas`);
     } catch {
       toast.error('Erro ao marcar atividades como vistas');

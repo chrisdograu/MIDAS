@@ -20,10 +20,9 @@ export function useDesktopRealtimeAlerts(enabled: boolean) {
     if (!enabled || !position) return;
     mountedAtRef.current = Date.now();
 
-    // Margem de 5s (em vez de 2s) para absorver skew de relógio
     const isFresh = (createdAt?: string | null) => {
       if (!createdAt) return true;
-      return new Date(createdAt).getTime() >= mountedAtRef.current - 5000;
+      return new Date(createdAt).getTime() >= mountedAtRef.current - 2000;
     };
 
     const showAlert = (

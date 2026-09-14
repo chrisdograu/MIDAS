@@ -28,6 +28,15 @@ interface Tournament {
 interface GameOpt { id: string; title: string; image_url: string | null }
 interface WaitlistEntry { user_id: string; joined_at: string; }
 
+// GAP-615: Contar participantes
+async function getParticipantCount(tournamentId: string): Promise<number> {
+  const { count } = await supabase
+    .from('tournament_participants' as any)
+    .select('*', { count: 'exact', head: true })
+    .eq('tournament_id', tournamentId);
+  return count || 0;
+}
+
 // GAP-617: Funções de lista de espera
 async function getWaitlist(tournamentId: string): Promise<WaitlistEntry[]> {
   const { data } = await supabase
@@ -203,18 +212,10 @@ export default function Torneios() {
     } else setGames([]);
     setMyIds(meusIds);
     
-    // GAP-615: Carregar contagem de participantes (1 query agregada)
+    // GAP-615: Carregar contagem de participantes
     const counts: Record<string, number> = {};
-    if (items.length > 0) {
-      const { data: partsData } = await supabase
-        .from('tournament_participants' as any)
-        .select('tournament_id')
-        .in('tournament_id', items.map(t => t.id));
-      const partMap = new Map<string, number>();
-      ((partsData as any[]) || []).forEach((p: any) => {
-        partMap.set(p.tournament_id, (partMap.get(p.tournament_id) || 0) + 1);
-      });
-      items.forEach(t => { counts[t.id] = partMap.get(t.id) || 0; });
+    for (const t of items) {
+      counts[t.id] = await getParticipantCount(t.id);
     }
     setParticipantCounts(counts);
     

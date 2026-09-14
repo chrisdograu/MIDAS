@@ -22,12 +22,10 @@ export default function XPMobile() {
       setLoading(true);
       try {
         // Buscar total de XP mobile
-        const { data: xpData, error } = await supabase
+        const { data: xpData } = await supabase
           .from('user_xp_log')
           .select('xp, action, user_id')
-          .in('action', MOBILE_ACTIONS)
-          .limit(50000);
-        if (error) throw error;
+          .in('action', MOBILE_ACTIONS);
 
         const totalXp = (xpData || []).reduce((acc, curr) => acc + (curr.xp || 0), 0);
         const uniqueUsers = new Set((xpData || []).map(r => r.user_id)).size;
@@ -53,7 +51,6 @@ export default function XPMobile() {
           top_action_count: topCount,
         });
       } catch (error) {
-        console.warn('[XPMobile] erro:', error);
         toast.error('Erro ao carregar estatísticas do Mobile');
       } finally {
         setLoading(false);
@@ -83,7 +80,7 @@ export default function XPMobile() {
       {/* Cards de estatísticas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-border/50">
-          <CardContent className="py-4 px-4 flex items-center gap-3" role="status" aria-label="XP total mobile">
+          <CardContent className="py-4 px-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10"><Zap className="h-5 w-5 text-primary" /></div>
             <div>
               <p className="text-2xl font-bold">{loading ? '...' : stats.total_xp}</p>

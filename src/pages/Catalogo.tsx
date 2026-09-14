@@ -34,10 +34,13 @@ function LastUpdated({ time }: { time: Date }) {
 function StarFilter({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="flex items-center gap-1">
+          <Link to="/desenvolvedores" className="text-xs text-primary hover:underline ml-auto">
+            Desenvolvedores →
+          </Link>
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
-          onClick={() => onChange(star === value ? 0 : star)} aria-label={`Filtrar por ${star} estrelas ou mais`} aria-pressed={star <= value}
+          onClick={() => onChange(star === value ? 0 : star)}
           className={`text-lg transition-colors ${star <= value ? 'text-yellow-400' : 'text-muted-foreground/30'}`}
         >
           ★
@@ -71,11 +74,15 @@ function YearFilter({ value, onChange }: { value: number; onChange: (v: number) 
 function ViewToggle({ view, onChange }: { view: 'grid' | 'list'; onChange: (v: 'grid' | 'list') => void }) {
   return (
     <div className="flex items-center gap-1 border border-border rounded-lg p-0.5">
-      <button aria-label="Visualizar em grade" aria-pressed={view === 'grid'} onClick={() => onChange('grid')} className={`p-1.5 rounded ${view === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+      <button
+        onClick={() => onChange('grid')}
+        className={`p-1.5 rounded ${view === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
       >
         <Grid3X3 className="h-4 w-4" />
       </button>
-      <button aria-label="Visualizar em lista" aria-pressed={view === 'list'} onClick={() => onChange('list')} className={`p-1.5 rounded ${view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+      <button
+        onClick={() => onChange('list')}
+        className={`p-1.5 rounded ${view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
       >
         <List className="h-4 w-4" />
       </button>
@@ -111,6 +118,7 @@ export default function Catalogo() {
     localStorage.setItem('catalogo-view-mode', viewMode);
   }, [viewMode]);
 
+  const [hideOwned, setHideOwned] = useState(false);
   const { data: ownedIds = [] } = useQuery({
     queryKey: ['catalogo-owned', user?.id],
     enabled: !!user,
@@ -120,12 +128,13 @@ export default function Catalogo() {
     },
     staleTime: 60_000,
   });
-  const { data: hideOwned = false, refetch: refetchHideOwned } = useQuery({
+  useQuery({
     queryKey: ['catalogo-hide-owned', user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase.from('profiles').select('hide_owned_games').eq('id', user!.id).maybeSingle();
-      return !!(data as any)?.hide_owned_games;
+      setHideOwned(!!data?.hide_owned_games);
+      return data?.hide_owned_games ?? false;
     },
     staleTime: 60_000,
   });
@@ -150,13 +159,11 @@ export default function Catalogo() {
 
   const [savingHideOwned, setSavingHideOwned] = useState(false);
   const toggleHideOwned = async () => {
-    if (!user) return;
     const next = !hideOwned;
-    setSavingHideOwned(true);
-    try {
+    setHideOwned(next);
+    if (user) {
+      setSavingHideOwned(true);
       await dbWrite(supabase.from('profiles').update({ hide_owned_games: next }).eq('id', user.id));
-      await refetchHideOwned();
-    } finally {
       setSavingHideOwned(false);
     }
   };
@@ -326,7 +333,7 @@ export default function Catalogo() {
               return (
                 <button
                   key={p}
-                  onClick={() => togglePlatform(p)} aria-pressed={selectedPlatforms.includes(p)}
+                  onClick={() => togglePlatform(p)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-foreground hover:border-primary/50'}`}
                 >
                   {p}
@@ -374,7 +381,7 @@ export default function Catalogo() {
         {user && (
           <button
             onClick={toggleHideOwned}
-            disabled={savingHideOwned} aria-pressed={hideOwned}
+            disabled={savingHideOwned}
             className={`self-start inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors disabled:opacity-50 ${hideOwned ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-foreground hover:border-primary/50'}`}
           >
             <EyeOff className="h-3.5 w-3.5" />

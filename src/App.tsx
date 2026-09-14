@@ -19,12 +19,6 @@ import { isNativeShell } from "@/lib/appUrl";
 import { useNavigate } from "react-router-dom";
 import { startOfflineQueueWatcher } from "@/lib/offlineQueue";
 import { ErrorBoundary } from "react-error-boundary";
-declare global {
-  interface Window {
-    gtag?: (...args: any[]) => void;
-  }
-}
-
 import DeveloperProfile from '@/pages/DeveloperProfile';
 import DevelopersList from '@/pages/DevelopersList';
 import GenrePage from '@/pages/GenrePage';
@@ -52,13 +46,11 @@ function AnalyticsTracker() {
       });
     }
 
-    // GAP-AP02: Performance timing (API moderna)
-    if (typeof performance !== 'undefined' && performance.getEntriesByType) {
-      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-      if (nav) {
-        const loadTime = nav.loadEventEnd - nav.startTime;
-        console.debug('[Analytics] Page load time:', Math.round(loadTime), 'ms');
-      }
+    // GAP-AP02: Performance timing
+    if (window.performance) {
+      const perfData = window.performance.timing;
+      const loadTime = perfData.loadEventEnd - perfData.navigationStart;
+      console.debug('[Analytics] Page load time:', loadTime, 'ms');
     }
   }, [location]);
 
@@ -71,13 +63,9 @@ function PWAUpdateHandler() {
 
   useEffect(() => {
     // GAP-AP03: Service worker update detection
-    let updatefoundHandler: (() => void) | null = null;
-    let registrationRef: ServiceWorkerRegistration | null = null;
-
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
-        registrationRef = registration;
-        updatefoundHandler = () => {
+        registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
@@ -86,8 +74,7 @@ function PWAUpdateHandler() {
               }
             });
           }
-        };
-        registration.addEventListener('updatefound', updatefoundHandler);
+        });
       });
 
       // Check for updates periodically
@@ -99,12 +86,7 @@ function PWAUpdateHandler() {
         }
       }, 60 * 60 * 1000); // Check every hour
 
-      return () => {
-        clearInterval(interval);
-        if (registrationRef && updatefoundHandler) {
-          registrationRef.removeEventListener('updatefound', updatefoundHandler);
-        }
-      };
+      return () => clearInterval(interval);
     }
   }, []);
 
@@ -158,12 +140,8 @@ const themeQueryClient = new QueryClient({
   },
 });
 
-// Restore cache (try/catch: localStorage pode estar corrompido)
-try {
-  restoreQueryCache(themeQueryClient);
-} catch (e) {
-  console.warn('[App] falha ao restaurar cache:', e);
-}
+// Restore cache
+restoreQueryCache(themeQueryClient);
 
 const OfflineSupport = () => {
   useEffect(() => {
@@ -228,15 +206,15 @@ const App = () => (
     }}
   >
     <QueryClientProvider client={themeQueryClient}>
-      <BrowserRouter>
+      <AuthProvider>
         <ThemeProvider>
           <TooltipProvider>
-            <AuthProvider>
-              <TutorialProvider>
-                <CartProvider>
-                  <Toaster />
-                  <Sonner />
-                  <OfflineSupport />
+            <TutorialProvider>
+              <CartProvider>
+                <Toaster />
+                <Sonner />
+                <OfflineSupport />
+                <BrowserRouter>
                   <NativeEntryRedirect />
                   <AnalyticsTracker />
                   <PWAUpdateHandler />
@@ -249,12 +227,12 @@ const App = () => (
                       </Routes>
                     </QueryErrorBoundary>
                   </Suspense>
-                </CartProvider>
-              </TutorialProvider>
-            </AuthProvider>
+                </BrowserRouter>
+              </CartProvider>
+            </TutorialProvider>
           </TooltipProvider>
         </ThemeProvider>
-      </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

@@ -50,24 +50,7 @@ interface Props {
   onBlur?: () => void;
 }
 
-// GAP: ChevronRight inline (evita import extra do lucide)
-const ChevronRight = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    className={className}
-  >
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
-);
- 
+export function ProdutoFormFields({ 
   value, 
   onChange, 
   onCategoryName,
@@ -338,5 +321,22 @@ const ChevronRight = ({ className }: { className?: string }) => (
   );
 }
 
+// Componente auxiliar para usar no lugar do ChevronRight (que não foi importado)
+const ChevronRight = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="16" 
+    height="16" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
 
 export default ProdutoFormFields;

@@ -76,11 +76,7 @@ export function useUserLoadout(userId: string | null | undefined) {
     setLoading(false);
   }, [userId]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void reload();
-    return () => { cancelled = true; };
-  }, [reload]);
+  useEffect(() => { reload(); }, [reload]);
   return { rows, loading, reload };
 }
 
@@ -111,11 +107,7 @@ export function useGamePageLoadout(userId: string | null | undefined, productId:
     setLoading(false);
   }, [userId, productId]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void reload();
-    return () => { cancelled = true; };
-  }, [reload]);
+  useEffect(() => { reload(); }, [reload]);
   return { rows, loading, reload };
 }
 
@@ -147,11 +139,7 @@ export function useGameRewards(productId: string | null | undefined) {
     setLoading(false);
   }, [productId]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void reload();
-    return () => { cancelled = true; };
-  }, [reload]);
+  useEffect(() => { reload(); }, [reload]);
   return { rows, loading, reload };
 }
 

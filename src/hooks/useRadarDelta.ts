@@ -88,9 +88,6 @@ export function useRadarDelta(limit = 8) {
   return useQuery({
     queryKey: ['radar-delta', limit],
     queryFn: () => fetchDelta(limit),
-    enabled: true,
     staleTime: 5 * 60_000,
-    // TODO: migrar para RPC get_radar_delta() — hoje transfere 72h de views pro cliente.
-    // Peso atual: c24 * 3 + (c72 - c24) * 1 (24h vale 3x mais que 72h).
   });
 }

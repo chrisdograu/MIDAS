@@ -34,9 +34,6 @@ function MetricCard({ label, value, change, icon, color }: MetricCardProps) {
   );
 }
 
-// AVISO: os gráficos diários, distribuição por categoria, retenção e heatmap
-// são DADOS SIMULADOS nesta versão acadêmica. As métricas do topo (usuários,
-// vendas, denúncias) vêm de queries reais no Supabase.
 export default function Analytics() {
   const [period, setPeriod] = useState('30d');
   const [platform, setPlatform] = useState('all');

@@ -43,22 +43,20 @@ export function useDesktopPending(enabled: boolean) {
 
     fetchAll();
 
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const debouncedFetchAll = () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => { void fetchAll(); }, 500);
-    };
-
     const channel = supabase
       .channel('desktop-pending-counts')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncias' }, debouncedFetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'certificados' }, debouncedFetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, debouncedFetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'trade_proposals' }, debouncedFetchAll)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'game_suggestions' }, debouncedFetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncias' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'certificados' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'trade_proposals' }, fetchAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'game_suggestions' }, fetchAll)
       .subscribe();
+
+    const interval = setInterval(fetchAll, 60_000);
+
     return () => {
       active = false;
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, [enabled]);

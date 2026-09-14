@@ -99,8 +99,7 @@ export default function GameTimeline({ userId, productId, limit = 20 }: { userId
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, productId, filter, limit]);
+  }, [userId, productId, filter, limit, events.length]);
 
   // GAP-GT01: Intersection Observer para paginação
   useEffect(() => {

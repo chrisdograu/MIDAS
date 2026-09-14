@@ -33,8 +33,6 @@ export default function Produtos() {
   const [fornecedores, setFornecedores] = useState<{ id: string; name: string }[]>([]);
   const [developers, setDevelopers] = useState<{ id: string; name: string }[]>([]);
   const [publishers, setPublishers] = useState<{ id: string; name: string }[]>([]);
-  // TODO: fDeveloperId e fPublisherId são declarados mas não entram no payload de save.
-  // Mover pra payload ou remover os estados + selects.
   const [fDeveloperId, setFDeveloperId] = useState('');
   const [fPublisherId, setFPublisherId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -338,7 +336,6 @@ export default function Produtos() {
   };
 
   const uniqueCats = [...new Set(produtos.map(p => p.category).filter(Boolean))] as string[];
-  // TODO: busca é client-side sobre produtos já paginados.
   const filtered = produtos.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
     const matchCat = categoryFilter === 'all' || p.category === categoryFilter;
@@ -363,9 +360,6 @@ export default function Produtos() {
             <Plus className="h-4 w-4 mr-2" />Novo Produto
           </Button>
         </div>
-            {/* TODO: BUG — este bloco de selects de Desenvolvedor/Publicadora está fora
-                 do Dialog de edição e não tem campo correspondente no payload de save.
-                 Mover pra dentro do Dialog (ao lado de Categoria/Fornecedor) ou remover. */}
             <div className="space-y-2">
               <Label>Desenvolvedor</Label>
               <Select value={fDeveloperId} onValueChange={setFDeveloperId}>

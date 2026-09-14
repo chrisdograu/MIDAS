@@ -51,8 +51,7 @@ export default function DisputasPartidas() {
       .from('tournament_matches')
       .select('id, tournament_id, round_label, player_a, player_b, score_a, score_b, reported_score_a, reported_score_b, reported_by, reported_at, proof_a, proof_b')
       .eq('dispute_open', true)
-      .order('reported_at', { ascending: false })
-      .limit(200);
+      .order('reported_at', { ascending: false });
 
     const list = (matches || []) as any[];
     if (!list.length) { setRows([]); setLoading(false); return; }

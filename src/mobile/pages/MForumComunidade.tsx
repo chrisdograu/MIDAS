@@ -36,15 +36,19 @@ export default function MForumComunidade() {
   const [composeSpoiler, setComposeSpoiler] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const load = async (reset: boolean = true, nextPageArg?: number) => {
+  const load = async (reset: boolean = true) => {
     if (reset) {
       setLoading(true);
       setPage(0);
       setHasMore(true);
     }
     
-    const currentPage = reset ? 0 : (nextPageArg ?? page + 1);
+    const currentPage = reset ? 0 : page;
     const offset = currentPage * LIMIT;
+    
+    const { data: cs } = await supabase.from('forum_categories').select('slug,name,description,parent_slug').eq('is_community', true).order('display_order');
+    const subcats = (cs || []).filter((c: any) => c.parent_slug) as Cat[];
+    setCats(subcats);
     
     if (slug) {
       const found = subcats.find(c => c.slug === slug) || null;
@@ -78,47 +82,11 @@ export default function MForumComunidade() {
   
   useEffect(() => { load(true); }, [slug]);
 
-  // Categorias: carrega 1x, não em cada página
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data: cs } = await supabase
-        .from('forum_categories')
-        .select('slug,name,description,parent_slug')
-        .eq('is_community', true)
-        .order('display_order');
-      if (cancelled) return;
-      const subcats = (cs || []).filter((c: any) => c.parent_slug) as Cat[];
-      setCats(subcats);
-      const found = subcats.find(c => c.slug === slug) || null;
-      setCat(found);
-    })();
-    return () => { cancelled = true; };
-  }, [slug]);
-
-  // Categorias: carrega 1x, não em cada página
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data: cs } = await supabase
-        .from('forum_categories')
-        .select('slug,name,description,parent_slug')
-        .eq('is_community', true)
-        .order('display_order');
-      if (cancelled) return;
-      const subcats = (cs || []).filter((c: any) => c.parent_slug) as Cat[];
-      setCats(subcats);
-      const found = subcats.find(c => c.slug === slug) || null;
-      setCat(found);
-    })();
-    return () => { cancelled = true; };
-  }, [slug]);
-
   // GAP-1041: Carregar mais
   const loadMore = () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    load(false, page + 1);
+    load(false);
   };
 
   const submit = async () => {

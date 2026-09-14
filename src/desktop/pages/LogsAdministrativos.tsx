@@ -95,9 +95,6 @@ function PayloadDialog({ open, onClose, payload }: { open: boolean; onClose: () 
 }
 
 // GAP-D155: Função de reversão por tipo
-// TODO: os updates abaixo não verificam quantas linhas foram afetadas.
-// Um UPDATE que afeta 0 rows retorna success mesmo assim. Adicionar .select()
-// após o update pra confirmar.
 async function revertAction(
   logId: string,
   action: string,
@@ -166,7 +163,7 @@ async function revertAction(
       case 'remove_screenshot': {
         // Restaurar screenshot (se possível)
         const { error } = await supabase
-          .from('game_screenshots')
+          .from('screenshots')
           .update({ is_hidden: false })
           .eq('id', entityId);
         if (!error) success = true;
@@ -308,8 +305,7 @@ export default function LogsAdministrativos() {
         query = query.lte('created_at', new Date(filters.to + 'T23:59:59').toISOString());
       }
       if (filters.search) {
-        const term = filters.search.replace(/[%_]/g, '');
-        const search = `%${term}%`;
+        const search = `%${filters.search}%`;
         query = query.or(
           `action.ilike.${search},entity.ilike.${search},entity_id.ilike.${search},reason.ilike.${search}`
         );

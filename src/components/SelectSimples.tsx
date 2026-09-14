@@ -15,7 +15,7 @@ export interface GrupoSelect {
 }
 
 interface SelectSimplesProps {
-  value?: string;
+  value: string;
   onChange: (v: string) => void;
   options?: OpcaoSelect[];
   /** GAP-SS02: Grupos de opções */
@@ -49,7 +49,7 @@ export default function SelectSimples({
   clearable = false,
   clearLabel = 'Limpar',
 }: SelectSimplesProps) {
-  const hasValue = !!(value && value !== '' );
+  const hasValue = value && value !== '';
 
   // GAP-SS03: Loading state
   if (loading) {
@@ -67,7 +67,7 @@ export default function SelectSimples({
 
   // GAP-SS04: Select com clear
   const triggerWithClear = (children: React.ReactNode) => (
-    <>
+    <div className="relative">
       {children}
       {clearable && hasValue && !disabled && (
         <button
@@ -76,13 +76,13 @@ export default function SelectSimples({
             e.stopPropagation();
             onChange('');
           }}
-          className="ml-1 p-1 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+          className="absolute right-8 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
           aria-label={clearLabel}
         >
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-    </>
+    </div>
   );
 
   const triggerContent = (
@@ -102,9 +102,6 @@ export default function SelectSimples({
   // GAP-SS02: Renderizar grupos
   const renderOptions = () => {
     if (groups && groups.length > 0) {
-      if (options && options.length > 0) {
-        console.warn('[SelectSimples] options e groups passados juntos — groups ganha');
-      }
       return groups.map((group) => (
         <SelectGroup key={group.label}>
           <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
@@ -137,35 +134,15 @@ export default function SelectSimples({
   };
 
   return (
-    <div className={cn(clearable && hasValue && 'relative', className)}>
-      <Select value={value ?? ''} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger
-          aria-label={label || placeholder}
-          className={cn(
-            size === 'sm' ? 'h-8 text-xs' : 'h-10 text-sm',
-            'bg-card',
-            clearable && hasValue && 'pr-8',
-          )}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {renderOptions()}
-        </SelectContent>
-      </Select>
-      {clearable && hasValue && !disabled && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onChange('');
-          }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground z-10"
-          aria-label={clearLabel}
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      {clearable && hasValue ? (
+        triggerWithClear(triggerContent)
+      ) : (
+        triggerContent
       )}
-    </div>
+      <SelectContent>
+        {renderOptions()}
+      </SelectContent>
+    </Select>
   );
 }

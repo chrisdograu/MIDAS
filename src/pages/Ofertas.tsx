@@ -8,6 +8,9 @@ import EstadoVazio from '@/components/EstadoVazio';
 import SelectSimples from '@/components/SelectSimples';
 import { toast } from 'sonner';
 
+// GAP-520: Simular ofertas com expiração
+const EXPIRING_SOON_IDS = ['game-1', 'game-2', 'game-3']; // Em produção, viria do banco
+
 export default function Ofertas() {
   const { data: games = [], isLoading } = useProdutos();
   const [minDiscount, setMinDiscount] = useState(0);
@@ -181,7 +184,7 @@ export default function Ofertas() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {paginatedDeals.map((game) => {
               // GAP-520: Badge "Últimas horas" (simulado)
-              const isExpiringSoon = (game as any).expiring_soon === true;
+              const isExpiringSoon = EXPIRING_SOON_IDS.includes(game.id);
               
               return (
                 <div key={game.id} className="relative">
@@ -201,7 +204,7 @@ export default function Ofertas() {
             <div className="flex items-center justify-center gap-2 mt-8">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1} aria-label="Página anterior"
+                disabled={page === 1}
                 className="px-3 py-1.5 rounded border border-border bg-card text-sm disabled:opacity-50 hover:bg-secondary transition"
               >
                 Anterior
@@ -211,7 +214,7 @@ export default function Ofertas() {
               </span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages} aria-label="Próxima página"
+                disabled={page === totalPages}
                 className="px-3 py-1.5 rounded border border-border bg-card text-sm disabled:opacity-50 hover:bg-secondary transition"
               >
                 Próxima

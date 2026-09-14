@@ -84,7 +84,6 @@ export default function Promocoes() {
   // GAP-D251: Validação de desconto
   const createPromo = async () => {
     if (!promoForm.product_id) return toast.error('Escolha um jogo');
-    // TODO: validação só no client. Adicionar CHECK constraint no banco.
     if (promoForm.discount_percent < 1 || promoForm.discount_percent > 90) {
       return toast.error('Desconto deve ser entre 1% e 90%');
     }
@@ -147,9 +146,6 @@ export default function Promocoes() {
     load();
   };
 
-  // TODO: saveBundle e removeBundle fazem 2-3 queries sem transação.
-  // Se o insert de items falhar, o bundle fica em estado inconsistente.
-  // Migrar para RPC `save_bundle` transacional.
   const saveBundle = async () => {
     if (!bundleForm.title || bundleForm.items.length < 2) return toast.error('Título e ao menos 2 jogos');
     
@@ -278,7 +274,7 @@ export default function Promocoes() {
     load();
   };
 
-  // TODO: exportData está vazio (só mostra toast). Implementar ou remover botão.
+  // GAP-D255: Exportar CSV
   const exportData = () => {
     setExporting(true);
     const data = promos.map(p => ({
@@ -425,8 +421,8 @@ export default function Promocoes() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    {!expired && <Button size="sm" variant="outline" aria-label={promo.is_active ? 'Pausar promoção' : 'Ativar promoção'} onClick={() => togglePromo(promo.id, promo.is_active)}>{promo.is_active ? 'Pausar' : 'Ativar'}</Button>}
-                    <Button size="sm" variant="ghost" aria-label={`Excluir promoção de ${productMap.get(promo.product_id)?.title || 'produto'}`} onClick={() => setConfirmDelete({ type: 'promo', id: promo.id, label: `promoção de ${productMap.get(promo.product_id)?.title || ''}` })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    {!expired && <Button size="sm" variant="outline" onClick={() => togglePromo(promo.id, promo.is_active)}>{promo.is_active ? 'Pausar' : 'Ativar'}</Button>}
+                    <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: 'promo', id: promo.id, label: `promoção de ${productMap.get(promo.product_id)?.title || ''}` })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                   </div>
                 </div>
               );
@@ -520,7 +516,7 @@ export default function Promocoes() {
                     <div className="flex gap-1">
                       <Button size="sm" variant="outline" onClick={() => { setEditingBundleId(b.id); setBundleForm({ title: b.title, description: b.description || '', price: Number(b.price), image_url: b.image_url || '', items: items.map(i => i.product_id) }); setBundleOpen(true); }}><Pencil className="h-4 w-4" /></Button>
                       <Button size="sm" variant="outline" onClick={() => toggleBundle(b.id, b.is_active)}>{b.is_active ? 'Pausar' : 'Ativar'}</Button>
-                      <Button size="sm" variant="ghost" aria-label={`Excluir bundle ${b.title}`} onClick={() => setConfirmDelete({ type: 'bundle', id: b.id, label: b.title })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => setConfirmDelete({ type: 'bundle', id: b.id, label: b.title })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
                   </div>
                   {b.description && <p className="text-sm text-muted-foreground mb-2">{b.description}</p>}
@@ -583,7 +579,7 @@ export default function Promocoes() {
                   <p className="text-sm text-muted-foreground">{productMap.get(p.product_id)?.title || p.product_id}</p>
                   {p.reason && <p className="text-xs text-muted-foreground">"{p.reason}"</p>}
                 </div>
-                <Button size="sm" variant="ghost" aria-label={`Remover pick do dia ${p.pick_date}`} onClick={() => removePick(p.pick_date)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                <Button size="sm" variant="ghost" onClick={() => removePick(p.pick_date)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
               </div>
             ))}
           </div>

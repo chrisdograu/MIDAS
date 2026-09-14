@@ -235,7 +235,6 @@ export default function AdminTeamMembers() {
       [newOrder[newIndex].display_order, newOrder[index].display_order];
 
     try {
-      // TODO: 2 updates sequenciais sem transação. Migrar para RPC `swap_team_member_order(_id_a, _id_b)`.
       await supabase
         .from('team_members')
         .update({ display_order: newOrder[index].display_order })
@@ -386,7 +385,7 @@ export default function AdminTeamMembers() {
                       <Button size="sm" variant="ghost" onClick={() => moveMember(m, 'down')} disabled={index === members.length - 1}>
                         <ArrowDown className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => toggleActive(m)} title={m.is_active ? 'Desativar membro' : 'Ativar membro'}>
+                      <Button size="sm" variant="ghost" onClick={() => toggleActive(m)}>
                         {m.is_active ? 'Desativar' : 'Ativar'}
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => openEdit(m)}>

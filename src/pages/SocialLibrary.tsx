@@ -30,6 +30,25 @@ interface TournamentActivity {
   profiles?: { display_name: string; avatar_url: string | null };
 }
 
+// GAP-603: Marcar todos como vistos (persistente)
+async function markAllAsSeen(userId: string, activityIds: string[]) {
+  if (activityIds.length === 0) return;
+  
+  // Inserir registros de "seen" para todas as atividades
+  const inserts = activityIds.map(id => ({
+    user_id: userId,
+    activity_id: id,
+    state: 'seen',
+    updated_at: new Date().toISOString(),
+  }));
+  
+  const { error } = await supabase
+    .from('friend_activity_states')
+    .upsert(inserts, { onConflict: 'user_id, activity_id' });
+  
+  if (error) throw error;
+}
+
 // GAP-604: Buscar participações em torneios oficiais
 async function fetchOfficialTournaments(friendIds: string[]): Promise<TournamentActivity[]> {
   if (friendIds.length === 0) return [];

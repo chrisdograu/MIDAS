@@ -214,7 +214,7 @@ export default function FAQ() {
                   <span className="text-xs text-muted-foreground">Esta resposta foi útil?</span>
                   <button
                     onClick={() => handleFeedback(item.id, true)}
-                    disabled={!!feedbackGiven[item.id]} aria-label="Marcar resposta como útil"
+                    disabled={!!feedbackGiven[item.id]}
                     className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors ${
                       feedbackGiven[item.id]
                         ? 'bg-success/10 text-success cursor-default'
@@ -226,7 +226,7 @@ export default function FAQ() {
                   </button>
                   <button
                     onClick={() => handleFeedback(item.id, false)}
-                    disabled={!!feedbackGiven[item.id]} aria-label="Marcar resposta como não útil"
+                    disabled={!!feedbackGiven[item.id]}
                     className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors ${
                       feedbackGiven[item.id]
                         ? 'bg-destructive/10 text-destructive cursor-default'

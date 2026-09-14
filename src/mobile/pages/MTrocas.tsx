@@ -36,8 +36,7 @@ const URGENCY_MS = 5 * 60_000;
 const WINDOW_MS = 72 * 3600_000;
 
 // GAP-1124: Notificação de status
-async function notifyStatusChange(proposalId: string, userId: string, currentUserId: string, status: string, message: string) {
-  if (userId === currentUserId) return;
+async function notifyStatusChange(proposalId: string, userId: string, status: string, message: string) {
   await dbWrite(
     supabase.from('notifications').insert({
       user_id: userId,
@@ -51,27 +50,17 @@ async function notifyStatusChange(proposalId: string, userId: string, currentUse
 }
 
 // GAP-1123: Avaliar usuário
-async function rateUser(
-  proposalId: string,
-  reviewerId: string,
-  targetUserId: string,
-  rating: number,
-  comment: string | null,
-  role: 'buyer' | 'seller',
-) {
+async function rateUser(proposalId: string, targetUserId: string, rating: number, comment: string | null, role: 'buyer' | 'seller') {
   const { error } = await supabase
     .from('avaliacoes_usuario')
-    .upsert(
-      {
-        reviewer_id: reviewerId,
-        reviewed_id: targetUserId,
-        rating,
-        comment: comment || null,
-        trade_proposal_id: proposalId,
-        role,
-      },
-      { onConflict: 'reviewer_id,reviewed_id,trade_proposal_id' },
-    );
+    .insert({
+      reviewer_id: targetUserId, // quem está avaliando
+      reviewed_id: targetUserId, // quem está sendo avaliado
+      rating,
+      comment: comment || null,
+      trade_proposal_id: proposalId,
+      role,
+    });
   if (error) throw error;
 }
 
@@ -99,7 +88,6 @@ export default function MTrocas() {
     if (!user) return;
     setLoading(true);
     setErro(false);
-    // Sem cancel flag: a página é pequena e o usuário raramente navega durante load.
     const { data, error } = await supabase.from('trade_proposals').select('*').order('created_at', { ascending: false });
     if (error) { setErro(true); setLoading(false); return; }
     const list = (data || []) as any[];
@@ -137,7 +125,7 @@ export default function MTrocas() {
         else if (values.delivered_at) message = 'Item marcado como entregue. Verifique sua negociação.';
         else if (values.dispute_status === 'open') message = 'Uma contestação foi aberta na negociação.';
         else if (values.status === 'cancelled') message = 'A negociação foi cancelada.';
-        await notifyStatusChange(id, otherId, user?.id || '', values.status || 'updated', message);
+        await notifyStatusChange(id, otherId, values.status || 'updated', message);
       }
     }
     
@@ -166,7 +154,7 @@ export default function MTrocas() {
     if (!ratingFor || !user) return;
     const targetId = ratingRole === 'buyer' ? ratingFor.proposer_id : ratingFor.seller_id;
     try {
-      await rateUser(ratingFor.id, user.id, targetId, ratingValue, ratingComment || null, ratingRole);
+      await rateUser(ratingFor.id, targetId, ratingValue, ratingComment || null, ratingRole);
       await patch(ratingFor.id, { 
         buyer_rated: ratingRole === 'buyer' ? true : undefined,
         seller_rated: ratingRole === 'seller' ? true : undefined,

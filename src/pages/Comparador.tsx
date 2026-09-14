@@ -10,14 +10,14 @@ const MAX_COMPARE = 4;
 
 export default function Comparador() {
   const { data: allGames = [], isLoading } = useProdutos();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const selectedGames = allGames.filter(g => selectedIds.includes(g.id));
   const availableGames = allGames.filter(g => !selectedIds.includes(g.id));
 
-  const addGame = (id: string) => {
+  const addGame = (id) => {
     if (selectedIds.length >= MAX_COMPARE) {
       toast.error(`Máximo de ${MAX_COMPARE} jogos para comparar`);
       return;
@@ -27,7 +27,7 @@ export default function Comparador() {
     setSearchQuery('');
   };
 
-  const removeGame = (id: string) => {
+  const removeGame = (id) => {
     setSelectedIds(selectedIds.filter(sid => sid !== id));
   };
 

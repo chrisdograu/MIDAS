@@ -114,7 +114,7 @@ export default function ForumAdmin() {
     const [{ data: profiles }, { data: prods }, { data: replies }] = await Promise.all([
       userIds.length ? supabase.from('profiles').select('id, display_name').in('id', userIds) : Promise.resolve({ data: [] as any[] }),
       prodIds.length ? supabase.from('produtos').select('id, title, catalog_game_id').in('id', prodIds) : Promise.resolve({ data: [] as any[] }),
-      supabase.from('forum_replies').select('post_id').in('post_id', data.map(p => p.id)),
+      supabase.from('forum_replies').select('post_id'),
     ]);
     const catIds = [...new Set((prods || []).map((p: any) => p.catalog_game_id).filter(Boolean))] as string[];
     const { data: catalog } = catIds.length
@@ -165,7 +165,6 @@ export default function ForumAdmin() {
   };
 
   // GAP-D119: Fixar/desfixar
-  // TODO: pin/lock sem AlertDialog. Ações são reversíveis, mas ideal confirmar.
   const togglePin = async (p: ForumPost) => {
     const next = !p.is_pinned;
     const { error } = await supabase.from('forum_posts').update({ is_pinned: next } as any).eq('id', p.id);
@@ -179,7 +178,6 @@ export default function ForumAdmin() {
     fetchPosts();
   };
 
-  // TODO: lock sem AlertDialog.
   const toggleLock = async (p: ForumPost) => {
     const next = !p.is_locked;
     const { error } = await supabase.from('forum_posts').update({ is_locked: next } as any).eq('id', p.id);
@@ -417,13 +415,13 @@ export default function ForumAdmin() {
                       <TableCell className="text-center text-sm">{p.replies_count}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{p.created_at ? formatDate(p.created_at) : '—'}</TableCell>
                       <TableCell className="text-center space-x-1 whitespace-nowrap">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" aria-label={p.is_pinned ? 'Desfixar tópico' : 'Fixar tópico'} onClick={() => togglePin(p)} title={p.is_pinned ? 'Desfixar' : 'Fixar'}>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => togglePin(p)} title={p.is_pinned ? 'Desfixar' : 'Fixar'}>
                           {p.is_pinned ? <PinOff className="h-3 w-3" /> : <Pin className="h-3 w-3" />}
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-xs h-7" aria-label={p.is_locked ? 'Destrancar tópico' : 'Trancar tópico'} onClick={() => toggleLock(p)} title={p.is_locked ? 'Destrancar' : 'Trancar'}>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => toggleLock(p)} title={p.is_locked ? 'Destrancar' : 'Trancar'}>
                           {p.is_locked ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-xs h-7 text-destructive" aria-label="Excluir post" onClick={() => setPendingDelete(p)}>
+                        <Button variant="ghost" size="sm" className="text-xs h-7 text-destructive" onClick={() => setPendingDelete(p)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </TableCell>
@@ -471,7 +469,7 @@ export default function ForumAdmin() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground align-top">{p.created_at ? formatDate(p.created_at) : '—'}</TableCell>
                       <TableCell className="text-center align-top">
-                        <Button variant="ghost" size="sm" className="text-xs h-7 text-destructive" aria-label="Excluir post" onClick={() => setPendingDelete(p)}>
+                        <Button variant="ghost" size="sm" className="text-xs h-7 text-destructive" onClick={() => setPendingDelete(p)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </TableCell>

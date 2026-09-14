@@ -94,12 +94,13 @@ export default function ChatAlertsQueue() {
     else setLoading(false);
   }, [tab, severityFilter, kindFilter, page]);
 
-  // Resetar pagina quando filtros mudam (dispara o load via dependencia)
+  useEffect(() => { load(); }, [load]);
+
+  // GAP-D80: Resetar página quando filtros mudam
   useEffect(() => {
     setPage(0);
+    load(false);
   }, [tab, severityFilter, kindFilter]);
-
-  useEffect(() => { load(); }, [load]);
 
   useRealtimeRefresh(['chat_ai_alerts'], () => load(false), 'admin-chat-alerts');
 

@@ -62,7 +62,7 @@ export default function AdminChaves() {
         query = query.eq('product_id', productFilter);
       }
 
-      const { data, error } = await query.limit(2000);
+      const { data, error } = await query;
       if (error) throw error;
 
       const productIds = [...new Set((data || []).map((k) => k.product_id))];
@@ -119,16 +119,15 @@ export default function AdminChaves() {
     const keysToInsert = lines.map((key) => ({
       product_id: selectedProduct,
       key_code: key,
-      platform: selectedPlatform && selectedPlatform !== '__none' ? selectedPlatform : null,
+      platform: selectedPlatform || null,
       status: 'available',
       imported_by: user?.user?.id,
       imported_at: new Date().toISOString(),
     }));
 
-    // TODO: chaves duplicadas causam unique violation. Considerar upsert com onConflict: 'key_code'.
     const { data, error } = await supabase
       .from('product_keys')
-      .upsert(keysToInsert, { onConflict: 'key_code', ignoreDuplicates: true })
+      .insert(keysToInsert)
       .select();
 
     setSaving(false);
@@ -356,7 +355,7 @@ export default function AdminChaves() {
               <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none">Nenhuma</SelectItem>
+                  <SelectItem value="">Nenhuma</SelectItem>
                   <SelectItem value="Steam">Steam</SelectItem>
                   <SelectItem value="Epic">Epic Games</SelectItem>
                   <SelectItem value="Xbox">Xbox</SelectItem>

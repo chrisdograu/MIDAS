@@ -19,7 +19,8 @@ export function useAdminNotifications() {
         .limit(50);
 
       if (error) {
-        throw error;
+        console.error('Erro ao buscar notificações admin:', error);
+        return { data: [], unreadCount: 0 };
       }
 
       const unreadCount = data?.filter((n) => !n.is_read).length || 0;

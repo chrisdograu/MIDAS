@@ -271,7 +271,7 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      <header aria-label="Cabeçalho da plataforma" className="sticky top-0 z-50 glass">
+      <header className="sticky top-0 z-50 glass">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 gap-4">
             <Link to="/" className="flex items-center gap-2 shrink-0">
@@ -295,7 +295,7 @@ export default function Header() {
               ))}
             </nav>
 
-            <form onSubmit={handleSearch} role="search" aria-label="Busca global" className="hidden md:flex flex-1 max-w-md">
+            <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md">
               <div ref={searchRef} className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input 

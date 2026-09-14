@@ -124,11 +124,6 @@ export default function MVendedor() {
 
   const requestCert = async () => {
     if (!user) return;
-    // Já tem pedido ativo/pendente? não duplica
-    if (certStatus.status === 'pending' || certStatus.status === 'active') {
-      toast.info('Você já tem uma solicitação em andamento.');
-      return;
-    }
     const { error } = await supabase
       .from('certificados')
       .insert({ user_id: user.id, status: 'pendente' });
@@ -140,27 +135,13 @@ export default function MVendedor() {
     loadData();
   };
 
-  const toggleVacation = async () => {
-    if (!user || !seller) return;
+  const toggleVacation = () => {
     const newVal = !vacationMode;
     setVacationMode(newVal);
-    if (!newVal) setVacationMessage('');
-    setSaving(true);
-    const { error } = await supabase
-      .from('seller_profiles')
-      .update({
-        vacation_mode: newVal,
-        vacation_message: newVal ? (vacationMessage.trim() || null) : null,
-        updated_at: new Date().toISOString(),
-      } as any)
-      .eq('user_id', user.id);
-    setSaving(false);
-    if (error) {
-      toast.error('Erro ao atualizar modo férias');
-      setVacationMode(!newVal);
-      return;
+    if (!newVal) {
+      setVacationMessage('');
     }
-    toast.success(newVal ? '🏖️ Modo férias ativado' : 'Voltamos ao trabalho!');
+    setTimeout(() => save(), 100);
   };
 
   const deactivateSeller = async () => {
@@ -194,7 +175,7 @@ export default function MVendedor() {
   }
 
   // ONBOARDING - Sem perfil de vendedor
-  if (!seller && hasSeller !== false) {
+  if (!seller) {
     return (
       <div className="px-4 py-8">
         <Link to="/m/config" className="inline-flex items-center gap-1 text-sm text-muted-foreground mb-4">
@@ -375,15 +356,7 @@ export default function MVendedor() {
       <div className="bg-card border border-border rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm">Editar perfil</h3>
-          <button onClick={() => {
-            if (editing) {
-              // Resetar campos ao cancelar
-              setDisplayName(seller.display_name || '');
-              setBio(seller.bio || '');
-              setIsPrivate(!!seller.is_private);
-            }
-            setEditing(!editing);
-          }} className="text-xs text-primary flex items-center gap-1">
+          <button onClick={() => setEditing(!editing)} className="text-xs text-primary flex items-center gap-1">
             <Edit2 className="h-3 w-3" /> {editing ? 'Fechar' : 'Editar'}
           </button>
         </div>

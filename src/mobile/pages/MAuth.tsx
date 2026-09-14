@@ -23,8 +23,23 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   return { score, label: 'Forte', color: 'bg-success' };
 }
 
-// GAP-1003: A verificação de banimento agora acontece server-side via RPC
-// durante o signIn (Supabase Auth). O client não pode mais enumerar e-mails.
+// GAP-1003: Verificar banimento
+async function checkBanStatus(email: string): Promise<{ banned: boolean; until: string | null; reason: string | null }> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('banned_until, ban_reason_public')
+    .eq('email', email)
+    .maybeSingle();
+  
+  if (!data) return { banned: false, until: null, reason: null };
+  const bannedUntil = (data as any)?.banned_until;
+  if (!bannedUntil) return { banned: false, until: null, reason: null };
+  return {
+    banned: new Date(bannedUntil) > new Date(),
+    until: bannedUntil,
+    reason: (data as any)?.ban_reason_public || null,
+  };
+}
 
 const signUpSchema = z.object({
   displayName: z.string().trim().min(2, 'Nome muito curto').max(60),
@@ -57,12 +72,13 @@ export default function MAuth() {
 
   // GAP-1003: Verificar banimento antes do login
   const handleSignIn = async (email: string, password: string) => {
-    const result = await signIn(email, password);
-    // Se o Supabase retornar erro de banimento, mostrar mensagem clara
-    if (result.error && result.error.toLowerCase().includes('banned')) {
-      toast.error('Sua conta está suspensa. Verifique o motivo no seu e-mail.');
+    // Verificar banimento
+    const banStatus = await checkBanStatus(email);
+    if (banStatus.banned) {
+      toast.error(`Conta suspensa até ${new Date(banStatus.until!).toLocaleDateString('pt-BR')}`);
+      return;
     }
-    return result;
+    return await signIn(email, password);
   };
 
   // GAP-1005: Login com Google
@@ -114,8 +130,14 @@ export default function MAuth() {
       const result = await handleSignIn(form.email, form.password);
       error = result?.error;
     } else {
-      const result = await signUp(form.email, form.password, form.displayName, { birth_date: form.birthDate });
+      const result = await signUp(form.email, form.password, form.displayName);
       error = result?.error;
+    }
+    
+    if (!error && mode === 'up') {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user?.id;
+      if (uid) await supabase.from('profiles').update({ birth_date: form.birthDate } as any).eq('id', uid);
     }
     setLoading(false);
     if (error) { toast.error(error); return; }

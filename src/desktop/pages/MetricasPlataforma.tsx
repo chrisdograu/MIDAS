@@ -36,8 +36,7 @@ const brl = (v: number) => formatCurrency(v);
 export default function MetricasPlataforma() {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('mes');
-  // AVISO: platformFilter só afeta o catálogo de produtos. As métricas de compras
-  // e fórum são sempre gerais (não filtram por plataforma de origem).
+  // GAP-D153: Filtro por plataforma
   const [platformFilter, setPlatformFilter] = useState('all');
 
   const [catalogo, setCatalogo] = useState({ total: 0, ativos: 0, semEstoque: 0, precoMedio: 0, categorias: 0 });
@@ -168,7 +167,7 @@ export default function MetricasPlataforma() {
   const chartConfig = useMemo(() => ({
     receita: { label: 'Receita simulada', color: 'hsl(var(--primary))' },
     pedidos: { label: 'Compras', color: 'hsl(var(--accent))' },
-    posts: { label: 'Posts no fórum', color: 'hsl(var(--warning))' },
+    posts: { label: 'Posts no fórum', color: 'hsl(var(--chart-3))' },
   }), []);
 
   const baixar = (nome: string, conteudo: string, tipo: string) => {
@@ -373,7 +372,6 @@ export default function MetricasPlataforma() {
               variant="ghost" 
               size="sm" 
               className="h-7 text-xs"
-              aria-label="Exportar gráfico de receita como PNG"
               onClick={() => exportChartImage('chart-receita', 'receita')}
             >
               <Image className="h-3 w-3 mr-1" /> PNG
@@ -401,7 +399,6 @@ export default function MetricasPlataforma() {
               variant="ghost" 
               size="sm" 
               className="h-7 text-xs"
-              aria-label="Exportar gráfico de compras e posts como PNG"
               onClick={() => exportChartImage('chart-compras', 'compras-posts')}
             >
               <Image className="h-3 w-3 mr-1" /> PNG

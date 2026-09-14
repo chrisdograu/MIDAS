@@ -56,19 +56,15 @@ export default function ErroCarregamento({
   const colors = severityColors[severity];
 
   return (
-    <div
-      role="alert"
-      aria-live="assertive"
-      className={cn(
-        "flex flex-col items-center justify-center text-center py-16 px-4",
-        "rounded-lg border border-border"
-      )}
-    >
+    <div className={cn(
+      "flex flex-col items-center justify-center text-center py-16 px-4",
+      "rounded-lg border border-border"
+    )}>
       <div className={cn(
         "w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors",
         colors.bg
       )}>
-        <IconComponent aria-hidden className={cn("h-7 w-7", colors.icon)} />
+        <IconComponent className={cn("h-7 w-7", colors.icon)} />
       </div>
       
       <p className="text-base font-semibold text-foreground">{titulo}</p>

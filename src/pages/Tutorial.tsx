@@ -1,5 +1,5 @@
 // Tutorial passo-a-passo com mini-playground interativo por tópico.
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, ArrowRight, Sparkles, X, Star, Heart, Camera, ShoppingBag, Trophy, MessageCircle, Send, Search, User, Gamepad2, Palette, Smartphone, Monitor, Lightbulb, ShieldCheck, Award, Check, AlertTriangle, FastForward } from 'lucide-react';
@@ -338,7 +338,6 @@ export default function Tutorial() {
   const meta = TUTORIALS.find(t => t.key === key);
   const steps = key ? STEPS[key] : null;
   const { markSeen, seen } = useTutorial();
-  const navigate = useNavigate();
   
   // GAP-627: Carregar progresso salvo
   const [idx, setIdx] = useState(() => {
@@ -380,7 +379,7 @@ export default function Tutorial() {
     // Marcar como visto e ir para a página de tutoriais
     await markSeen(meta.key);
     clearProgress(key);
-    navigate('/tutoriais');
+    window.location.href = '/tutoriais';
   };
 
   if (!meta || !steps) {
@@ -484,7 +483,7 @@ export default function Tutorial() {
               <Button size="sm" className="bg-gradient-to-r from-primary to-accent" onClick={async () => { 
                 await markSeen(meta.key); 
                 clearProgress(key);
-                navigate('/tutoriais'); 
+                window.location.href = '/tutoriais'; 
               }}>
                 <CheckCircle2 className="h-4 w-4 mr-1" /> Concluir
               </Button>

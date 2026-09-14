@@ -55,21 +55,7 @@ export default function BundlesAdmin() {
       supabase.from('bundles').select('*').order('created_at', { ascending: false }),
       supabase.from('categorias').select('id, name').order('name'),
     ]);
-    // Popula _count.items para exibicao na tabela
-    const itemsPerBundle = new Map<string, number>();
-    if ((bundlesData || []).length > 0) {
-      const { data: allItems } = await supabase
-        .from('bundle_items')
-        .select('bundle_id')
-        .in('bundle_id', (bundlesData || []).map(b => b.id));
-      (allItems || []).forEach((it: any) => {
-        itemsPerBundle.set(it.bundle_id, (itemsPerBundle.get(it.bundle_id) || 0) + 1);
-      });
-    }
-    setBundles((bundlesData || []).map(b => ({
-      ...b,
-      _count: { items: itemsPerBundle.get(b.id) || 0 },
-    })));
+    setBundles(bundlesData || []);
     setCategories(catsData || []);
 
     // GAP-D54: Calcular médias de avaliações dos bundles
@@ -197,7 +183,6 @@ export default function BundlesAdmin() {
   };
 
   // GAP-D53: Upload de imagens
-  // TODO: aplicar stripImageExif(file) antes do upload (remove GPS/EXIF).
   const uploadBundleImage = async (file: File, bundleId: string, isPrimary: boolean = false) => {
     setUploadingImage(true);
     const ext = file.name.split('.').pop();
@@ -621,7 +606,7 @@ export default function BundlesAdmin() {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleteReason.trim().length < 4} className="bg-destructive text-destructive-foreground">Excluir</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">Excluir</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

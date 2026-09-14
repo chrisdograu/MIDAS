@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Loader2, Send, Settings, Users, Trash2, Crown, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -78,21 +78,24 @@ export default function MGroupChat() {
   // GAP-1059: "digitando..."
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const memberMap = useMemo(() => new Map(members.map(m => [m.user_id, m])), [members]);
+  const memberMap = new Map(members.map(m => [m.user_id, m]));
 
   // GAP-1059: Enviar sinal de "digitando..."
-  const typingDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const sendTyping = () => {
     if (!user || !id) return;
-    // Debounce: envia no máximo 1x por 1s
-    if (typingDebounceRef.current) return;
-    typingDebounceRef.current = setTimeout(() => { typingDebounceRef.current = null; }, 1000);
-    // Usa RPC para array_append (não sobrescreve outros digitando)
-    void supabase.rpc('set_typing' as any, { _group_id: id, _user_id: user.id, _typing: true });
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    supabase
+      .from('groups')
+      .update({ typing_users: [...typingUsers, user.id] })
+      .eq('id', id)
+      .then(() => {});
     typingTimeoutRef.current = setTimeout(() => {
-      void supabase.rpc('set_typing' as any, { _group_id: id, _user_id: user.id, _typing: false });
-    }, 2500);
+      supabase
+        .from('groups')
+        .update({ typing_users: typingUsers.filter(uid => uid !== user.id) })
+        .eq('id', id)
+        .then(() => {});
+    }, 2000);
   };
 
   useEffect(() => {
@@ -127,7 +130,6 @@ export default function MGroupChat() {
       supabase.removeChannel(ch);
       supabase.removeChannel(typingChannel);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
     };
   }, [user?.id, id]);
 
@@ -159,7 +161,11 @@ export default function MGroupChat() {
     if (!text.trim() || !user || !canSend || sending) return;
     // Parar de digitar
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    void supabase.rpc('set_typing' as any, { _group_id: id, _user_id: user.id, _typing: false });
+    supabase
+      .from('groups')
+      .update({ typing_users: typingUsers.filter(uid => uid !== user.id) })
+      .eq('id', id)
+      .then(() => {});
     
     setSending(true);
     const content = text.trim();

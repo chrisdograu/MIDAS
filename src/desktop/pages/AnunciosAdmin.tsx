@@ -56,7 +56,7 @@ export default function AnunciosAdmin() {
     if (setting?.value !== undefined && setting?.value !== null) setAdLimit(Number(setting.value) || 5);
     
     // Anúncios
-    const { data } = await supabase.from('anuncios').select('*').order('created_at', { ascending: false }).limit(2000);
+    const { data } = await supabase.from('anuncios').select('*').order('created_at', { ascending: false });
     if (!data) { setLoading(false); return; }
 
     const sellerIds = [...new Set(data.map(a => a.seller_id))];
@@ -67,12 +67,12 @@ export default function AnunciosAdmin() {
     const profileMap = new Map<string, string>(profiles?.map(p => [p.id, p.display_name || 'Vendedor']) || []);
 
     // Fotos
-    const { data: fotos } = await supabase.from('fotos_anuncio').select('anuncio_id').in('anuncio_id', adIds);
+    const { data: fotos } = await supabase.from('fotos_anuncio').select('anuncio_id');
     const fotoCount = new Map<string, number>();
     fotos?.forEach(f => fotoCount.set(f.anuncio_id, (fotoCount.get(f.anuncio_id) || 0) + 1));
 
     // GAP-D26: Certificados
-    const { data: certs } = await supabase.from('certificados').select('user_id').eq('status', 'active').in('user_id', sellerIds);
+    const { data: certs } = await supabase.from('certificados').select('user_id').eq('status', 'active');
     const certifiedSet = new Set(certs?.map(c => c.user_id) || []);
     setCertifiedMap(certifiedSet);
 
@@ -220,8 +220,7 @@ export default function AnunciosAdmin() {
       formatDate(a.created_at),
     ]);
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    // BOM UTF-8 para Excel brasileiro reconhecer acentos
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

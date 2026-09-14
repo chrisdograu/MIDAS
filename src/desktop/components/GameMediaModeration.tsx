@@ -132,8 +132,7 @@ export default function GameMediaModeration({ kind }: { kind: Kind; showSearch?:
 
   // GAP-D382: Paginação
   const totalPages = Math.ceil(filtradas.length / ITEMS_PER_PAGE);
-  const paginated = filtradas.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
-  const realHasMore = (page + 1) * ITEMS_PER_PAGE < filtradas.length;
+  const paginated = filtradas.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   const handleLoadMore = () => {
     if (hasMore && (page + 1) * ITEMS_PER_PAGE < filtradas.length) {
@@ -317,7 +316,7 @@ export default function GameMediaModeration({ kind }: { kind: Kind; showSearch?:
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  disabled={!realHasMore} 
+                  disabled={!hasMore || (page + 1) * ITEMS_PER_PAGE >= filtradas.length} 
                   onClick={handleLoadMore}
                 >
                   <ChevronRight className="h-4 w-4" />

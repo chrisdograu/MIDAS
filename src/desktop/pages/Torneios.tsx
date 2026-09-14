@@ -95,8 +95,7 @@ export default function TorneiosAdmin() {
         query = query.eq('status', statusFilter);
       }
       if (search) {
-        const term = search.replace(/[%_]/g, '');
-        query = query.ilike('title', `%${term}%`);
+        query = query.ilike('title', `%${search}%`);
       }
 
       const { data, error, count } = await query.range(from, from + ITEMS_PER_PAGE - 1);
@@ -140,7 +139,7 @@ export default function TorneiosAdmin() {
 
   const xpPreview = useMemo(() => calcXp(Number(form.max_participants) || 16), [form.max_participants]);
 
-  // TODO: notifica em massa (insert de N rows). Migrar para RPC que faz INSERT...SELECT.
+  // GAP-D297: Notificar usuários
   const notifyParticipants = async (tournamentId: string, title: string, body: string) => {
     const { data: participants } = await supabase
       .from('tournament_participants' as any)
@@ -325,7 +324,6 @@ export default function TorneiosAdmin() {
 
   const doGenerateBracket = async () => {
     if (!bracketFor) return;
-    // TODO: deletar todos os matches sem verificar se há apostas/odds vinculadas.
     const { error: errClear } = await supabase.from('tournament_matches' as any).delete().eq('tournament_id', bracketFor.id);
     if (errClear) return toast.error(errClear.message);
     const shuffled = [...participants].sort(() => Math.random() - 0.5);
@@ -448,8 +446,8 @@ export default function TorneiosAdmin() {
           <p className="text-xs text-muted-foreground uppercase">{t.type} · {t.status}</p>
         </div>
         <div className="flex gap-1">
-          <Button size="icon" variant="ghost" aria-label={`Editar torneio ${t.title}`} onClick={() => { setForm({ ...t, description: t.description || '', starts_at: t.starts_at || '', ends_at: t.ends_at || '', prize_types: t.prize_types || [], prize_xp_bonus: t.prize_xp_bonus || 0, verified: !!t.verified, prize_title: (t as any).prize_title || '' }); setEditing(t.id); setDialog(true); }}><Edit className="h-4 w-4" /></Button>
-          <Button size="icon" variant="ghost" aria-label={`Excluir torneio ${t.title}`} onClick={() => setConfirmDelete(t)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+          <Button size="icon" variant="ghost" aria-label="Editar" onClick={() => { setForm({ ...t, description: t.description || '', starts_at: t.starts_at || '', ends_at: t.ends_at || '', prize_types: t.prize_types || [], prize_xp_bonus: t.prize_xp_bonus || 0, verified: !!t.verified, prize_title: (t as any).prize_title || '' }); setEditing(t.id); setDialog(true); }}><Edit className="h-4 w-4" /></Button>
+          <Button size="icon" variant="ghost" aria-label="Excluir" onClick={() => setConfirmDelete(t)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
         </div>
       </div>
       <div className="text-xs text-muted-foreground">
@@ -466,7 +464,7 @@ export default function TorneiosAdmin() {
   );
 
   const totalPages = Math.ceil(list.length / ITEMS_PER_PAGE);
-  const paginated = list.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = list.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin" /></div>;
 
@@ -714,10 +712,10 @@ export default function TorneiosAdmin() {
                       <SelectItem value="3">🥉 3º</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button size="icon" variant="ghost" aria-label={`Falar com ${p.display_name || '}`} onClick={() => talkToParticipant(p.user_id)} title="Falar com participante">
+                  <Button size="icon" variant="ghost" onClick={() => talkToParticipant(p.user_id)} title="Falar com participante">
                     <MessageCircle className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" aria-label={`Banir ${p.display_name || '} do torneio`} onClick={() => banUser(p.user_id)} title="Banir do torneio">
+                  <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => banUser(p.user_id)} title="Banir do torneio">
                     <Ban className="h-4 w-4" />
                   </Button>
                 </li>

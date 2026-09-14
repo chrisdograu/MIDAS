@@ -10,7 +10,7 @@ import { usePrefetchRoute } from '@/hooks/usePrefetchRoute';
 import { supabase } from '@/integrations/supabase/client';
 import { mapProdutoToGame } from '@/lib/gameData';
 import { formatCurrency } from '@/lib/format';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 // GAP-GC03: Quick View Modal
@@ -29,8 +29,6 @@ function QuickViewModal({ game, onClose }: QuickViewModalProps) {
     toast.success(`${game.title} adicionado ao carrinho!`);
     setTimeout(() => setIsAdding(false), 500);
   };
-
-  // (cleanup de timeout é cosmético aqui — o modal desmonta junto)
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
@@ -111,7 +109,7 @@ export default function GameCard({
   const [isHovered, setIsHovered] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
-  const outOfStock = (game.stock ?? 0) <= 0;
+  const outOfStock = game.stock <= 0;
   const qc = useQueryClient();
   const prefetchRoute = usePrefetchRoute();
 
@@ -133,7 +131,6 @@ export default function GameCard({
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!onWishlistToggle) return;
     if (isWishlistLoading) return;
     
     setIsWishlistLoading(true);
@@ -175,11 +172,11 @@ export default function GameCard({
   };
 
   // GAP-GC04: Verificar se é novo (últimos 7 dias)
-  const isNew = useMemo(() => {
-    if (!showNewBadge || !game.createdAt) return false;
+  const isNew = showNewBadge && (() => {
+    if (!game.createdAt) return false;
     const diff = Date.now() - new Date(game.createdAt).getTime();
     return diff < 7 * 24 * 60 * 60 * 1000;
-  }, [showNewBadge, game.createdAt]);
+  })();
 
   return (
     <>
@@ -259,7 +256,7 @@ export default function GameCard({
 
               <button 
                 onClick={handleAddToCart} 
-                aria-label={`Adicionar ${game.title} ao carrinho`}
+                aria-label="Adicionar ao carrinho"
                 className={cn(
                   "absolute bottom-2 left-2 p-2 bg-card/80 backdrop-blur-sm rounded-lg z-10 transition-all",
                   isHovered || !outOfStock ? "opacity-100" : "opacity-0",

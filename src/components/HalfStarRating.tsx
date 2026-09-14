@@ -20,12 +20,7 @@ export const HalfStarDisplay = forwardRef<HTMLDivElement, HalfStarRatingProps>(f
   emptyColor = 'text-muted-foreground'
 }, ref) {
   return (
-    <div
-      ref={ref}
-      role="img"
-      aria-label={`Avaliação: ${rating.toFixed(1)} de 5`}
-      className={cn("flex items-center gap-0.5", className)}
-    >
+    <div ref={ref} className={cn("flex items-center gap-0.5", className)}>
       {Array.from({ length: 5 }).map((_, i) => {
         const starValue = i + 1;
         if (rating >= starValue) {
@@ -79,38 +74,11 @@ export function InteractiveHalfStar({
     onHover?.(val);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (disabled) return;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      onChange(Math.min(5, value + 0.5));
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      onChange(Math.max(0.5, value - 0.5));
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      onChange(0.5);
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      onChange(5);
-    }
-  };
-
   return (
-    <div
-      role="slider"
-      aria-label="Avaliação"
-      aria-valuemin={0.5}
-      aria-valuemax={5}
-      aria-valuenow={value}
-      aria-valuetext={`${value} de 5`}
-      tabIndex={disabled ? -1 : 0}
-      onKeyDown={handleKeyDown}
-      className={cn(
-        "flex items-center gap-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-        disabled ? "opacity-50 cursor-not-allowed" : ""
-      )}
-    >
+    <div className={cn(
+      "flex items-center gap-0.5",
+      disabled ? "opacity-50 cursor-not-allowed" : ""
+    )}>
       {Array.from({ length: 5 }).map((_, i) => {
         const starValue = i + 1;
         const halfValue = starValue - 0.5;
@@ -145,7 +113,7 @@ export function InteractiveHalfStar({
               <Star 
                 className={cn(
                   filledColor,
-                  !disabled && "transition-transform hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100"
+                  !disabled && "transition-transform hover:scale-110"
                 )} 
                 style={{ width: size, height: size }} 
               />
@@ -158,7 +126,7 @@ export function InteractiveHalfStar({
               <Star 
                 className={cn(
                   emptyColor,
-                  !disabled && "transition-transform hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100"
+                  !disabled && "transition-transform hover:scale-110"
                 )} 
                 style={{ width: size, height: size }} 
               />

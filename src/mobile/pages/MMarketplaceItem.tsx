@@ -85,15 +85,13 @@ function SellerReviews({ sellerId }: { sellerId: string }) {
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
     (async () => {
       const { data } = await supabase
         .from('avaliacoes_usuario')
         .select('id, rating, comment, created_at, reviewer:reviewer_id(display_name, avatar_url)')
         .eq('reviewed_id', sellerId)
         .order('created_at', { ascending: false })
-        .limit(20);
-      if (cancelled) return;
+        .limit(10);
       setReviews((data || []).map((r: any) => ({
         id: r.id,
         rating: r.rating,
@@ -104,7 +102,6 @@ function SellerReviews({ sellerId }: { sellerId: string }) {
       })));
       setLoading(false);
     })();
-    return () => { cancelled = true; };
   }, [sellerId]);
 
   if (loading) return <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;

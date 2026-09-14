@@ -184,12 +184,7 @@ export default function IntegracoesAdmin() {
     let statusMessage = '';
     
     try {
-      let payload: any;
-      try {
-        payload = JSON.parse(r.payload_template || PAYLOAD_TEMPLATES[r.event] || '{"event":"test"}');
-      } catch {
-        payload = { event: r.event || 'test', _parse_error: true };
-      }
+      const payload = JSON.parse(r.payload_template || PAYLOAD_TEMPLATES[r.event] || '{"event":"test"}');
       const res = await fetch(r.url, {
         method: 'POST',
         headers: { 
@@ -258,7 +253,6 @@ export default function IntegracoesAdmin() {
   };
 
   const remove = async (r: any) => {
-    // TODO: trocar confirm() nativo por AlertDialog.
     if (!confirm(`Excluir webhook "${r.name}"?`)) return;
     const { error } = await supabase.from('integration_webhooks').delete().eq('id', r.id);
     if (error) return toast.error(error.message);
@@ -395,20 +389,19 @@ export default function IntegracoesAdmin() {
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          aria-label={`Testar webhook ${r.name}`}
                           onClick={() => testWebhook(r)} 
                           disabled={isTesting}
                         >
                           {isTesting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5 mr-1" />}
                           Testar
                         </Button>
-                        <Button size="sm" variant="ghost" aria-label={`Ver timeline do webhook ${r.name}`} onClick={() => setTimeline({ open: true, id: r.id })}>
+                        <Button size="sm" variant="ghost" onClick={() => setTimeline({ open: true, id: r.id })}>
                           <Activity className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" aria-label={`Editar webhook ${r.name}`} onClick={() => openEdit(r)}>
+                        <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" aria-label={`Excluir webhook ${r.name}`} onClick={() => remove(r)}>
+                        <Button size="sm" variant="ghost" onClick={() => remove(r)}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </TableCell>

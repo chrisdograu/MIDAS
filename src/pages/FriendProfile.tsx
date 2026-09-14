@@ -45,7 +45,7 @@ export default function FriendProfile() {
   const [tab, setTab] = useState<Tab>('overview');
 
   // GAP-493: Silenciar amigo
-  const isMuted = mutedFromDb;
+  const [isMuted, setIsMuted] = useState(false);
 
   const { data: isMutual, isLoading: checkingFriendship } = useQuery({
     queryKey: ['is-mutual', user?.id, userId],
@@ -122,7 +122,7 @@ export default function FriendProfile() {
   });
 
   // GAP-493: Verificar se está silenciado
-  const { data: mutedFromDb = false } = useQuery({
+  const { data: mutedStatus } = useQuery({
     queryKey: ['friend-muted', user?.id, userId],
     enabled: !!user && !!userId,
     queryFn: async () => {
@@ -132,7 +132,8 @@ export default function FriendProfile() {
         .eq('user_id', user!.id)
         .eq('friend_id', userId!)
         .maybeSingle();
-      return !!(data as any)?.is_muted;
+      setIsMuted(!!data?.is_muted);
+      return !!data?.is_muted;
     },
   });
 
@@ -151,6 +152,7 @@ export default function FriendProfile() {
       if (error) throw error;
     },
     onSuccess: (_, muted) => {
+      setIsMuted(muted);
       toast.success(muted ? 'Amigo silenciado' : 'Amigo reativado');
       queryClient.invalidateQueries({ queryKey: ['friend-muted', user?.id, userId] });
     },
@@ -367,7 +369,7 @@ export default function FriendProfile() {
           {isMutual && (
             <button
               onClick={() => muteMutation.mutate(!isMuted)}
-              disabled={muteMutation.isPending} aria-label={isMuted ? 'Reativar notificações' : 'Silenciar notificações'}
+              disabled={muteMutation.isPending}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:border-primary/40 transition-colors disabled:opacity-50"
               title={isMuted ? 'Reativar notificações' : 'Silenciar notificações'}
             >

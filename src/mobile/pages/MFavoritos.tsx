@@ -55,12 +55,7 @@ export default function MFavoritos() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    let cancelled = false;
-    void load();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  useEffect(() => { load(); }, [user?.id]);
 
   const remove = async (anuncioId: string) => {
     if (!user) return;

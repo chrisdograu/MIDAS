@@ -236,17 +236,13 @@ export default function PublicProfile() {
     mutationFn: async () => {
       if (!user || !userId) return;
       if (followStatus?.isFollowing) {
-        const ok = await dbWrite(
+        await dbWrite(
           supabase
             .from('user_follows')
             .delete()
             .eq('follower_id', user.id)
             .eq('following_id', userId)
         );
-        if (!ok) {
-          toast.error('Erro ao deixar de seguir');
-          return;
-        }
         toast.success('Deixou de seguir');
       } else {
         const { data: targetProfile } = await supabase
@@ -258,15 +254,11 @@ export default function PublicProfile() {
         const needsApproval = (targetProfile as any)?.require_follow_approval || false;
         const status = needsApproval ? 'pending' : 'accepted';
         
-        const ok = await dbWrite(
+        await dbWrite(
           supabase
             .from('user_follows')
             .insert({ follower_id: user.id, following_id: userId, status })
         );
-        if (!ok) {
-          toast.error('Erro ao seguir');
-          return;
-        }
         
         if (needsApproval) {
           toast.info('Pedido de seguimento enviado! Aguarde aprovação.');
@@ -300,7 +292,7 @@ export default function PublicProfile() {
 
   // GAP-578: Amigos em comum
   const { data: mutualFriends = [] } = useQuery({
-    queryKey: ['mutual-friends', userId, user?.id, isFriend, isCloseFriend, hasException],
+    queryKey: ['mutual-friends', userId, user?.id],
     queryFn: async (): Promise<any[]> => {
       if (!userId || !user || user.id === userId) return Promise.resolve([]);
       

@@ -99,8 +99,7 @@ export default function AdminDevelopers() {
       const { data, error, count } = await query.range(from, from + ITEMS_PER_PAGE - 1);
       if (error) throw error;
       
-      // TODO: N+1 — hoje traz todos os jogos dos devs da página para contar no cliente.
-      // Migrar para RPC `get_developer_game_counts(_ids uuid[])` que retorna {developer_id, count, avg_rating}.
+      // Buscar contagem de jogos para cada desenvolvedor
       const devIds = (data || []).map(d => d.id);
       let gameCounts = new Map();
       let avgRatings = new Map();
@@ -208,7 +207,7 @@ export default function AdminDevelopers() {
     return name
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[̀-ͯ]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   };
@@ -375,11 +374,8 @@ export default function AdminDevelopers() {
     toast.success('Dados exportados!');
   };
 
-  // A paginação é server-side (range); `developers` já é a página atual.
-  // Não fatiar de novo no cliente.
-  const paginated = developers;
-  const hasPrev = page > 1;
-  const hasNext = hasMore;
+  const totalPages = Math.ceil(developers.length / ITEMS_PER_PAGE);
+  const paginated = developers.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) {
     return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;

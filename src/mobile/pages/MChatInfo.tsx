@@ -14,16 +14,6 @@ interface Msg { id: string; content: string; image_url: string | null; message_t
 function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; initialIndex: number; onClose: () => void }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowLeft') setCurrentIndex(i => (i - 1 + images.length) % images.length);
-      else if (e.key === 'ArrowRight') setCurrentIndex(i => (i + 1) % images.length);
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [images.length, onClose]);
-  
   if (images.length === 0) return null;
   
   const currentImage = images[currentIndex];
@@ -35,13 +25,9 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Visualizador de imagem"
     >
       <button
         onClick={onClose}
-        aria-label="Fechar visualizador"
         className="absolute top-4 right-4 text-white/70 hover:text-white p-2 z-10"
       >
         <X className="h-8 w-8" />
@@ -51,14 +37,12 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
         <>
           <button
             onClick={(e) => { e.stopPropagation(); setCurrentIndex((currentIndex - 1 + images.length) % images.length); }}
-            aria-label="Imagem anterior"
             className="absolute left-4 text-white/70 hover:text-white p-2 z-10"
           >
             <ChevronLeft className="h-8 w-8" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); setCurrentIndex((currentIndex + 1) % images.length); }}
-            aria-label="Próxima imagem"
             className="absolute right-4 text-white/70 hover:text-white p-2 z-10"
           >
             <ChevronRight className="h-8 w-8" />

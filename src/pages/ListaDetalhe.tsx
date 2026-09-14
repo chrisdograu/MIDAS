@@ -15,8 +15,6 @@ export default function ListaDetalhe() {
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [togglingFollow, setTogglingFollow] = useState(false);
-  const [togglingSave, setTogglingSave] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -44,22 +42,13 @@ export default function ListaDetalhe() {
         });
         
         if (user) {
-          const [{ data: follow }, { data: savedRow }] = await Promise.all([
-            supabase
-              .from('curated_list_follows')
-              .select('id')
-              .eq('list_id', id)
-              .eq('user_id', user.id)
-              .maybeSingle(),
-            supabase
-              .from('saved_lists')
-              .select('id')
-              .eq('list_id', id)
-              .eq('user_id', user.id)
-              .maybeSingle(),
-          ]);
+          const { data: follow } = await supabase
+            .from('curated_list_follows')
+            .select('id')
+            .eq('list_id', id)
+            .eq('user_id', user.id)
+            .maybeSingle();
           setFollowing(!!follow);
-          setSaved(!!savedRow);
         }
       }
       
@@ -72,8 +61,7 @@ export default function ListaDetalhe() {
       toast.error('Faça login para seguir listas');
       return;
     }
-    if (!list || togglingFollow) return;
-    setTogglingFollow(true);
+    if (!list) return;
     
     if (following) {
       const { error } = await supabase
@@ -98,8 +86,6 @@ export default function ListaDetalhe() {
       setFollowing(true);
       toast.success('Seguindo a lista!');
     }
-    setTogglingFollow(false);
-  };
   };
 
   const toggleSave = async () => {
@@ -107,8 +93,7 @@ export default function ListaDetalhe() {
       toast.error('Faça login para salvar listas');
       return;
     }
-    if (!list || togglingSave) return;
-    setTogglingSave(true);
+    if (!list) return;
     
     if (saved) {
       const { error } = await supabase
@@ -133,8 +118,6 @@ export default function ListaDetalhe() {
       setSaved(true);
       toast.success('Lista salva!');
     }
-    setTogglingSave(false);
-  };
   };
 
   const shareList = async () => {

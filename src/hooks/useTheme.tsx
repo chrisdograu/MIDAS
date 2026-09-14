@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { applyPersonalTheme, type PersonalTheme } from '@/lib/personalTheme';
-import { useAuth } from '@/hooks/useAuth';
 
 // GAP-UT01: Tema do sistema
 type SystemTheme = 'dark' | 'light';
@@ -89,8 +88,6 @@ const PREDEFINED_THEMES: NamedTheme[] = [
 ];
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-
   // GAP-UT01: Detectar tema do sistema
   const getSystemTheme = useCallback((): SystemTheme => {
     if (typeof window === 'undefined') return 'dark';
@@ -98,7 +95,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'system';
     const saved = localStorage.getItem('midias-theme') as Theme | null;
     return saved || 'system';
   });
@@ -127,15 +123,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // GAP-UT02: Transição suave
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    const root = document.documentElement;
-    // Remover antes de readicionar (evita travar se mudar 2x rápido)
-    root.classList.remove('theme-transition');
-    // Forçar reflow
-    void root.offsetHeight;
-    root.classList.add('theme-transition');
+    
+    // Adicionar classe de transição
+    document.documentElement.classList.add('theme-transition');
+    
     const timer = setTimeout(() => {
-      root.classList.remove('theme-transition');
+      document.documentElement.classList.remove('theme-transition');
     }, 300);
+    
     return () => clearTimeout(timer);
   }, [currentTheme]);
 
@@ -159,28 +154,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.setProperty('--custom-text', themeToApply.text);
     
     localStorage.setItem('midias-theme', theme);
-    const customKey = user?.id ? `midias-custom-theme-${user.id}` : 'midias-custom-theme';
     if (customTheme) {
-      localStorage.setItem(customKey, JSON.stringify(customTheme));
-    } else {
-      localStorage.removeItem(customKey);
+      localStorage.setItem('midias-custom-theme', JSON.stringify(customTheme));
     }
   }, [theme, currentTheme, customTheme]);
 
   // GAP-UT04: Carregar tema personalizado salvo
   useEffect(() => {
     try {
-      const key = user?.id ? `midias-custom-theme-${user.id}` : 'midias-custom-theme';
-      const saved = localStorage.getItem(key);
+      const saved = localStorage.getItem('midias-custom-theme');
       if (saved) {
         setCustomTheme(JSON.parse(saved));
-      } else {
-        setCustomTheme(null);
       }
     } catch {
       // Ignorar
     }
-  }, [user?.id]);
+  }, []);
 
   // Rodada 18 — "ambiente pessoal": aplica a cor de destaque salva no perfil
   useEffect(() => {
@@ -219,9 +208,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // GAP-UT03: Resetar tema personalizado
   const resetCustomTheme = useCallback(() => {
     setCustomTheme(null);
-    const key = user?.id ? `midias-custom-theme-${user.id}` : 'midias-custom-theme';
-    localStorage.removeItem(key);
-  }, [user?.id]);
+    localStorage.removeItem('midias-custom-theme');
+  }, []);
 
   return (
     <ThemeContext.Provider value={{

@@ -29,33 +29,20 @@ export default function RecompensasAdmin() {
   const loadStats = async () => {
     setLoading(true);
     try {
-      const [badgesRes, titulosRes, cuponsRes, xpRes] = await Promise.all([
-        supabase.from('badge_catalog').select('*', { count: 'exact', head: true }),
-        supabase.from('user_titles').select('*', { count: 'exact', head: true }),
+      const [
+        { count: badges },
+        { count: titulos },
+        { count: cupons },
+        { data: xpData },
+      ] = await Promise.all([
+        supabase.from('badges').select('*', { count: 'exact', head: true }),
+        supabase.from('titles').select('*', { count: 'exact', head: true }),
         supabase.from('cupons').select('*', { count: 'exact', head: true }),
-        supabase.from('user_xp_log').select('xp, user_id'),
+        supabase.from('user_xp').select('xp, user_id'),
       ]);
 
-      // Supabase não lança erro — precisa checar explicitamente.
-      if (badgesRes.error || titulosRes.error || cuponsRes.error || xpRes.error) {
-        console.warn('[RecompensasAdmin] erro nas queries:', {
-          badges: badgesRes.error,
-          titulos: titulosRes.error,
-          cupons: cuponsRes.error,
-          xp: xpRes.error,
-        });
-        toast.error('Erro ao carregar estatísticas');
-        setLoading(false);
-        return;
-      }
-
-      const xpData = xpRes.data;
       const totalXp = (xpData || []).reduce((acc, curr) => acc + (curr.xp || 0), 0);
       const usuariosComXp = new Set((xpData || []).map(u => u.user_id)).size;
-
-      const badges = badgesRes.count;
-      const titulos = titulosRes.count;
-      const cupons = cuponsRes.count;
 
       setStats({
         badges: badges || 0,
@@ -65,10 +52,6 @@ export default function RecompensasAdmin() {
         usuarios_com_xp: usuariosComXp,
       });
     } catch (error) {
-      // TODO: as queries usam supabase.from() que retorna { data, error } — o error
-      // não é lançado. Precisamos checar data/error explicitamente pra mostrar
-      // números reais em vez de 0.
-      console.warn('[RecompensasAdmin] erro:', error);
       toast.error('Erro ao carregar estatísticas');
     } finally {
       setLoading(false);

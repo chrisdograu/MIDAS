@@ -98,12 +98,9 @@ export default function PedidosOnline() {
         : { data: [] };
       const profileMap = new Map<string, string>((profiles || []).map(p => [p.id, p.display_name || 'Cliente'] as [string, string]));
 
-      const orderIds = orders.map(o => o.id);
-      const { data: items } = orderIds.length
-        ? await supabase.from('itens_pedido').select('order_id').in('order_id', orderIds)
-        : { data: [] as any[] };
+      const { data: items } = await supabase.from('itens_pedido').select('order_id');
       const itemCount = new Map<string, number>();
-      (items || []).forEach((i: any) => itemCount.set(i.order_id, (itemCount.get(i.order_id) || 0) + 1));
+      items?.forEach(i => itemCount.set(i.order_id, (itemCount.get(i.order_id) || 0) + 1));
 
       const processed = orders.map(o => ({
         id: o.id, user_id: o.user_id, total: Number(o.total), status: o.status,
@@ -262,7 +259,6 @@ export default function PedidosOnline() {
     toast({ title: 'CSV exportado com sucesso' });
   };
 
-  // TODO: busca é client-side sobre pedidos já paginados. Mover para .or() no servidor.
   const filtered = pedidos.filter(p => {
     const matchSearch = p.id.toLowerCase().includes(search.toLowerCase()) || 
                         p.cliente_name.toLowerCase().includes(search.toLowerCase());
@@ -277,7 +273,7 @@ export default function PedidosOnline() {
   }));
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   return (
     <div className="p-6 space-y-6">

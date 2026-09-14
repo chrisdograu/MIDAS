@@ -86,12 +86,7 @@ export default function EntityTimelineDrawer({
 
   useEffect(() => {
     if (!open || !entityId) return;
-    let cancelled = false;
-    load(true).then(() => {
-      if (cancelled) return;
-    });
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    load(true);
   }, [open, entity, entityId, actionFilter]);
 
   // GAP-D375: Filtrar por busca
@@ -120,7 +115,7 @@ export default function EntityTimelineDrawer({
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (!entityId) return null;
 

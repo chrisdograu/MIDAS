@@ -43,7 +43,7 @@ const TARGET_CONFIG: Record<string, { label: string; table: string; select: stri
   anuncio:            { label: 'Anúncio',        table: 'anuncios',           select: 'title, description, price, status, seller_id', titleField: 'title',   authorField: 'seller_id', canDelete: true },
   forum_post:         { label: 'Post do Fórum',  table: 'forum_posts',        select: 'title, content, user_id',                        titleField: 'title',   authorField: 'user_id',   canDelete: true },
   forum_replies:      { label: 'Resposta Fórum', table: 'forum_replies',      select: 'content, user_id',                               titleField: 'content', authorField: 'user_id',   canDelete: true },
-  // comentario_forum removido — usa forum_replies
+  comentario_forum:   { label: 'Comentário Fórum', table: 'forum_replies',    select: 'content, user_id',                               titleField: 'content', authorField: 'user_id',   canDelete: true },
   profile:            { label: 'Usuário',        table: 'profiles',           select: 'display_name, bio, banned_until',                titleField: 'display_name', authorField: 'id',   canDelete: false },
   usuario:            { label: 'Usuário',        table: 'profiles',           select: 'display_name, bio, banned_until',                titleField: 'display_name', authorField: 'id',   canDelete: false },
   mensagem:           { label: 'Mensagem',       table: 'mensagens',          select: 'content, sender_id',                             titleField: 'content', authorField: 'sender_id', canDelete: true },
@@ -256,8 +256,6 @@ export default function Moderacao() {
   }, 'admin-moderacao');
 
   // GAP-D187: Estatísticas por tipo
-  // TODO: filtro de busca é client-side sobre denúncias já paginadas.
-  // Mover pra .or() na query server-side.
   const typeStats = useMemo(() => {
     const stats: Record<string, number> = {};
     denuncias.forEach(d => {
@@ -295,7 +293,6 @@ export default function Moderacao() {
   };
 
   const handleDeleteContent = async (d: Denuncia) => {
-    // TODO: trocar confirm() nativo por AlertDialog.
     if (!confirm('Tem certeza? Esta ação é irreversível.')) return;
     const cfg = TARGET_CONFIG[d.target_type];
     if (!cfg || !cfg.canDelete) {
@@ -576,7 +573,7 @@ export default function Moderacao() {
                           {formatDate(d.created_at)}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button variant="ghost" size="sm" className="text-xs h-7" aria-label={`Ver detalhes da denúncia ${d.id.slice(0, 8)}`} onClick={() => openDetail(d)}>
+                          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => openDetail(d)}>
                             <Eye className="h-3 w-3 mr-1" />Detalhes
                           </Button>
                         </TableCell>
@@ -644,7 +641,7 @@ export default function Moderacao() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Button variant="ghost" size="sm" className="text-xs h-7" aria-label={`Desbanir usuário ${b.display_name || b.id.slice(0, 8)}`} onClick={() => handleUnban(b.id)}>
+                            <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => handleUnban(b.id)}>
                               <CheckCircle className="h-3 w-3 mr-1" />Desbanir
                             </Button>
                           </TableCell>

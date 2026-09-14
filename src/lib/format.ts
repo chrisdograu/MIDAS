@@ -33,48 +33,39 @@ export function formatCurrency(valor: number | null | undefined): string {
 
 /** 09/08/2026 */
 export function formatDate(date: string | number | Date | null | undefined): string {
-  const d = toDate(date);
+  const d = toDate(date as string);
   return d ? dateFmt.format(d) : '—';
 }
 
 /** 09/08 */
 export function formatDateShort(date: string | number | Date | null | undefined): string {
-  const d = toDate(date);
+  const d = toDate(date as string);
   return d ? dateShortFmt.format(d) : '—';
 }
 
 /** 09/08/2026 22:35 */
 export function formatDateTime(date: string | number | Date | null | undefined): string {
-  const d = toDate(date);
+  const d = toDate(date as string);
   return d ? dateTimeFmt.format(d) : '—';
 }
 
 /** agosto de 2026 */
 export function formatMonthYear(date: string | number | Date | null | undefined): string {
-  const d = toDate(date);
+  const d = toDate(date as string);
   return d ? monthYearFmt.format(d) : '—';
 }
 
 /** 22:35 */
 export function formatTime(date: string | number | Date | null | undefined): string {
-  const d = toDate(date);
+  const d = toDate(date as string);
   return d ? timeFmt.format(d) : '—';
 }
 
 /** "há 5 min", "há 2 h", "há 3 d" */
 export function formatRelativeTime(date: string | number | Date | null | undefined): string {
-  const d = toDate(date);
+  const d = toDate(date as string);
   if (!d) return '—';
   const diff = Date.now() - d.getTime();
-  // Data no futuro: "em X min"
-  if (diff < 0) {
-    const futureMin = Math.floor(-diff / 60000);
-    if (futureMin < 1) return 'agora';
-    if (futureMin < 60) return `em ${futureMin} min`;
-    const futureH = Math.floor(futureMin / 60);
-    if (futureH < 24) return `em ${futureH} h`;
-    return `em ${Math.floor(futureH / 24)} d`;
-  }
   const min = Math.floor(diff / 60000);
   if (min < 1) return 'agora';
   if (min < 60) return `há ${min} min`;

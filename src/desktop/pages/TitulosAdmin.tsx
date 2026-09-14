@@ -92,7 +92,7 @@ export default function TitulosAdmin() {
     </div>
   ) : null;
 
-  // TODO: filtro de busca é client-side sobre rows paginados.
+  // GAP-D312: Filtrar por busca
   const filtered = useMemo(() => {
     const q = filterSearch.toLowerCase();
     return rows.filter(r => 
@@ -196,7 +196,7 @@ export default function TitulosAdmin() {
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
@@ -317,7 +317,7 @@ export default function TitulosAdmin() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      aria-label={`Remover título "${r.name}"`}
+                      aria-label="Excluir" 
                       onClick={() => { setPendingRemove(r); setRemoveReason(''); }}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />

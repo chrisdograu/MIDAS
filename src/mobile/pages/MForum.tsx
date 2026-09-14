@@ -1,6 +1,7 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2, Search, MessagesSquare, TrendingUp, Clock, MessageSquare, ThumbsUp, Star, Flame, Gamepad2, Users, Newspaper, Lightbulb, Send, X, ChevronDown } from 'lucide-react';
+import { Loader2, Search, MessagesSquare, TrendingUp, Clock, MessageSquare, ThumbsUp, Star, Flame, Gamepad2, Users, Newspaper, Lightbulb, Send, X, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileChip, MForumTag, MobileBadge } from '@/mobile/lib/badge';
 import { timeAgo, periodSince, type Period, PERIOD_OPTIONS } from '@/mobile/lib/time';
@@ -72,7 +73,6 @@ export default function MForum() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const pageRef = useRef(0);
   const [communityHits, setCommunityHits] = useState<{ id: string; title: string; image_url: string | null }[]>([]);
   const [communityCats, setCommunityCats] = useState<{ slug: string; name: string; description: string | null; parent_slug: string | null }[]>([]);
   const navigate = useNavigate();
@@ -81,6 +81,7 @@ export default function MForum() {
   const [suggestTitle, setSuggestTitle] = useState('');
   const [suggestDesc, setSuggestDesc] = useState('');
   const [suggesting, setSuggesting] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [mySuggestions, setMySuggestions] = useState<{ id: string; title: string; status: string; admin_notes: string | null; created_product_id: string | null }[]>([]);
 
   // GAP-1035: Constante de limite
@@ -146,7 +147,6 @@ export default function MForum() {
     (async () => {
       setLoading(true);
       setPage(0);
-      pageRef.current = 0;
       setHasMore(true);
       const since = periodSince(period);
       const sinceISO = since ? since.toISOString() : '1970-01-01';
@@ -228,8 +228,7 @@ export default function MForum() {
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    const nextPage = pageRef.current + 1;
-    pageRef.current = nextPage;
+    const nextPage = page + 1;
     const since = periodSince(period);
     const sinceISO = since ? since.toISOString() : '1970-01-01';
     const offset = nextPage * LIMIT;
@@ -330,6 +329,8 @@ export default function MForum() {
     return arr;
   }, [reviews, sort, debouncedQuery]);
 
+  const activeFilters = (sort !== 'popular' ? 1 : 0) + (period !== 'week' ? 1 : 0);
+
   return (
     <div className="px-4 py-5 space-y-4">
       <h1 className="font-display text-xl font-bold gradient-text flex items-center gap-2">
@@ -426,7 +427,8 @@ export default function MForum() {
         </div>
       )}
 
-      <div className="flex p-1 bg-secondary/50 rounded-lg">
+      <div className="flex items-center gap-2">
+      <div className="flex-1 flex p-1 bg-secondary/50 rounded-lg">
         <button onClick={() => setTab('tudo')} className={`flex-1 py-2 rounded-md text-xs font-semibold flex items-center justify-center gap-1 ${tab === 'tudo' ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground' : 'text-muted-foreground'}`}>
           <Flame className="h-3.5 w-3.5" /> Tudo
         </button>
@@ -437,44 +439,10 @@ export default function MForum() {
           <Star className="h-3.5 w-3.5" /> Reviews
         </button>
       </div>
-
-      {/* Filtros sempre visíveis: ordenar + período em linhas roláveis */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5">
-          <span className="text-[10px] uppercase tracking-wide text-muted-foreground shrink-0 pr-1">Ordenar</span>
-          {SORTS.map(s => {
-            const Icon = s.icon;
-            return (
-              <button
-                key={s.id}
-                onClick={() => setSort(s.id)}
-                className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${sort === s.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border'}`}
-              >
-                <Icon className="h-3 w-3" /> {s.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5">
-          <span className="text-[10px] uppercase tracking-wide text-muted-foreground shrink-0 pr-1">Período</span>
-          {PERIOD_OPTIONS.map(p => (
-            <button
-              key={p.id}
-              onClick={() => setPeriod(p.id)}
-              className={`shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${period === p.id ? 'bg-accent text-accent-foreground border-accent' : 'bg-card text-muted-foreground border-border'}`}
-            >
-              {p.label}
-            </button>
-          ))}
-          {(sort !== 'popular' || period !== 'week' || query) && (
-            <button
-              onClick={() => { setSort('popular'); setPeriod('week'); setQuery(''); }}
-              className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium border border-border bg-secondary/60 text-muted-foreground"
-            >
-              <X className="h-3 w-3" /> Limpar
-            </button>
-          )}
-        </div>
+        <button onClick={() => setFiltersOpen(true)} aria-label="Abrir filtros" className="relative h-10 w-10 shrink-0 rounded-lg bg-card border border-border flex items-center justify-center">
+          <SlidersHorizontal className="h-4 w-4" />
+          {activeFilters > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">{activeFilters}</span>}
+        </button>
       </div>
 
       {loading ? (
@@ -549,6 +517,16 @@ export default function MForum() {
               Enviar sugestão
             </button>
           </div>
+        </div>
+      )}
+      {filtersOpen && (
+        <div className="fixed inset-0 z-50 overlay-scrim flex items-end" onClick={() => setFiltersOpen(false)}>
+          <motion.div initial={{ y: 400 }} animate={{ y: 0 }} className="w-full max-h-[85vh] overflow-y-auto bg-card rounded-t-2xl p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between"><h3 className="font-bold flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />Filtros</h3><button onClick={() => setFiltersOpen(false)} aria-label="Fechar filtros"><X className="h-5 w-5" /></button></div>
+            <div><p className="text-[10px] uppercase text-muted-foreground">Ordenar por</p><div className="flex flex-wrap gap-2 mt-2">{SORTS.map(s => <MobileChip key={s.id} active={sort === s.id} onClick={() => setSort(s.id)}>{s.label}</MobileChip>)}</div></div>
+            <div><p className="text-[10px] uppercase text-muted-foreground">Período</p><div className="flex flex-wrap gap-2 mt-2">{PERIOD_OPTIONS.map(p => <MobileChip key={p.id} active={period === p.id} onClick={() => setPeriod(p.id)}>{p.label}</MobileChip>)}</div></div>
+            <div className="flex gap-2"><button onClick={() => { setSort('popular'); setPeriod('week'); }} className="flex-1 py-2.5 rounded-lg bg-secondary text-sm font-semibold">Limpar</button><button onClick={() => setFiltersOpen(false)} className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">Aplicar</button></div>
+          </motion.div>
         </div>
       )}
     </div>

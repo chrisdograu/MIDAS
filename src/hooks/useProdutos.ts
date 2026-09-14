@@ -8,15 +8,13 @@ export function useProdutos() {
     queryFn: async (): Promise<Game[]> => {
       const { data, error } = await supabase
         .from('produtos')
-        .select('id, title, image_url, price, original_price, discount, platform, category, rating, stock, release_date, tags, publisher, description, featured, is_active')
+        .select('*')
         .eq('is_active', true)
         .eq('awaiting_first_stock', false)
-        .order('created_at', { ascending: false })
-        .limit(500);
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return (data || []).map(mapProdutoToGame);
     },
-    staleTime: 5 * 60_000,
   });
 }
 
@@ -34,6 +32,5 @@ export function useProduto(id: string | undefined) {
       return data ? mapProdutoToGame(data) : null;
     },
     enabled: !!id,
-    staleTime: 5 * 60_000,
   });
 }

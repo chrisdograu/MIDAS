@@ -292,7 +292,6 @@ export default function SugestoesJogos() {
     toast({ title: 'CSV exportado com sucesso' });
   };
 
-  // TODO: filtro de busca é client-side sobre items paginados.
   const visible = useMemo(() => {
     const q = search.toLowerCase();
     return items.filter(i => {
@@ -311,7 +310,7 @@ export default function SugestoesJogos() {
   };
 
   const totalPages = Math.ceil(visible.length / ITEMS_PER_PAGE);
-  const paginated = visible.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = visible.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 

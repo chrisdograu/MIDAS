@@ -134,7 +134,7 @@ export default function BundleDetail() {
         user_id: user.id,
         rating,
         updated_at: new Date().toISOString(),
-      }), { onConflict: 'bundle_id,user_id' };
+      });
     if (error) {
       toast.error('Erro ao avaliar');
       return;
@@ -153,21 +153,23 @@ export default function BundleDetail() {
       return;
     }
     
-    for (const it of bundle!.items) {
+    if (!bundle) return;
+    for (const it of bundle.items) {
       cart.addItem({
         id: it.product_id, title: it.title, price: it.price,
         image: it.image_url || '', category: it.category || '', platform: [], rating: 0,
         originalPrice: it.price, discount: 0, description: '',
-      } as any, { bundleId: bundle!.id });
+      } as any, {
+        bundleId: bundle.id,
+        bundleTitle: bundle.title,
+        bundlePrice: bundle.price,
+        bundleImage: bundle.image_url,
+      });
     }
-    toast.success(`Bundle "${bundle!.title}" adicionado ao carrinho`);
+    toast.success(`Bundle "${bundle.title}" adicionado ao carrinho`);
   });
 
   // GAP-416: Compartilhar bundle
-  // GAP: total/saving calculados antes do handleShare
-  const total = bundle ? bundle.items.reduce((s, i) => s + i.price, 0) : 0;
-  const saving = total > 0 && bundle ? Math.round((1 - bundle.price / total) * 100) : 0;
-
   const handleShare = async () => {
     setSharing(true);
     const url = window.location.href;
@@ -200,6 +202,9 @@ export default function BundleDetail() {
       />
     </div>
   );
+
+  const total = bundle.items.reduce((s, i) => s + i.price, 0);
+  const saving = total > 0 ? Math.round((1 - bundle.price / total) * 100) : 0;
   const savingValue = total - bundle.price;
 
   const gallery: string[] = [

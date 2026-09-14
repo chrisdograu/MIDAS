@@ -56,15 +56,12 @@ export default function LiveTournamentChat({ tournamentId, matchId }: { tourname
   // GAP-LC01: Broadcast de digitação
   const broadcastTyping = useCallback(async (isTyping: boolean) => {
     if (!user) return;
-    // Reusa um único canal — não cria um novo a cada tecla
-    const channel = supabase.channel(`typing-send-${tournamentId}`);
+    const channel = supabase.channel(`typing-${tournamentId}`);
     await channel.send({
       type: 'broadcast',
       event: 'typing',
       payload: { user_id: user.id, isTyping }
     });
-    // Cleanup imediato após o envio (não deixa canal aberto)
-    setTimeout(() => { supabase.removeChannel(channel); }, 100);
   }, [tournamentId, user]);
 
   useEffect(() => {

@@ -125,7 +125,6 @@ export default function GameRewardsAdmin() {
     badge_id: (r as any).badge_id || undefined,
   });
 
-  // TODO: aplicar stripImageExif(f) antes do upload.
   const upload = async (f: File) => {
     if (!editing) return;
     if (f.size > 3 * 1024 * 1024) return toast.error('Máx 3MB');
@@ -175,7 +174,6 @@ export default function GameRewardsAdmin() {
   };
 
   const remove = async (id: string) => {
-    // TODO: trocar confirm() nativo por AlertDialog.
     if (!confirm('Excluir esta recompensa?')) return;
     const { error } = await supabase.from('game_rewards').delete().eq('id', id);
     if (error) return toast.error(error.message);
@@ -193,11 +191,10 @@ export default function GameRewardsAdmin() {
   // GAP-D129: Buscar usuários para atribuição em massa
   const searchUsers = async () => {
     if (!userSearch.trim()) return;
-    const term = userSearch.replace(/[%_]/g, '');
     const { data } = await supabase
       .from('profiles')
       .select('id, display_name, username')
-      .ilike('display_name', `%${term}%`)
+      .ilike('display_name', `%${userSearch}%`)
       .limit(20);
     setUsers((data || []).map(u => ({
       id: u.id,
@@ -245,16 +242,17 @@ export default function GameRewardsAdmin() {
     
     if (error) { toast.error('Erro ao atribuir: ' + error.message); return; }
     
-    // GAP-D128: Adicionar XP para cada usuário (batch)
+    // GAP-D128: Adicionar XP para cada usuário
     if ((bulkReward as any).xp_reward > 0) {
-      const xpRows = userIds.map(userId => ({
-        user_id: userId,
-        source: 'reward',
-        source_id: bulkReward.id,
-        xp: (bulkReward as any).xp_reward,
-        reason: bulkReason,
-      }));
-      await supabase.from('user_xp_log').insert(xpRows);
+      for (const userId of userIds) {
+        await supabase.from('user_xp_log').insert({
+          user_id: userId,
+          source: 'reward',
+          source_id: bulkReward.id,
+          xp: (bulkReward as any).xp_reward,
+          reason: bulkReason,
+        });
+      }
     }
     
     await adminLog({

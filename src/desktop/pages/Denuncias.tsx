@@ -137,9 +137,7 @@ export default function Denuncias() {
 
   useRealtimeRefresh(['denuncias'], () => load(false), 'admin-denuncias');
 
-  // TODO: o filtro de busca é client-side sobre rows já paginados.
-    // Mover para .or() na query server-side pra funcionar com paginação.
-    const filtered = useMemo(() => {
+  const filtered = useMemo(() => {
     const searchLower = search.toLowerCase();
     return rows.filter(r => {
       if (!search) return true;
@@ -413,12 +411,10 @@ export default function Denuncias() {
     
     // Para ações em lote, apenas resolver/descartar são suportadas
     const newStatus = batchAction === 'resolve' ? 'resolved' : 'dismissed';
-    // Só atualiza denúncias ainda pendentes
     const { error } = await supabase
       .from('denuncias')
       .update({ status: newStatus, resolved_by: user?.id, resolved_at: now })
-      .in('id', ids)
-      .eq('status', 'pending');
+      .in('id', ids);
     
     if (error) return toast.error(error.message);
     
@@ -569,7 +565,7 @@ export default function Denuncias() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8">
-                    <button aria-label="Selecionar todas as denúncias" onClick={toggleSelectAll} className="text-muted-foreground">
+                    <button onClick={toggleSelectAll} className="text-muted-foreground">
                       {selectedIds.size === filtered.length && filtered.length > 0 ? 
                         <CheckSquare className="h-4 w-4" /> : 
                         <Square className="h-4 w-4" />
@@ -595,7 +591,7 @@ export default function Denuncias() {
                   return (
                     <TableRow key={r.id} className={isPending ? 'bg-warning/5' : ''}>
                       <TableCell>
-                        <button aria-label={`Selecionar denúncia ${r.id.slice(0, 8)}`} onClick={() => toggleSelect(r.id)} className="text-muted-foreground">
+                        <button onClick={() => toggleSelect(r.id)} className="text-muted-foreground">
                           {selectedIds.has(r.id) ? 
                             <CheckSquare className="h-4 w-4 text-primary" /> : 
                             <Square className="h-4 w-4" />

@@ -198,11 +198,11 @@ export function DesktopAuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         setUser(session.user);
-        Promise.resolve().then(() => {
+        setTimeout(() => {
           fetchStaffData(session.user.id).then(() => {
             setLoading(false);
           });
-        });
+        }, 0);
       } else {
         setUser(null);
         setProfile(null);

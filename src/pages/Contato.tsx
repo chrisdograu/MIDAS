@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, MessageSquare, Send, Phone, Paperclip, X, Loader2, AlertCircle, CheckCircle2, History, Flag } from 'lucide-react';
 import { toast } from 'sonner';
@@ -76,11 +76,11 @@ export default function Contato() {
   const contactPhone = store?.phone;
 
   // GAP-456: Buscar contagem de tickets ao carregar
-  useEffect(() => {
+  useState(() => {
     if (user) {
       getTicketCount(user.id).then(setTicketCount);
     }
-  }, [user]);
+  });
 
   // GAP-455: Upload de anexo
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

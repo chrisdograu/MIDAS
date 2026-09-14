@@ -27,11 +27,7 @@ export function useDataSaver() {
   }, []);
 
   useEffect(() => {
-    if (!user) {
-      setDataSaverCache(false);
-      return;
-    }
-    if (cache !== null) return;
+    if (!user || cache !== null) return;
     let cancel = false;
     supabase.from('profiles').select('data_saver_mode').eq('id', user.id).maybeSingle()
       .then(({ data }) => {

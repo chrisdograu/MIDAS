@@ -195,11 +195,10 @@ export default function BadgesAdmin() {
   // GAP-D31: Atribuição em massa
   const searchUsers = async () => {
     if (!searchUser.trim()) return;
-    const term = searchUser.replace(/[%_]/g, '');
     const { data } = await supabase
       .from('profiles')
       .select('id, display_name, username')
-      .ilike('display_name', `%${term}%`)
+      .ilike('display_name', `%${searchUser}%`)
       .limit(20);
     setAssignUsers(data || []);
   };
@@ -222,9 +221,7 @@ export default function BadgesAdmin() {
     }));
     
     
-    const { error } = await supabase
-      .from('user_badges')
-      .upsert(inserts, { onConflict: 'user_id,badge_id' });
+    const { error } = await supabase.from('user_badges').insert(inserts);
     if (error) return toast.error(error.message);
     
     await adminLog({
@@ -242,6 +239,16 @@ export default function BadgesAdmin() {
     load();
   };
 
+  // GAP-D34: Histórico de atribuições
+  const getAssignHistory = async (badgeId: string) => {
+    const { data } = await supabase
+      .from('user_badges')
+      .select('*, profiles:user_id(display_name)')
+      .eq('badge_id', badgeId)
+      .order('assigned_at', { ascending: false })
+      .limit(50);
+    return data || [];
+  };
 
   const removeUserBadge = async (userBadgeId: string) => {
     if (!confirm('Remover este badge do usuário?')) return;
@@ -254,15 +261,12 @@ export default function BadgesAdmin() {
   // Títulos
   const createTitle = async () => {
     if (!titleForm.name || !titleForm.user_email) return toast.error('Nome e usuário obrigatórios');
-    const term = titleForm.user_email.trim().replace(/[(),]/g, '');
-    const { data: prof } = term
-      ? await supabase
-          .from('profiles')
-          .select('id')
-          .or(`username.eq.${term},display_name.eq.${term}`)
-          .limit(1)
-          .maybeSingle()
-      : { data: null };
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('id')
+      .or(`username.eq.${titleForm.user_email.trim()},display_name.eq.${titleForm.user_email.trim()}`)
+      .limit(1)
+      .maybeSingle();
     if (!prof) return toast.error('Usuário não encontrado');
     
     const { error } = await supabase.from('user_titles').insert({

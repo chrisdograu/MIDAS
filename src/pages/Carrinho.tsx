@@ -4,7 +4,7 @@ import { useCupom } from '@/hooks/useCupom';
 import { useFavoritos } from '@/hooks/useFavoritos';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, Heart, X, AlertTriangle, Loader2 } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, Heart, X, AlertTriangle, Loader2, Package } from 'lucide-react';
 import EstadoVazio from '@/components/EstadoVazio';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '@/lib/format';
@@ -66,12 +66,8 @@ export default function Carrinho() {
 
   // GAP-118: Salvar carrinho no banco (cross-device)
   useEffect(() => {
-    if (!user) return;
-    if (items.length === 0) {
-      // Limpa o carrinho salvo do banco
-      void supabase.from('carrinho_salvo' as any).delete().eq('user_id', user.id);
-      return;
-    }
+    if (!user || items.length === 0) return;
+    
     const saveCart = async () => {
       try {
         const cartData = items.map(item => ({
@@ -172,6 +168,13 @@ export default function Carrinho() {
   }
 
   const hasStockIssues = stockIssues.length > 0;
+  const groupedItems = items.reduce<Array<{ key: string; bundleId: string | null; items: typeof items }>>((groups, item) => {
+    const key = item.bundleId ? `bundle-${item.bundleId}` : `game-${item.game.id}`;
+    const group = groups.find(entry => entry.key === key);
+    if (group) group.items.push(item);
+    else groups.push({ key, bundleId: item.bundleId ?? null, items: [item] });
+    return groups;
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -211,7 +214,30 @@ export default function Carrinho() {
         {/* Items */}
         <div className="lg:col-span-2 space-y-3">
           <AnimatePresence>
-            {items.map(item => {
+            {groupedItems.map(group => {
+              const item = group.items[0];
+              if (group.bundleId) {
+                const issue = group.items.some(entry => stockIssues.some(stock => stock.id === entry.game.id));
+                const price = item.bundlePrice ?? group.items.reduce((sum, entry) => sum + entry.game.price, 0);
+                return (
+                  <motion.div key={group.key} layout exit={{ opacity: 0, x: -20 }} className={`flex gap-4 bg-card border rounded-xl p-4 ${issue ? 'border-destructive/50' : 'border-border'}`}>
+                    <div className="w-20 h-20 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">{item.bundleImage ? <img src={item.bundleImage} alt={item.bundleTitle || 'Bundle'} className="w-full h-full object-cover" /> : <Package className="h-8 w-8 text-primary" />}</div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold">{item.bundleTitle || 'Bundle de jogos'}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">{group.items.map(entry => entry.game.title).join(' • ')}</p>
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => updateQuantity(item.game.id, item.quantity - 1, group.bundleId)} disabled={item.quantity <= 1} className="p-1 rounded bg-secondary disabled:opacity-50"><Minus className="h-3.5 w-3.5" /></button>
+                          <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.game.id, item.quantity + 1, group.bundleId)} className="p-1 rounded bg-secondary"><Plus className="h-3.5 w-3.5" /></button>
+                          <button onClick={() => removeItem(item.game.id, group.bundleId)} className="p-1 rounded hover:bg-destructive/20"><Trash2 className="h-3.5 w-3.5 text-destructive" /></button>
+                        </div>
+                        <span className="text-price font-bold">{formatCurrency(price * item.quantity)}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              }
               const isDigital = item.game.type === 'digital' || item.game.type === 'subscription';
               // GAP-115: Verificar se este item específico tem problema de estoque
               const stockIssue = stockIssues.find(s => s.id === item.game.id);
@@ -219,7 +245,7 @@ export default function Carrinho() {
               
               return (
                 <motion.div
-                  key={item.game.id}
+                  key={group.key}
                   layout
                   exit={{ opacity: 0, x: -20 }}
                   className={`flex gap-4 bg-card border rounded-xl p-4 ${hasIssue ? 'border-destructive/50' : 'border-border'}`}
@@ -247,14 +273,21 @@ export default function Carrinho() {
                     </div>
                     <div className="flex items-center justify-between mt-3">
                       <div className="flex items-center gap-2">
-                        <button aria-label={`Diminuir quantidade de ${item.game.title}`} onClick={() => updateQuantity(item.game.id, item.quantity - 1, item.bundleId)} className="p-1 rounded bg-secondary hover:bg-secondary/80 transition-colors" disabled={item.quantity <= 1}>
+                        <button 
+                          onClick={() => updateQuantity(item.game.id, item.quantity - 1)} 
+                          className="p-1 rounded bg-secondary hover:bg-secondary/80 transition-colors"
+                          disabled={item.quantity <= 1}
+                        >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
                         <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
-                        <button aria-label={`Aumentar quantidade de ${item.game.title}`} onClick={() => updateQuantity(item.game.id, item.quantity + 1, item.bundleId)} className="p-1 rounded bg-secondary hover:bg-secondary/80 transition-colors">
+                        <button 
+                          onClick={() => updateQuantity(item.game.id, item.quantity + 1)} 
+                          className="p-1 rounded bg-secondary hover:bg-secondary/80 transition-colors"
+                        >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
-                        <button aria-label={`Remover ${item.game.title} do carrinho`} onClick={() => removeItem(item.game.id, item.bundleId)} className="p-1 rounded hover:bg-destructive/20 transition-colors ml-2">
+                        <button onClick={() => removeItem(item.game.id)} className="p-1 rounded hover:bg-destructive/20 transition-colors ml-2">
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </button>
                         {/* GAP-119: Mover para favoritos */}

@@ -33,13 +33,13 @@ export function useCuratedLists() {
 
 export function useCuratedList(listId: string) {
   const { user } = useAuth();
-
+  
   return useQuery({
     queryKey: ['curated-list', listId, user?.id],
     queryFn: async () => {
       const { data } = await supabase
         .from('curated_lists')
-        .select(
+        .select(`
           *,
           creator:profiles!created_by(display_name),
           items:curated_list_items(
@@ -47,30 +47,19 @@ export function useCuratedList(listId: string) {
             game:produtos(*)
           ),
           follows:curated_list_follows(count)
-        )
+        `)
         .eq('id', listId)
         .maybeSingle();
-
+      
       if (!data) return null;
-
-      let is_following = false;
-      if (user) {
-        const { data: myFollow } = await supabase
-          .from('curated_list_follows')
-          .select('list_id')
-          .eq('user_id', user.id)
-          .eq('list_id', listId)
-          .maybeSingle();
-        is_following = !!myFollow;
-      }
-
+      
       return {
         ...data,
-        item_count: (data as any).items?.length || 0,
-        follow_count: (data as any).follows?.[0]?.count || 0,
-        creator_name: (data as any).creator?.display_name || 'Usuário',
-        is_following,
-        items: (data as any).items || [],
+        item_count: data.items?.length || 0,
+        follow_count: data.follows?.[0]?.count || 0,
+        creator_name: data.creator?.display_name || 'Usuário',
+        is_following: user ? data.follows?.some((f) => f.user_id === user.id) : false,
+        items: data.items || [],
       };
     },
     enabled: !!listId,

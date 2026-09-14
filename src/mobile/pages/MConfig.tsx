@@ -102,9 +102,6 @@ export default function MConfig() {
   const sendDeleteConfirmation = async () => {
     setEmailConfirmStep('sending');
     try {
-      // AVISO: Fluxo SIMULADO para fins acadêmicos.
-      // Em produção: usar Edge Function `send-delete-code` que envia e-mail real
-      // e valida o código server-side. NUNCA validar código apenas no cliente.
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       localStorage.setItem('mobile_delete_confirm_code', code);
       localStorage.setItem('mobile_delete_confirm_expiry', Date.now() + 600000 + '');

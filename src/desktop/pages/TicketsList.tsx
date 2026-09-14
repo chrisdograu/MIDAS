@@ -83,7 +83,7 @@ export default function TicketsList({ channel }: Props) {
   // Realtime
   useRealtimeRefresh(['tickets', 'ticket_messages'], () => load(true), 'admin-tickets');
 
-  // TODO: filtro de busca é client-side sobre tickets paginados.
+  // GAP-D270: Paginação
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return tickets.filter(t =>
@@ -181,7 +181,6 @@ export default function TicketsList({ channel }: Props) {
   };
 
   const close = async (t: any) => {
-    // TODO: trocar prompt() nativo por AlertDialog.
     const reason = prompt('Motivo do fechamento (opcional):') || '';
     const { error: errClose } = await supabase.from('tickets').update({ status: 'closed' } as any).eq('id', t.id);
     if (errClose) return toast.error(errClose.message);
@@ -229,7 +228,7 @@ export default function TicketsList({ channel }: Props) {
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
@@ -320,7 +319,6 @@ export default function TicketsList({ channel }: Props) {
                             variant="ghost" 
                             size="sm" 
                             className="h-5 px-1 text-[10px]"
-                            aria-label={`Ver histórico do ticket #${t.id.slice(0, 8)}`}
                             onClick={() => openHistory(t)}
                           >
                             <History className="h-3 w-3 mr-1" />Histórico

@@ -71,10 +71,9 @@ export default function TournamentRegistration({ open, onOpenChange, tournament,
     setLoading(true);
     try {
       if (isFull) {
-        const { error } = await supabase.from('tournament_waitlist' as any).upsert(
-          { tournament_id: tournament.id, user_id: user.id },
-          { onConflict: 'tournament_id,user_id' },
-        );
+        const { error } = await supabase.from('tournament_waitlist' as any).insert({
+          tournament_id: tournament.id, user_id: user.id,
+        });
         if (error) throw error;
         toast.success('Você entrou na fila de espera!');
       } else {

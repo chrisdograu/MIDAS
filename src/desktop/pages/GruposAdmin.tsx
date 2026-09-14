@@ -160,7 +160,6 @@ export default function GruposAdmin() {
 
   // GAP-D151: Remover membro do grupo
   const removeMember = async (groupId: string, userId: string, displayName: string) => {
-    // TODO: trocar confirm() nativo por AlertDialog.
     if (!confirm(`Remover ${displayName} do grupo?`)) return;
     
     const { error } = await supabase
@@ -254,7 +253,6 @@ export default function GruposAdmin() {
                         variant="ghost" 
                         size="sm" 
                         className="h-6 px-2 text-xs"
-                        aria-label={`Ver ${g.members} membros do grupo ${g.name}`}
                         onClick={() => loadMembers(g)}
                       >
                         <Users className="h-3 w-3 mr-1" />

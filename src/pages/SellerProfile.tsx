@@ -364,14 +364,14 @@ export default function SellerProfile() {
                   <UserPlus className="h-4 w-4" /> {isFollowing ? 'Seguindo' : requested ? 'Pedido enviado' : 'Seguir'}
                 </button>
                 <div className="flex gap-2">
-                  <button aria-label="Bloquear vendedor" onClick={() => setBlockOpen(true)} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-destructive hover:border-destructive/40">
+                  <button onClick={() => setBlockOpen(true)} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-destructive hover:border-destructive/40">
                     <Ban className="h-3.5 w-3.5" /> Bloquear
                   </button>
                   <button onClick={() => setReportOpen(true)} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground">
                     <Flag className="h-3.5 w-3.5" /> Denunciar
                   </button>
                   {/* GAP-597: Compartilhar */}
-                  <button aria-label="Compartilhar perfil" onClick={handleShare} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground">
+                  <button onClick={handleShare} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground">
                     <Share2 className="h-3.5 w-3.5" />
                   </button>
                 </div>

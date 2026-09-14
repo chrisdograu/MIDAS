@@ -60,20 +60,17 @@ export default function MForumPost() {
 
   const sendAttachment = async (url: string) => {
     if (!user || !postId) return;
-    if (post?.is_locked) { toast.error('Tópico trancado — não é possível responder.'); return; }
     const prefix = replyTo ? `@${replyTo.user} ` : '';
     const content = `${prefix}[img:${url}] ${text.trim()}`.slice(0, 1000);
     const { error } = await supabase.from('forum_replies').insert({ user_id: user.id, post_id: postId, content });
     if (error) { toast.error(error.message); return; }
     // GAP-1050: Notificação de resposta
     if (user.id !== post?.user_id) {
-      const { data: me } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle();
-      const myName = me?.display_name || 'Alguém';
       await dbWrite(
         supabase.from('notifications').insert({
           user_id: post?.user_id,
           type: 'forum_reply',
-          title: `${myName} respondeu seu post`,
+          title: `${(user as any).display_name || 'Alguém'} respondeu seu post`,
           body: content.slice(0, 100),
           reference_type: 'forum_post',
           reference_id: postId,
@@ -147,8 +144,7 @@ export default function MForumPost() {
         content: editPostContent.trim(),
         edited_at: new Date().toISOString(),
       })
-      .eq('id', post.id)
-      .eq('user_id', user.id);
+      .eq('id', post.id);
     if (error) { toast.error('Erro ao editar'); return; }
     setPost({ ...post, content: editPostContent.trim(), edited_at: new Date().toISOString() });
     setEditingPost(false);
@@ -165,8 +161,7 @@ export default function MForumPost() {
         content: editReplyContent.trim(),
         edited_at: new Date().toISOString(),
       })
-      .eq('id', replyId)
-      .eq('user_id', user.id);
+      .eq('id', replyId);
     if (error) { toast.error('Erro ao editar'); return; }
     setReplies(prev => prev.map(r => 
       r.id === replyId 
@@ -239,13 +234,11 @@ export default function MForumPost() {
     toast.success('Comentário publicado');
     // GAP-1050: Notificação de resposta
     if (user.id !== post?.user_id) {
-      const { data: me } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle();
-      const myName = me?.display_name || 'Alguém';
       await dbWrite(
         supabase.from('notifications').insert({
           user_id: post?.user_id,
           type: 'forum_reply',
-          title: `${myName} respondeu seu post`,
+          title: `${(user as any).display_name || 'Alguém'} respondeu seu post`,
           body: content.slice(0, 100),
           reference_type: 'forum_post',
           reference_id: postId,

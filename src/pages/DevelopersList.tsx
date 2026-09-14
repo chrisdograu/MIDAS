@@ -81,7 +81,7 @@ export default function DevelopersList() {
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={countryFilter}
-              onChange={(e) => setCountryFilter(e.target.value)} aria-label="Filtrar por país"
+              onChange={(e) => setCountryFilter(e.target.value)}
               className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             >
               <option value="all">Todos os países</option>
@@ -91,7 +91,7 @@ export default function DevelopersList() {
             </select>
             {countryFilter !== 'all' && (
               <button
-                onClick={() => setCountryFilter('all')} aria-label="Limpar filtro de país"
+                onClick={() => setCountryFilter('all')}
                 className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
               >
                 <X className="h-4 w-4 text-muted-foreground" />

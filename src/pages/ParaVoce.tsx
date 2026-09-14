@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { GameCardGridSkeleton } from '@/components/skeletons';
 import EstadoVazio from '@/components/EstadoVazio';
 import { toast } from 'sonner';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { dbWrite } from '@/lib/dbWrite';
 
 // GAP-542: Tabela de recomendações ignoradas
@@ -76,36 +76,34 @@ async function fetchFriendRecommendations(userId: string): Promise<Game[]> {
   return (products || []).map(mapProdutoToGame);
 }
 
-// GAP-543: Função para garantir diversidade de gêneros (determinística)
+// GAP-543: Função para garantir diversidade de gêneros
 function ensureGenreDiversity(recommendations: Record<string, Game[]>, maxPerGenre: number = 5): Game[] {
   const result: Game[] = [];
   const genres = Object.keys(recommendations);
-  if (genres.length === 0) return result;
-
-  // Ordenar por quantidade de itens (mais itens primeiro) — determinístico
-  const sortedGenres = [...genres].sort((a, b) => {
-    const diff = (recommendations[b]?.length || 0) - (recommendations[a]?.length || 0);
-    if (diff !== 0) return diff;
-    return a.localeCompare(b);
-  });
-
-  // Pegar os 2 primeiros gêneros
-  const selectedGenres = sortedGenres.slice(0, Math.min(2, sortedGenres.length));
+  
+  // Se tem mais de 2 gêneros, pegar pelo menos 2 de cada
+  const shuffledGenres = [...genres].sort(() => Math.random() - 0.5);
+  
+  // Pegar no máximo 2 gêneros para diversidade
+  const selectedGenres = shuffledGenres.slice(0, Math.min(2, shuffledGenres.length));
+  
   for (const genre of selectedGenres) {
     const games = recommendations[genre] || [];
-    result.push(...games.slice(0, maxPerGenre));
+    const slice = games.slice(0, maxPerGenre);
+    result.push(...slice);
   }
-
-  // Preencher com outros gêneros até 10
-  if (result.length < 10 && sortedGenres.length > 2) {
-    const remainingGenres = sortedGenres.slice(2);
+  
+  // Se ainda tiver espaço, preencher com outros gêneros
+  if (result.length < 10 && genres.length > 2) {
+    const remainingGenres = shuffledGenres.slice(2);
     for (const genre of remainingGenres) {
       if (result.length >= 10) break;
       const games = recommendations[genre] || [];
-      result.push(...games.slice(0, Math.min(3, 10 - result.length)));
+      const slice = games.slice(0, Math.min(3, 10 - result.length));
+      result.push(...slice);
     }
   }
-
+  
   return result.slice(0, 10);
 }
 
@@ -284,10 +282,15 @@ export default function ParaVoce() {
     },
   });
   
-  // GAP-543: Garantir diversidade de gêneros (memoizado)
-  const diverseRecommendations = useMemo(() => ({
-    data: Object.keys(byGenre).length > 0 ? ensureGenreDiversity(byGenre, 4) : [],
-  }), [byGenre]);
+  // GAP-543: Garantir diversidade de gêneros
+  const diverseRecommendations = useQuery({
+    queryKey: ['pra-voce-diverse', user?.id, byGenre],
+    enabled: !!user && Object.keys(byGenre).length > 0,
+    queryFn: () => {
+      return ensureGenreDiversity(byGenre, 4);
+    },
+    staleTime: 5 * 60_000,
+  });
   
   // GAP-545: Estado para carrossel
   const [carouselIndex, setCarouselIndex] = useState(0);

@@ -3,7 +3,7 @@
 // - Remove `,` e parênteses, que quebram o parser do `.or(...)`.
 // Use como: .ilike('col', `%${escapeIlikeTerm(term)}%`)
 export function escapeIlikeTerm(s: string): string {
-  if (typeof s !== 'string' || !s) return '';
+  if (!s) return '';
   return s
     .replace(/[\\%_]/g, (m) => '\\' + m)
     .replace(/,/g, ' ')

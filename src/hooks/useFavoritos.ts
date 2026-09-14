@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { dbWrite } from '@/lib/dbWrite';
-import { toast } from 'sonner';
 
 export function useFavoritos() {
   const { user } = useAuth();
@@ -27,21 +26,12 @@ export function useFavoritos() {
       if (!user) throw new Error('Not authenticated');
       const isFav = favoritos.includes(productId);
       if (isFav) {
-        const ok = await dbWrite(supabase.from('favoritos').delete().eq('user_id', user.id).eq('product_id', productId));
-        if (!ok) throw new Error('Falha ao remover favorito');
+        await dbWrite(supabase.from('favoritos').delete().eq('user_id', user.id).eq('product_id', productId));
       } else {
-        // upsert evita unique violation em cliques duplos
-        const ok = await dbWrite(supabase.from('favoritos').upsert(
-          { user_id: user.id, product_id: productId },
-          { onConflict: 'user_id,product_id' }
-        ));
-        if (!ok) throw new Error('Falha ao favoritar');
+        await dbWrite(supabase.from('favoritos').insert({ user_id: user.id, product_id: productId }));
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['favoritos'] }),
-    onError: (e: any) => {
-      toast.error(e?.message || 'Erro ao salvar favorito');
-    },
   });
 
   return {

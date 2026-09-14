@@ -64,14 +64,13 @@ export default function AvaliacoesJogos() {
     const { data: banned } = await supabase
       .from('profiles')
       .select('id')
-      .gt('banned_until', new Date().toISOString())
-      .limit(2000);
+      .gt('banned_until', new Date().toISOString());
     const bannedSet = new Set(banned?.map(b => b.id) || []);
     setBannedUsers(bannedSet);
 
     const [{ data: rawNotas, error: e1 }, { data: rawCompletas, error: e2 }] = await Promise.all([
-      supabase.from('avaliacoes').select('*').order('created_at', { ascending: false }).limit(2000),
-      supabase.from('reviews_completas').select('*').order('created_at', { ascending: false }).limit(1000),
+      supabase.from('avaliacoes').select('*').order('created_at', { ascending: false }),
+      supabase.from('reviews_completas').select('*').order('created_at', { ascending: false }),
     ]);
     if (e1 || e2) {
       toast({ title: 'Erro ao carregar avaliações', description: (e1 || e2)?.message, variant: 'destructive' });
@@ -220,8 +219,7 @@ export default function AvaliacoesJogos() {
       formatDate(n.created_at),
     ]);
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    // BOM UTF-8 para Excel brasileiro reconhecer acentos
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -263,8 +261,7 @@ export default function AvaliacoesJogos() {
     fetchAll();
   };
 
-  const notasPublicadas = notas.filter(n => n.is_approved);
-  const media = notasPublicadas.length ? (notasPublicadas.reduce((s, n) => s + n.rating, 0) / notasPublicadas.length).toFixed(1) : '0';
+  const media = notas.length ? (notas.reduce((s, n) => s + n.rating, 0) / notas.length).toFixed(1) : '0';
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 

@@ -136,8 +136,8 @@ export default function BibliotecaSocialAdmin() {
     ] = await Promise.all([
       supabase.from('avaliacoes').select('*').eq('user_id', u.id).limit(20),
       supabase.from('reviews_completas').select('*').eq('user_id', u.id).limit(20),
-      supabase.from('game_screenshots').select('*').eq('user_id', u.id).limit(20),
-      supabase.from('game_opinions').select('*').eq('user_id', u.id).limit(20),
+      supabase.from('screenshots').select('*').eq('user_id', u.id).limit(20),
+      supabase.from('opinions').select('*').eq('user_id', u.id).limit(20),
     ]);
 
     setSocialContent([
@@ -150,7 +150,7 @@ export default function BibliotecaSocialAdmin() {
     // GAP-D40: Buscar amigos
     const { data: friendsData } = await supabase
       .from('user_follows')
-      .select('follower_id, following_id, profiles:following_id(display_name, username, avatar_url)')
+      .select('follower_id, followed_id, profiles:followed_id(display_name, username, avatar_url)')
       .eq('follower_id', u.id)
       .limit(20);
     setFriends(friendsData || []);

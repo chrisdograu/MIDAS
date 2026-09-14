@@ -13,14 +13,7 @@ const MIME_MAP: Record<string, string> = {
   'image/jpg': 'image/jpeg',
   'image/png': 'image/png',
   'image/webp': 'image/webp',
-  // HEIC/HEIF: browser pode decodificar via createImageBitmap em alguns casos;
-  // se não decodificar, cai no catch e o caller decide (aviso).
-  'image/heic': 'image/jpeg',
-  'image/heif': 'image/jpeg',
 };
-
-const MAX_DIMENSION = 6000; // 6000x6000 = 36MP, limite razoável pra web
-const MAX_PIXELS = MAX_DIMENSION * MAX_DIMENSION;
 
 export async function stripImageExif(file: File): Promise<File> {
   if (typeof document === 'undefined') return file;
@@ -28,32 +21,20 @@ export async function stripImageExif(file: File): Promise<File> {
   if (!mime) return file; // GIF/SVG/HEIC — não mexemos
   try {
     const bmp = await createImageBitmap(file);
-    // Rejeita imagens gigantes (DoS local + memória)
-    if (bmp.width * bmp.height > MAX_PIXELS) {
-      console.warn('[stripImageExif] imagem muito grande:', bmp.width, 'x', bmp.height);
-      bmp.close?.();
-      return file;
-    }
     const canvas = document.createElement('canvas');
     canvas.width = bmp.width;
     canvas.height = bmp.height;
     const ctx = canvas.getContext('2d');
-    if (!ctx) { bmp.close?.(); return file; }
+    if (!ctx) return file;
     ctx.drawImage(bmp, 0, 0);
     bmp.close?.();
     const blob: Blob | null = await new Promise((resolve) =>
       canvas.toBlob(resolve, mime, 0.92)
     );
-    if (!blob) {
-      console.warn('[stripImageExif] toBlob retornou null — mantendo arquivo original');
-      return file;
-    }
-    const name = file.name.replace(/\.[^.]+$/, '.jpg');
+    if (!blob) return file;
+    const name = file.name.replace(/\.(jpe?g|png|webp)$/i, (ext) => ext);
     return new File([blob], name, { type: mime, lastModified: Date.now() });
-  } catch (e) {
-    // Falha aberta: comentário no topo do arquivo explica o trade-off.
-    // O caller (upload) decide se mostra aviso ao usuário.
-    console.warn('[stripImageExif] falhou — arquivo original mantido:', e);
+  } catch {
     return file;
   }
 }

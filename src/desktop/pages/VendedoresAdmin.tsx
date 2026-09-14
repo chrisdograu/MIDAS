@@ -240,9 +240,6 @@ export default function VendedoresAdmin() {
     toast.success('CSV exportado com sucesso');
   };
 
-  // TODO: busca é client-side sobre sellers paginados.
-  // TODO: busca é client-side sobre sellers paginados.
-  // TODO: busca é client-side sobre sellers paginados.
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return sellers.filter(s =>
@@ -254,7 +251,7 @@ export default function VendedoresAdmin() {
   const onVacation = sellers.filter(s => s.vacation_mode).length;
   const suspended = sellers.filter(s => s.admin_suspended).length;
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
@@ -341,7 +338,7 @@ export default function VendedoresAdmin() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">
-                      <Button size="sm" variant="ghost" aria-label={`Ver histórico de ${s.display_name}`} onClick={() => loadHistory(s)} title="Histórico">
+                      <Button size="sm" variant="ghost" onClick={() => loadHistory(s)} title="Histórico">
                         <History className="h-3.5 w-3.5" />
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => openEditor(s)}>
@@ -387,7 +384,7 @@ export default function VendedoresAdmin() {
                   <p className="font-medium text-sm">Ativar modo férias</p>
                   <p className="text-xs text-muted-foreground">Oculta os anúncios ativos para visitantes.</p>
                 </div>
-                <Switch checked={draftMode} onCheckedChange={setDraftMode} aria-label="Ativar modo férias" />
+                <Switch checked={draftMode} onCheckedChange={setDraftMode} />
               </div>
 
               <div>
@@ -407,7 +404,7 @@ export default function VendedoresAdmin() {
                     <p className="font-medium text-sm flex items-center gap-1.5"><Ban className="h-4 w-4 text-destructive" /> Suspender vendedor</p>
                     <p className="text-xs text-muted-foreground">Retira a loja e os anúncios do marketplace.</p>
                   </div>
-                  <Switch checked={draftSuspended} onCheckedChange={setDraftSuspended} aria-label="Suspender vendedor" />
+                  <Switch checked={draftSuspended} onCheckedChange={setDraftSuspended} />
                 </div>
                 {draftSuspended && (
                   <div>

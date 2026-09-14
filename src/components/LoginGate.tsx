@@ -57,7 +57,7 @@ export function useLoginGate(options: UseLoginGateOptions = {}) {
   const currentPath = location.pathname + location.search;
 
   const requireAuth = useCallback(
-    (action?: () => void): boolean => {
+    (action?: () => void) => {
       if (user) {
         action?.();
         return true;

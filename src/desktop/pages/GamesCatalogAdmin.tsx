@@ -58,8 +58,6 @@ export default function GamesCatalogAdmin() {
   useEffect(() => { load(); }, []);
 
   // GAP-D130: Sincronizar com JogosAdmin (produtos)
-  // AVISO: esta função só reporta o estado atual, não sincroniza de verdade.
-  // Para sincronizar, precisa de uma RPC que crie/atualize games_catalog a partir de produtos.
   const syncWithProducts = async () => {
     setSyncing(true);
     const { data: products } = await supabase

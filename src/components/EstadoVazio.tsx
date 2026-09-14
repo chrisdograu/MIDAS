@@ -56,7 +56,7 @@ export default function EstadoVazio({
         "rounded-full bg-secondary/60 flex items-center justify-center",
         size === 'sm' ? 'w-12 h-12' : size === 'lg' ? 'w-20 h-20' : 'w-16 h-16'
       )}>
-        <Icone aria-hidden className={cn(
+        <Icone className={cn(
           "text-muted-foreground",
           size === 'sm' ? 'h-5 w-5' : size === 'lg' ? 'h-9 w-9' : 'h-7 w-7'
         )} />
@@ -105,14 +105,10 @@ export default function EstadoVazio({
   };
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={cn(
-        "flex flex-col items-center justify-center text-center px-4",
-        size === 'sm' ? 'py-8' : size === 'lg' ? 'py-24' : 'py-16'
-      )}
-    >
+    <div className={cn(
+      "flex flex-col items-center justify-center text-center px-4",
+      size === 'sm' ? 'py-8' : size === 'lg' ? 'py-24' : 'py-16'
+    )}>
       {renderIllustration()}
       
       <p className={cn(

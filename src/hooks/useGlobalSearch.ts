@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDebounce } from '@/hooks/useDebounce';
 
@@ -31,7 +31,7 @@ export function useGlobalSearch(query: string) {
       const [products, users, orders, developers, publishers] = await Promise.all([
         supabase.from('produtos').select('id, title, image_url').ilike('title', term).limit(5),
         supabase.from('profiles').select('id, display_name, avatar_url').ilike('display_name', term).limit(5),
-        supabase.from('pedidos').select('id, coupon_code').or(`coupon_code.ilike.%${searchTerm}%`).limit(5),
+        supabase.from('pedidos').select('id').ilike('id', `%${searchTerm}%`).limit(5),
         supabase.from('developers').select('id, name, logo_url').ilike('name', term).limit(5),
         supabase.from('publishers').select('id, name, logo_url').ilike('name', term).limit(5),
       ]);
@@ -96,13 +96,8 @@ export function useGlobalSearch(query: string) {
     }
   }, []);
 
-  const abortRef = useRef<AbortController | null>(null);
-
   useEffect(() => {
-    abortRef.current?.abort();
-    abortRef.current = new AbortController();
     search(debouncedQuery);
-    return () => { abortRef.current?.abort(); };
   }, [debouncedQuery, search]);
 
   return { results, loading };

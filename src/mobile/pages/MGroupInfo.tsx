@@ -50,7 +50,6 @@ export default function MGroupInfo() {
   const loadFriends = async () => {
     if (!user || !id) return;
     setLoadingFriends(true);
-    // O caller (modal) controla o ciclo — sem cancel flag necessário.
     // Buscar amigos mútuos que não estão no grupo
     const { data: iFollow } = await supabase.from('user_follows').select('following_id').eq('follower_id', user.id);
     const { data: followsMe } = await supabase.from('user_follows').select('follower_id').eq('following_id', user.id);
@@ -100,16 +99,6 @@ export default function MGroupInfo() {
   const visible = expanded ? members : members.slice(0, 5);
 
   const changeRole = async (uid: string, role: 'admin'|'member'|'observer') => {
-    // Se rebaixando um admin, verifica se não é o último
-    if (role !== 'admin') {
-      const admins = members.filter(m => m.role === 'admin');
-      const target = members.find(m => m.user_id === uid);
-      if (target?.role === 'admin' && admins.length <= 1) {
-        toast.error('Não é possível rebaixar o último administrador do grupo.');
-        setActionFor(null);
-        return;
-      }
-    }
     const { error } = await supabase.from('group_members').update({ role }).eq('group_id', id!).eq('user_id', uid);
     if (error) toast.error(error.message); else { toast.success('Papel atualizado'); load(); }
     setActionFor(null);
@@ -241,11 +230,10 @@ export default function MGroupInfo() {
               <div className="flex-1 overflow-y-auto space-y-1.5">
                 {friends.map(f => (
                   <button key={f.id} onClick={() => {
-                    setSelectedFriends(prev => {
-                      const n = new Set(prev);
-                      n.has(f.id) ? n.delete(f.id) : n.add(f.id);
-                      return n;
-                    });
+                    const newSet = new Set(selectedFriends);
+                    if (newSet.has(f.id)) newSet.delete(f.id);
+                    else newSet.add(f.id);
+                    setSelectedFriends(newSet);
                   }} className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${selectedFriends.has(f.id) ? 'bg-primary/15 border border-primary/40' : 'bg-card border border-border'}`}>
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent overflow-hidden flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
                       {f.avatar_url ? <img src={f.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" /> : (f.display_name?.[0]?.toUpperCase() || '?')}

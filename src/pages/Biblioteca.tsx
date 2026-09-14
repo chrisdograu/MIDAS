@@ -41,7 +41,8 @@ export default function Biblioteca() {
   // GAP-127, GAP-400: Filtro por gênero (categoria)
   const [genreFilter, setGenreFilter] = useState<string>('todos');
 
-    // GAP-128, GAP-401: Horas totais (derivado via useMemo abaixo)
+  // GAP-128, GAP-401: Horas totais
+  const [totalHours, setTotalHours] = useState(0);
 
   // Modo limpo
   const [modoLimpo, setModoLimpo] = useState(false);
@@ -56,11 +57,14 @@ export default function Biblioteca() {
     });
   };
 
-    // GAP-128, GAP-401: Calcular horas totais da biblioteca (memoizado)
-  const totalHours = useMemo(
-    () => Math.round(biblioteca.reduce((acc, item) => acc + ((item as any).hours_played || 0), 0) * 10) / 10,
-    [biblioteca]
-  );
+  // GAP-128, GAP-401: Calcular horas totais da biblioteca
+  useEffect(() => {
+    const total = biblioteca.reduce((acc, item) => {
+      // Usar hours_played do item ou valor padrão
+      return acc + ((item as any).hours_played || 0);
+    }, 0);
+    setTotalHours(Math.round(total * 10) / 10);
+  }, [biblioteca]);
 
   const stats = {
     total: biblioteca.length,
@@ -286,7 +290,7 @@ export default function Biblioteca() {
           { key: 'quero_jogar' as const, label: 'Quero jogar' },
           { key: 'ja_joguei' as const, label: 'Já joguei' },
         ]).map(f => (
-          <button key={f.key} onClick={() => setFilter(f.key)} aria-pressed={filter === f.key}
+          <button key={f.key} onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === f.key ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
             {f.label}
           </button>
@@ -312,12 +316,12 @@ export default function Biblioteca() {
         <div className="flex flex-wrap gap-1.5 mb-6 items-center">
           <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="text-[11px] uppercase text-muted-foreground tracking-wide mr-1">Gênero</span>
-          <button onClick={() => setGenreFilter('todos')} aria-pressed={genreFilter === 'todos'}
+          <button onClick={() => setGenreFilter('todos')}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${genreFilter === 'todos' ? 'bg-accent text-accent-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
             Todos
           </button>
           {allGenres.map(g => (
-            <button key={g} onClick={() => setGenreFilter(g)} aria-pressed={genreFilter === g}
+            <button key={g} onClick={() => setGenreFilter(g)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${genreFilter === g ? 'bg-accent text-accent-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
               {g}
             </button>

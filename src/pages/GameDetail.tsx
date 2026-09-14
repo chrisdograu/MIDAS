@@ -159,6 +159,15 @@ export default function GameDetail() {
     if (user && id) userOwnsGame(user.id, id).then(setOwns);
   }, [user?.id, id]);
 
+  useDocumentMeta({
+    title: game ? `${game.title} · MIDIAS` : 'Jogo · MIDIAS',
+    description: game
+      ? (game.description || `Compre ${game.title} na MIDIAS — entrega instantânea por e-mail.`).slice(0, 160)
+      : undefined,
+    image: game?.image,
+    type: 'product',
+  });
+
   // GAP-023, GAP-113: Tratamento de erro específico
   if (isError) {
     return (
@@ -198,10 +207,11 @@ export default function GameDetail() {
     .filter(g => g.id !== game.id && g.category === game.category)
     .slice(0, 4);
 
-  // 2. "Quem comprou também comprou" — placeholder determinístico
-  // Em produção, viria de uma query real. Aqui usamos mesma categoria pra não depender de Math.random.
+  // 2. "Quem comprou também comprou" (baseado em compras anteriores)
+  // Nota: Esta é uma simulação — em produção, viria de uma query real
   const alsoBought = allGames
-    .filter(g => g.id !== game.id && g.category === game.category)
+    .filter(g => g.id !== game.id && g.id !== game.id)
+    .sort(() => Math.random() - 0.5)
     .slice(0, 4);
 
   // Usa "quem comprou também" se disponível, senão fallback para mesma categoria
@@ -231,15 +241,6 @@ export default function GameDetail() {
 
   const installments = Math.min(12, Math.max(2, Math.ceil(game.price / 10)));
   const installmentValue = formatCurrency(game.price / installments);
-
-  useDocumentMeta({
-    title: game ? `${game.title} · MIDIAS` : 'Jogo · MIDIAS',
-    description: game
-      ? (game.description || `Compre ${game.title} na MIDIAS — entrega instantânea por e-mail.`).slice(0, 160)
-      : undefined,
-    image: game?.image,
-    type: 'product',
-  });
 
   return (
     <div className="container mx-auto px-4 py-8" data-game-cosmetic={game.id}>
@@ -281,7 +282,7 @@ export default function GameDetail() {
             )}
 
             <button
-              aria-label={isFavorito(game.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'} onClick={handleFav}
+              onClick={handleFav}
               className="absolute top-4 right-4 p-2 rounded-full bg-card/80 backdrop-blur-sm hover:bg-card transition-colors z-10"
             >
               <Heart
@@ -380,11 +381,12 @@ export default function GameDetail() {
         <div className="space-y-3">
           <h2 className="text-lg font-bold text-foreground">Detalhes</h2>
           <div className="bg-card border border-border rounded-xl p-4 space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Publicadora</span>
-              <span className="text-foreground">{game.publisher}</span>
-            
-                  </div>
+            {game.publisher && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Publicadora</span>
+                <span className="text-foreground">{game.publisher}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Lançamento</span>
               <span className="text-foreground">

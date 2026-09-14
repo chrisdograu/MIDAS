@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Loader2, Plus, ThumbsUp, ThumbsDown, MessageSquare, BookMarked, Check, Gamepad2, ShoppingBag, Edit2, X, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, ThumbsUp, ThumbsDown, MessageSquare, BookMarked, Check, Gamepad2, ShoppingBag, Edit2, X, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { MForumTag } from '@/mobile/lib/badge';
+import { MForumTag, MobileChip } from '@/mobile/lib/badge';
 import { timeAgo, periodSince, type Period, PERIOD_OPTIONS } from '@/mobile/lib/time';
 import { HalfStarDisplay, InteractiveHalfStar } from '@/components/HalfStarRating';
 import LevelBadge from '@/components/LevelBadge';
@@ -56,6 +56,7 @@ export default function MForumGame() {
   const [gameError, setGameError] = useState(false);
   const [postSending, setPostSending] = useState(false);
   const [reviewSending, setReviewSending] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const loadGame = () => {
     if (!gameId) { setGameLoading(false); return; }
@@ -93,8 +94,7 @@ export default function MForumGame() {
     const { error } = await supabase
       .from('forum_posts')
       .update({ content: content.trim(), edited_at: new Date().toISOString() })
-      .eq('id', postId)
-      .eq('user_id', user.id);
+      .eq('id', postId);
     if (error) { toast.error('Erro ao editar'); return; }
     setPosts(prev => prev.map(p => 
       p.id === postId 
@@ -110,8 +110,7 @@ export default function MForumGame() {
     const { error } = await supabase
       .from('avaliacoes')
       .update({ rating, comment: comment.trim() || null, edited_at: new Date().toISOString() })
-      .eq('id', reviewId)
-      .eq('user_id', user.id);
+      .eq('id', reviewId);
     if (error) { toast.error('Erro ao editar review'); return; }
     setReviews(prev => prev.map(r => 
       r.id === reviewId 
@@ -124,18 +123,11 @@ export default function MForumGame() {
   // GAP-1045: Notificação de resposta
   const notifyPostOwner = async (postId: string, postUserId: string, content: string) => {
     if (!user || user.id === postUserId) return;
-    // Buscar display_name do próprio user (Auth user não tem display_name)
-    const { data: me } = await supabase
-      .from('profiles')
-      .select('display_name')
-      .eq('id', user.id)
-      .maybeSingle();
-    const myName = me?.display_name || 'Alguém';
     await dbWrite(
       supabase.from('notifications').insert({
         user_id: postUserId,
         type: 'forum_reply',
-        title: `${myName} respondeu seu post no fórum`,
+        title: `${(user as any).display_name || 'Alguém'} respondeu seu post no fórum`,
         body: content.slice(0, 100),
         reference_type: 'forum_post',
         reference_id: postId,
@@ -143,18 +135,17 @@ export default function MForumGame() {
     );
   };
 
-  const loadFeed = async (reset: boolean = true, nextPageArg?: number) => {
+  const loadFeed = async (reset: boolean = true) => {
     if (!gameId) { setFeedLoading(false); return; }
-    let currentPage: number;
     if (reset) {
       setFeedLoading(true);
-      currentPage = 0;
+      setPage(0);
       setHasMore(true);
     } else {
       setFeedLoadingMore(true);
-      currentPage = nextPageArg ?? (page + 1);
     }
     
+    const currentPage = reset ? 0 : page;
     const offset = currentPage * LIMIT;
     const since = periodSince(period);
     const sinceISO = since ? since.toISOString() : '1970-01-01';
@@ -274,18 +265,9 @@ export default function MForumGame() {
       : await supabase.from('avaliacoes').insert(payload);
     setReviewSending(false);
     if (error) { toast.error(error.message); return; }
-    // Só adiciona se não existir (não sobrescreve status existente)
-    const { data: existingLib } = await supabase
-      .from('biblioteca_usuario')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('product_id', gameId)
-      .maybeSingle();
-    if (!existingLib) {
-      await supabase.from('biblioteca_usuario')
-        .insert({ user_id: user.id, product_id: gameId, status: 'ja_joguei' });
-      setLibStatus('ja_joguei');
-    }
+    await supabase.from('biblioteca_usuario')
+      .upsert({ user_id: user.id, product_id: gameId, status: 'ja_joguei' }, { onConflict: 'user_id,product_id' });
+    setLibStatus('ja_joguei');
     toast.success(existing ? 'Review atualizada' : 'Review publicada — adicionada como "já joguei"');
     setReviewOpen(false); setReviewText(''); setReviewSpoiler(false); setReviewAchievement(null); loadFeed(true);
   };
@@ -389,29 +371,13 @@ export default function MForumGame() {
           </div>
         </div>
 
-        <div className="flex p-1 bg-secondary/50 rounded-lg mt-4">
+        <div className="flex items-center gap-2 mt-4">
+        <div className="flex-1 flex p-1 bg-secondary/50 rounded-lg">
           <button onClick={() => setTab('both')} className={`flex-1 py-2 rounded-md text-xs font-semibold ${tab === 'both' ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground' : 'text-muted-foreground'}`}>✨ Ambos</button>
           <button onClick={() => setTab('forum')} className={`flex-1 py-2 rounded-md text-xs font-semibold ${tab === 'forum' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>💬 Fórum</button>
           <button onClick={() => setTab('reviews')} className={`flex-1 py-2 rounded-md text-xs font-semibold ${tab === 'reviews' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}`}>⭐ Reviews</button>
         </div>
-
-        <div className="mt-3 space-y-2">
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-thin">
-            {(['popular', 'recent'] as Sort[]).map(s => (
-              <button key={s} onClick={() => setSort(s)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${sort === s ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground'}`}>
-                {s === 'popular' ? '🔥 Populares' : '🕒 Recentes'}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-thin">
-            {PERIOD_OPTIONS.map(p => (
-              <button key={p.id} onClick={() => setPeriod(p.id)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${period === p.id ? 'bg-accent text-accent-foreground' : 'bg-card border border-border text-muted-foreground'}`}>
-                {p.label}
-              </button>
-            ))}
-          </div>
+          <button onClick={() => setFiltersOpen(true)} aria-label="Abrir filtros" className="relative h-10 w-10 shrink-0 rounded-lg bg-card border border-border flex items-center justify-center"><SlidersHorizontal className="h-4 w-4" />{(sort !== 'popular' || period !== 'all') && <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">{(sort !== 'popular' ? 1 : 0) + (period !== 'all' ? 1 : 0)}</span>}</button>
         </div>
 
         {tab === 'reviews' && (
@@ -432,7 +398,7 @@ export default function MForumGame() {
             const showPosts = tab !== 'reviews';
             const showReviews = tab !== 'forum';
             const bothMode = tab === 'both';
-            const postNodes = filteredPosts.map(p => {
+            const renderPost = (p: Post) => {
               const canEdit = user && user.id === p.user_id && !p.edited_at && 
                 (Date.now() - new Date(p.created_at).getTime()) < 5 * 60 * 1000;
               return (
@@ -486,8 +452,8 @@ export default function MForumGame() {
                   </div>
                 </div>
               );
-            });
-            const reviewNodes = filteredReviews.map(r => {
+            };
+            const renderReview = (r: Review) => {
               const canEdit = user && user.id === r.user_id && !r.edited_at && 
                 (Date.now() - new Date(r.created_at).getTime()) < 5 * 60 * 1000;
               return (
@@ -545,17 +511,16 @@ export default function MForumGame() {
                   </div>
                 </div>
               );
-            });
-            let merged: any[] = [];
-            if (tab === 'forum') merged = postNodes;
-            else if (tab === 'reviews') merged = reviewNodes;
-            else {
-              const all = [
-                ...filteredPosts.map(p => ({ kind: 'p' as const, date: p.created_at, node: postNodes.find(n => n.key === `p-${p.id}`)! })),
-                ...filteredReviews.map(r => ({ kind: 'r' as const, date: r.created_at, node: reviewNodes.find(n => n.key === `r-${r.id}`)! })),
-              ].sort((a,b) => +new Date(b.date) - +new Date(a.date));
-              merged = all.map(x => x.node);
-            }
+            };
+            const merged = tab === 'forum'
+              ? filteredPosts.map(renderPost)
+              : tab === 'reviews'
+                ? filteredReviews.map(renderReview)
+                : [
+                    ...filteredPosts.map(item => ({ kind: 'post' as const, date: item.created_at, item })),
+                    ...filteredReviews.map(item => ({ kind: 'review' as const, date: item.created_at, item })),
+                  ].sort((a, b) => +new Date(b.date) - +new Date(a.date))
+                    .map(entry => entry.kind === 'post' ? renderPost(entry.item as Post) : renderReview(entry.item as Review));
             if (!merged.length) return <EstadoVazio icone={MessageSquareIcon} titulo="Nada por aqui no período" descricao="Ajuste os filtros ou seja o primeiro a publicar." />;
             return (
               <>
@@ -609,6 +574,16 @@ export default function MForumGame() {
               <button onClick={() => setReviewOpen(false)} disabled={reviewSending} className="flex-1 py-2.5 rounded-lg bg-secondary text-secondary-foreground text-sm font-semibold disabled:opacity-50">Cancelar</button>
               <button onClick={submitReview} disabled={reviewSending} className="flex-1 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-semibold disabled:opacity-50">{reviewSending ? 'Publicando...' : 'Publicar review'}</button>
             </div>
+          </motion.div>
+        </div>
+      )}
+      {filtersOpen && (
+        <div className="fixed inset-0 z-50 overlay-scrim flex items-end" onClick={() => setFiltersOpen(false)}>
+          <motion.div initial={{ y: 400 }} animate={{ y: 0 }} className="w-full max-h-[85vh] overflow-y-auto bg-card rounded-t-2xl p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between"><h3 className="font-bold flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />Filtros</h3><button onClick={() => setFiltersOpen(false)} aria-label="Fechar filtros"><X className="h-5 w-5" /></button></div>
+            <div><p className="text-[10px] uppercase text-muted-foreground">Ordenar por</p><div className="flex flex-wrap gap-2 mt-2"><MobileChip active={sort === 'popular'} onClick={() => setSort('popular')}>Populares</MobileChip><MobileChip active={sort === 'recent'} onClick={() => setSort('recent')}>Recentes</MobileChip></div></div>
+            <div><p className="text-[10px] uppercase text-muted-foreground">Período</p><div className="flex flex-wrap gap-2 mt-2">{PERIOD_OPTIONS.map(p => <MobileChip key={p.id} active={period === p.id} onClick={() => setPeriod(p.id)}>{p.label}</MobileChip>)}</div></div>
+            <div className="flex gap-2"><button onClick={() => { setSort('popular'); setPeriod('all'); }} className="flex-1 py-2.5 rounded-lg bg-secondary text-sm font-semibold">Limpar</button><button onClick={() => setFiltersOpen(false)} className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">Aplicar</button></div>
           </motion.div>
         </div>
       )}

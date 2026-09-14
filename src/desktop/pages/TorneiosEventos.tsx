@@ -74,8 +74,7 @@ export default function TorneiosEventos() {
 
   useEffect(() => { load(true); }, [dateFilter]);
 
-  // TODO: filtro de busca é client-side sobre rows paginados.
-  // Mover para .ilike() no servidor.
+  // GAP-D301: Filtro por busca
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return rows.filter(r => 
@@ -101,7 +100,7 @@ export default function TorneiosEventos() {
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 

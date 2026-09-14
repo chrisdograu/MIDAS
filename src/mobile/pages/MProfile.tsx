@@ -62,9 +62,7 @@ export default function MProfile() {
   const [editForm, setEditForm] = useState({ display_name: '', bio: '', username: '', is_private: false });
   const [saving, setSaving] = useState(false);
 
-  // useFollow só é relevante quando visitamos o perfil de outro
-  const followHookTarget = isOwn ? undefined : targetId;
-  const { isFollowing, requested, followersCount, followingCount, loading: followLoading, toggle: toggleFollow } = useFollow(followHookTarget);
+  const { isFollowing, requested, followersCount, followingCount, loading: followLoading, toggle: toggleFollow } = useFollow(targetId);
 
   useEffect(() => {
     if (!targetId) { setLoading(false); return; }
@@ -124,22 +122,13 @@ export default function MProfile() {
   // GAP-1100: Salvar edição
   const saveEdit = async () => {
     if (!user || !profile) return;
-    const uname = editForm.username.trim();
-    if (uname && !/^[a-zA-Z0-9_.]{3,30}$/.test(uname)) {
-      toast.error('Username inválido (3-30 caracteres, letras/números/._)');
-      return;
-    }
-    if (!editForm.display_name.trim()) {
-      toast.error('Nome de exibição é obrigatório');
-      return;
-    }
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
       .update({
-        display_name: editForm.display_name.trim(),
+        display_name: editForm.display_name.trim() || null,
         bio: editForm.bio.trim() || null,
-        username: uname || null,
+        username: editForm.username.trim() || null,
         is_private: editForm.is_private,
       })
       .eq('id', user.id);
@@ -149,14 +138,13 @@ export default function MProfile() {
       return;
     }
     toast.success('Perfil atualizado!');
-    setProfile({ ...profile, ...editForm, username: uname || null });
+    setProfile({ ...profile, ...editForm });
     setEditOpen(false);
   };
 
   const openFollowList = async (kind: 'followers' | 'following') => {
     if (!targetId) return;
     setFollowersOpen(kind);
-    setFollowList([]);  // limpa lista antiga
     const col = kind === 'followers' ? 'follower_id' : 'following_id';
     const filter = kind === 'followers' ? 'following_id' : 'follower_id';
     const { data } = await supabase.from('user_follows').select(col).eq(filter, targetId);
@@ -168,14 +156,8 @@ export default function MProfile() {
 
   const handleBlock = async () => {
     if (!user || !targetId) return;
-    const { error } = await supabase
-      .from('blocked_users')
-      .upsert(
-        { blocker_id: user.id, blocked_id: targetId },
-        { onConflict: 'blocker_id,blocked_id' },
-      );
-    if (error) toast.error('Erro ao bloquear');
-    else toast.success('Usuário bloqueado');
+    const { error } = await supabase.from('blocked_users').insert({ blocker_id: user.id, blocked_id: targetId });
+    if (error) toast.error('Erro ao bloquear'); else toast.success('Usuário bloqueado');
   };
   const handleMessage = async () => {
     if (!user || !targetId) return;

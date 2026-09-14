@@ -128,45 +128,41 @@ export default function MensagensAdmin() {
       if (status !== 'all') {
         query = query.eq('status', status);
       }
-      // Filtro por nome é client-side (PostgREST não permite filtrar
-      // coluna de join via .or()). Para volumes grandes, migrar para RPC.
-      // Aqui apenas limitamos quando há busca — o filtro real é no useMemo.
+      if (search) {
+        query = query.or(
+          `participant_1_profile.display_name.ilike.%${search}%,participant_2_profile.display_name.ilike.%${search}%`
+        );
+      }
 
       const { data, error } = await query.range(from, from + ITEMS_PER_PAGE - 1);
 
       if (error) throw error;
 
-      // Buscar todas as mensagens das conversas em 1 query (evita N+1)
+      // Buscar última mensagem e contagem para cada conversa
       const convs = data || [];
-      const convIds = convs.map((c: any) => c.id);
-      const { data: allMsgs } = convIds.length
-        ? await supabase
+      const enriched = await Promise.all(
+        convs.map(async (c: any) => {
+          const { data: lastMsg } = await supabase
             .from('mensagens')
-            .select('conversation_id, content, created_at')
-            .in('conversation_id', convIds)
+            .select('content, created_at')
+            .eq('conversation_id', c.id)
             .order('created_at', { ascending: false })
-        : { data: [] as any[] };
+            .limit(1)
+            .maybeSingle();
 
-      // Agrupar por conversa
-      const msgsByConv = new Map<string, { last: any; count: number }>();
-      (allMsgs || []).forEach((m: any) => {
-        const cur = msgsByConv.get(m.conversation_id);
-        if (!cur) {
-          msgsByConv.set(m.conversation_id, { last: m, count: 1 });
-        } else {
-          cur.count += 1;
-        }
-      });
+          const { count } = await supabase
+            .from('mensagens')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', c.id);
 
-      const enriched = convs.map((c: any) => {
-        const stats = msgsByConv.get(c.id);
-        return {
-          ...c,
-          last_message: stats?.last?.content || null,
-          last_message_at: stats?.last?.created_at || null,
-          message_count: stats?.count || 0,
-        };
-      });
+          return {
+            ...c,
+            last_message: lastMsg?.content || null,
+            last_message_at: lastMsg?.created_at || null,
+            message_count: count || 0,
+          };
+        })
+      );
 
       if (reset) {
         setConversations(enriched);

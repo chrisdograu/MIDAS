@@ -71,10 +71,6 @@ export default function MTournamentGroup() {
 
   const send = async () => {
     if (!text.trim() || !user || !canSend || sending) return;
-    if (tournament?.event_state === 'finished' || tournament?.event_state === 'archived') {
-      toast.error('Este torneio já foi encerrado.');
-      return;
-    }
     const content = text.trim();
     setSending(true);
     setText('');
@@ -93,11 +89,6 @@ export default function MTournamentGroup() {
     if (error) toast.error(error.message); else toast.success('Mensagem removida');
   };
   const kick = async (uid: string) => {
-    const target = participants.find(p => p.user_id === uid);
-    if (target?.chat_role === 'admin') {
-      toast.error('Não é possível remover um administrador.');
-      return;
-    }
     if (!confirm('Remover do torneio?')) return;
     if (!id) return;
     const { error } = await supabase.from('tournament_participants').delete().eq('tournament_id', id).eq('user_id', uid);
@@ -105,11 +96,6 @@ export default function MTournamentGroup() {
     else toast.success('Participante removido');
   };
   const mute = async (uid: string) => {
-    const target = participants.find(p => p.user_id === uid);
-    if (target?.chat_role === 'admin') {
-      toast.error('Não é possível silenciar um administrador.');
-      return;
-    }
     const h = Number(prompt('Silenciar por quantas horas?', '24'));
     if (!h || h <= 0) return;
     const until = new Date(Date.now() + h*3600000).toISOString();
@@ -120,16 +106,6 @@ export default function MTournamentGroup() {
   };
 
   const setRole = async (uid: string, role: Role) => {
-    const target = participants.find(p => p.user_id === uid);
-    if (target?.chat_role === 'admin' && role !== 'admin') {
-      // Só permite rebaixar admin se houver outro admin no grupo
-      const otherAdmins = participants.filter(p => p.chat_role === 'admin' && p.user_id !== uid);
-      if (otherAdmins.length === 0) {
-        toast.error('Não é possível rebaixar o último administrador do grupo.');
-        return;
-      }
-      if (!confirm(`Rebaixar ${target.profiles?.display_name || 'este admin'} para ${role}?`)) return;
-    }
     const { error } = await supabase.from('tournament_participants').update({ chat_role: role } as any)
       .eq('tournament_id', id!).eq('user_id', uid);
     if (error) toast.error(error.message); else toast.success('Permissão atualizada');
@@ -139,16 +115,9 @@ export default function MTournamentGroup() {
   const bulkSetRole = async (role: 'member' | 'observer') => {
     if (!confirm(role === 'member' ? 'Transformar todos os observadores em membros?' : 'Transformar todos os membros em observadores?')) return;
     const target: Role = role === 'member' ? 'observer' : 'member';
-    const { data, error } = await supabase
-      .from('tournament_participants')
-      .update({ chat_role: role } as any)
-      .eq('tournament_id', id!)
-      .eq('chat_role', target)
-      .select('user_id');
-    if (error) { toast.error(error.message); return; }
-    const n = (data || []).length;
-    toast.success(`${n} participante(s) atualizado(s) (admins preservados)`);
-    loadParticipants();
+    const { error } = await supabase.from('tournament_participants').update({ chat_role: role } as any)
+      .eq('tournament_id', id!).eq('chat_role', target);
+    if (error) toast.error(error.message); else { toast.success('Aplicado a todos (admins preservados)'); loadParticipants(); }
   };
 
   if (!user) return <Navigate to="/m/auth" replace />;

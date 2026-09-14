@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Flame, AlertTriangle, Share2, Filter, Monitor, Smartphone, Trophy, Calendar, Gamepad2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useRadarDelta } from '@/hooks/useRadarDelta';
@@ -70,16 +70,18 @@ export default function EmAlta() {
     }
   };
 
-  // Aplicar filtros (memoizado)
-  const filteredItems = useMemo(() => items.filter(item => {
+  // Aplicar filtros
+  const filteredItems = items.filter(item => {
+    // GAP-143, GAP-470: Filtro por plataforma
     if (platformFilter !== 'Todas' && !item.platform?.includes(platformFilter)) {
       return false;
     }
+    // GAP-145: Filtro por categoria
     if (categoryFilter !== 'Todos' && item.category !== categoryFilter) {
       return false;
     }
     return true;
-  }), [items, platformFilter, categoryFilter]);
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,7 +99,7 @@ export default function EmAlta() {
         {/* GAP-144: Botão de compartilhar */}
         <button
           onClick={handleShare}
-          disabled={sharing || items.length === 0} aria-label="Compartilhar ranking de jogos em alta"
+          disabled={sharing || items.length === 0}
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-sm font-medium hover:border-primary/40 transition-colors disabled:opacity-50"
         >
           <Share2 className="h-4 w-4" />
@@ -110,7 +112,7 @@ export default function EmAlta() {
         {windowTabs.map(tab => (
           <button
             key={tab.key}
-            onClick={() => setWindow(tab.key)} aria-pressed={window === tab.key} aria-label={`Ver tendências de ${tab.label}`}
+            onClick={() => setWindow(tab.key)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               window === tab.key
                 ? 'bg-primary text-primary-foreground'

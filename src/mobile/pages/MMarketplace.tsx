@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Plus, Loader2, ShieldCheck, ArrowLeftRight, ShoppingBag, SlidersHorizontal, X, Disc3, HardDrive, Gamepad2, Joystick, Sparkles, Package, Clock, TrendingDown, TrendingUp, ChevronDown, Bell } from 'lucide-react';
 import EstadoVazio from '@/components/EstadoVazio';
@@ -74,7 +74,7 @@ function useRealtimeAds(onNewAd: () => void) {
           duration: 5000,
           action: {
             label: 'Ver',
-            onClick: () => { window.location.href = `/m/marketplace/${newAd.id}`; },
+            onClick: () => window.location.reload(),
           }
         });
         onNewAd();
@@ -92,7 +92,6 @@ export default function MMarketplace() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const pageRef = useRef(0);
   const [query, setQuery] = useState('');
   const [type, setType] = useState<typeof TYPE_FILTERS[number]['id']>('all');
   const [onlyProtected, setOnlyProtected] = useState(false);
@@ -107,12 +106,8 @@ export default function MMarketplace() {
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
   // GAP-1080: Realtime
-  const realtimeDebounce = useRef<NodeJS.Timeout | null>(null);
   const handleNewAd = useCallback(() => {
-    if (realtimeDebounce.current) clearTimeout(realtimeDebounce.current);
-    realtimeDebounce.current = setTimeout(() => {
-      setReloadTrigger(prev => prev + 1);
-    }, 800);
+    setReloadTrigger(prev => prev + 1);
   }, []);
 
   useRealtimeAds(handleNewAd);
@@ -186,8 +181,7 @@ export default function MMarketplace() {
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    const nextPage = pageRef.current + 1;
-    pageRef.current = nextPage;
+    const nextPage = page + 1;
     const offset = nextPage * LIMIT;
     const nowIso = new Date().toISOString();
 
@@ -391,7 +385,7 @@ export default function MMarketplace() {
 
             <div>
               <label className="text-[10px] uppercase tracking-wide text-muted-foreground">Preço máximo: {priceMax > 0 ? `R$ ${priceMax}` : 'sem limite'}</label>
-              <input type="range" min={0} max={Math.max(500, ...ads.map(a => a.price))} step={10} value={priceMax} onChange={e => setPriceMax(Number(e.target.value))} className="w-full mt-1.5 accent-primary" />
+              <input type="range" min={0} max={500} step={10} value={priceMax} onChange={e => setPriceMax(Number(e.target.value))} className="w-full mt-1.5 accent-primary" />
             </div>
 
             <div>

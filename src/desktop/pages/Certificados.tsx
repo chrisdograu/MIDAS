@@ -71,8 +71,7 @@ export default function Certificados() {
     const { data, error } = await supabase
       .from('certificados')
       .select('*')
-      .order('requested_at', { ascending: false })
-      .limit(2000);
+      .order('requested_at', { ascending: false });
     if (error) {
       toast.error(`Erro ao carregar certificados: ${error.message}`);
       setCerts([]);

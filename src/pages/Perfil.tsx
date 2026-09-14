@@ -161,8 +161,7 @@ export default function Perfil() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (!user || loaded) return;
+  if (user && !loaded) {
     (supabase as any).rpc('get_my_profile').then(({ data }: any) => {
       const row = Array.isArray(data) ? data[0] : data;
       if (row) {
@@ -175,8 +174,10 @@ export default function Perfil() {
         setPushNotifications(row.push_notifications ?? true);
         setEmailNotifications(row.email_notifications ?? false);
         setBannedUntil(row.banned_until || null);
+        // GAP-035: Última alteração de nome
         setLastNameChange(row.last_name_change || null);
 
+        // GAP-038: Calcular progresso do perfil
         let progress = 0;
         if (row.avatar_url) progress += 20;
         if (row.display_name && row.display_name.length > 0) progress += 20;
@@ -190,7 +191,7 @@ export default function Perfil() {
     supabase.from('seller_profiles').select('handle').eq('user_id', user.id).maybeSingle().then(({ data }) => {
       setSellerHandle(data?.handle || null);
     });
-  }, [user, loaded]);
+  }
 
   // GAP-037, GAP-150, GAP-563: Validar CPF
   const handleCpfChange = (value: string) => {
@@ -229,8 +230,7 @@ export default function Perfil() {
     setUploading(false);
   };
 
-  const handleSave = async (e?: React.FormEvent | React.MouseEvent) => {
-    e?.preventDefault?.();
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
@@ -528,7 +528,7 @@ export default function Perfil() {
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
 
-              <button onClick={handleSave} disabled={saving}
+              <button onClick={handleSave as any} disabled={saving}
                 className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Salvar alterações
@@ -570,7 +570,7 @@ export default function Perfil() {
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
 
-              <button onClick={handleSave} disabled={saving}
+              <button onClick={handleSave as any} disabled={saving}
                 className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Salvar alterações

@@ -147,11 +147,9 @@ export default function MChat() {
   const markAllAsRead = async () => {
     if (!user) return;
     setMarkingAll(true);
-    // Filtra apenas as conversas do tab atual
-    const relevantConvs = tab === 'torneios' ? tournamentConvs : tab === 'vendedores' ? vendorConvs : friendsConvs;
-    const unreadSenders = relevantConvs.filter(c => c.unread > 0).map(c => c.other_id);
-    if (unreadSenders.length === 0) {
-      toast.info('Nenhuma mensagem não lida nesta aba');
+    const unreadIds = conversas.filter(c => c.unread > 0).map(c => c.id);
+    if (unreadIds.length === 0) {
+      toast.info('Nenhuma mensagem não lida');
       setMarkingAll(false);
       return;
     }
@@ -159,7 +157,6 @@ export default function MChat() {
       .from('mensagens')
       .update({ is_read: true })
       .eq('receiver_id', user.id)
-      .in('sender_id', unreadSenders)
       .is('group_id', null)
       .is('tournament_id', null)
       .eq('is_read', false);
@@ -168,7 +165,7 @@ export default function MChat() {
       toast.error('Erro ao marcar como lidas');
       return;
     }
-    toast.success(`${unreadSenders.length} conversa(s) marcadas como lidas`);
+    toast.success(`${unreadIds.length} conversa(s) marcadas como lidas`);
     load();
   };
 
@@ -182,23 +179,13 @@ export default function MChat() {
 
   const archiveSelected = async () => {
     if (selectedIds.size === 0) return;
-    // Buscar settings existentes para não sobrescrever favorited/muted
-    const { data: existing } = await supabase
-      .from('conversation_settings')
-      .select('conversation_id, favorited, muted')
-      .eq('user_id', user!.id)
-      .in('conversation_id', [...selectedIds]);
-    const existingMap = new Map((existing || []).map((s: any) => [s.conversation_id, s]));
-    const inserts = [...selectedIds].map(convId => {
-      const prev = existingMap.get(convId);
-      return {
-        user_id: user!.id,
-        conversation_id: convId,
-        archived: true,
-        favorited: prev?.favorited ?? false,
-        muted: prev?.muted ?? false,
-      };
-    });
+    const inserts = [...selectedIds].map(convId => ({
+      user_id: user!.id,
+      conversation_id: convId,
+      archived: true,
+      favorited: false,
+      muted: false,
+    }));
     const { error } = await supabase
       .from('conversation_settings')
       .upsert(inserts, { onConflict: 'user_id, conversation_id' });
@@ -241,7 +228,7 @@ export default function MChat() {
     );
   }
 
-  const pending = conversas.filter(c => c.status === 'pending' && (c.participant_1 === user.id || c.participant_2 === user.id));
+  const pending = conversas.filter(c => c.status === 'pending' && c.participant_2 === user.id);
   const active = conversas.filter(c => c.status === 'accepted');
   const tournamentConvs = active.filter(c => c.tournament_id);
   const sellerCh = (c: Conv) => c.channel === 'seller' || (!c.channel && !!c.anuncio_id);

@@ -15,12 +15,12 @@ export function useUnreadNotifications() {
         .eq('user_id', user.id)
         .eq('is_read', false);
       if (error) {
-        throw error;
+        console.error('Erro ao buscar notificações não lidas:', error);
+        return 0;
       }
       return count || 0;
     },
     enabled: !!user,
-    // TODO: migrar para Realtime (INSERT em notifications com filter user_id)
     refetchInterval: 30000,
     staleTime: 15000,
   });

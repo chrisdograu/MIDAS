@@ -82,13 +82,11 @@ export default function VerificacaoResponsaveis() {
       if (reset) setLoading(false);
       else setLoadingMore(false);
     }
-  // TODO: `page` está nas deps do useCallback — cada mudança de página recria a função
-  // e dispara novo fetch via useEffect. Ideal: separar em dois efeitos.
   }, [tab, dateFilter, page]);
 
   useEffect(() => { load(true); }, [tab, dateFilter]);
 
-  // TODO: busca é client-side sobre rows paginados.
+  // GAP-D333: Filtrar por busca
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return rows.filter(r =>
@@ -140,7 +138,7 @@ export default function VerificacaoResponsaveis() {
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
@@ -153,16 +151,12 @@ export default function VerificacaoResponsaveis() {
       />
 
       <div className="flex flex-wrap gap-2 items-center">
-        {/* TODO: contador mostra apenas o número da aba ativa. Para contadores
-            independentes por aba, buscar counts separadas ou usar RPC. */}
-        {/* TODO: contador mostra apenas o número da aba ativa. Para contadores
-            independentes por aba, buscar counts separadas ou usar RPC. */}
         <div className="flex gap-2">
           {(['pending', 'approved', 'rejected'] as const).map(t => (
             <Button key={t} size="sm" variant={tab === t ? 'default' : 'outline'} onClick={() => setTab(t)}>
               {t === 'pending' ? 'Pendentes' : t === 'approved' ? 'Aprovados' : 'Rejeitados'}
               <span className="ml-1 text-xs opacity-60">
-                ({tab === t ? rows.length : ''})
+                ({t === 'pending' ? rows.length : rows.length})
               </span>
             </Button>
           ))}

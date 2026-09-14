@@ -40,7 +40,7 @@ export default function MSalvos() {
         id,
         post_id,
         created_at,
-        post:forum_posts!inner(
+        post:forum_posts(
           id,
           content,
           created_at,
@@ -68,21 +68,16 @@ export default function MSalvos() {
 
   const removeSaved = async (postId: string) => {
     if (!user) return;
-    // Optimistic
-    setSavedPosts(prev => prev.filter(sp => sp.post_id !== postId));
-    const ok = await dbWrite(
-      supabase
-        .from('saved_posts')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('post_id', postId),
-      'Não foi possível remover dos salvos',
-    );
-    if (!ok) {
-      // Rollback: recarrega
-      load();
+    const { error } = await supabase
+      .from('saved_posts')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('post_id', postId);
+    if (error) {
+      toast.error('Erro ao remover dos salvos');
       return;
     }
+    setSavedPosts(prev => prev.filter(sp => sp.post_id !== postId));
     toast.success('Post removido dos salvos');
   };
 

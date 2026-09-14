@@ -25,18 +25,10 @@ const setMeta = (selector: string, attr: 'name' | 'property', key: string, value
 
 export function useDocumentMeta(meta: DocumentMeta) {
   useEffect(() => {
-    const prev = {
-      title: document.title,
-      description: document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.getAttribute('content') ?? '',
-      ogTitle: document.head.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.getAttribute('content') ?? '',
-      ogDescription: document.head.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.getAttribute('content') ?? '',
-      ogType: document.head.querySelector<HTMLMetaElement>('meta[property="og:type"]')?.getAttribute('content') ?? '',
-      ogImage: document.head.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.getAttribute('content') ?? '',
-      ogUrl: document.head.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.getAttribute('content') ?? '',
-      twitterCard: document.head.querySelector<HTMLMetaElement>('meta[name="twitter:card"]')?.getAttribute('content') ?? '',
-    };
+    const prevTitle = document.title;
+    const prevDesc = document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.getAttribute('content') ?? '';
 
-    if (meta.title) document.title = meta.title.length > 70 ? meta.title.slice(0, 69) + '…' : meta.title;
+    if (meta.title) document.title = meta.title.slice(0, 70);
 
     const descTxt = (meta.description ?? '').slice(0, 200);
     setMeta('meta[name="description"]', 'name', 'description', descTxt);
@@ -48,20 +40,9 @@ export function useDocumentMeta(meta: DocumentMeta) {
     if (meta.url) setMeta('meta[property="og:url"]', 'property', 'og:url', meta.url);
 
     return () => {
-      document.title = prev.title;
-      const restore = (selector: string, value: string) => {
-        const el = document.head.querySelector<HTMLMetaElement>(selector);
-        if (!el) return;
-        if (value) el.setAttribute('content', value);
-        else el.removeAttribute('content');
-      };
-      restore('meta[name="description"]', prev.description);
-      restore('meta[property="og:title"]', prev.ogTitle);
-      restore('meta[property="og:description"]', prev.ogDescription);
-      restore('meta[property="og:type"]', prev.ogType);
-      restore('meta[property="og:image"]', prev.ogImage);
-      restore('meta[property="og:url"]', prev.ogUrl);
-      restore('meta[name="twitter:card"]', prev.twitterCard);
+      document.title = prevTitle;
+      const d = document.head.querySelector<HTMLMetaElement>('meta[name="description"]');
+      if (d) d.setAttribute('content', prevDesc);
     };
   }, [meta.title, meta.description, meta.image, meta.url, meta.type]);
 }

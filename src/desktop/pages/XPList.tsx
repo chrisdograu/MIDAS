@@ -109,9 +109,6 @@ export default function XPList({ platform }: Props) {
   // GAP-D356: Realtime
   useRealtimeRefresh(['user_xp_log'], () => load(true), 'admin-xp');
 
-  // TODO: filtros (search, from, to) rodam client-side sobre rows paginados.
-  // TODO: filtro client-side sobre rows paginados.
-  // TODO: filtro client-side sobre rows paginados.
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return rows.filter(r => {
@@ -161,10 +158,6 @@ export default function XPList({ platform }: Props) {
   const grant = async () => {
     const xp = Number(form.xp);
     if (!form.user_id) return toast.error('Informe o User ID');
-    // Validar formato UUID
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(form.user_id)) {
-      return toast.error('User ID deve ser um UUID válido');
-    }
     if (!xp || xp <= 0) return toast.error('XP deve ser maior que 0');
     if (xp > 10000) return toast.error('XP máximo por concessão é 10.000');
     if (form.reason.trim().length < 4) return toast.error('Justificativa obrigatória (mínimo 4 caracteres)');
@@ -200,7 +193,7 @@ export default function XPList({ platform }: Props) {
     load(true);
   };
 
-  // TODO: usa toast.info com multi-line. Deveria ser um modal dedicado.
+  // GAP-D354: Histórico de ajustes
   const getAdjustmentHistory = async (userId: string) => {
     const { data } = await supabase
       .from('user_xp_log')
@@ -270,7 +263,7 @@ export default function XPList({ platform }: Props) {
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
@@ -368,7 +361,6 @@ export default function XPList({ platform }: Props) {
                         size="sm" 
                         variant="ghost" 
                         className="h-7 text-xs"
-                        aria-label={`Ver histórico de ajustes de ${a.user_name}`}
                         onClick={() => getAdjustmentHistory(a.user_id)}
                       >
                         <History className="h-3 w-3 mr-1" />Ajustes
@@ -406,7 +398,6 @@ export default function XPList({ platform }: Props) {
                           size="sm" 
                           variant="ghost" 
                           className="h-7 text-xs"
-                          aria-label={`Ver referência ${r.reference_type || ''} ${r.reference_id || ''}`}
                           onClick={() => viewReference(r)}
                         >
                           <Eye className="h-3 w-3 mr-1" />Ver ref.

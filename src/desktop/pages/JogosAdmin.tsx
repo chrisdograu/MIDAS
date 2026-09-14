@@ -58,8 +58,7 @@ export default function JogosAdmin() {
     const { data } = await supabase
       .from('produtos')
       .select('id, title, estado_publicacao, stock, price, featured, is_active, awaiting_first_stock, category_id, platform')
-      .order('updated_at', { ascending: false })
-      .limit(2000);
+      .order('updated_at', { ascending: false });
     
     // GAP-D150: Buscar nomes das categorias
     const catIds = [...new Set((data || []).map(p => p.category_id).filter(Boolean))] as string[];

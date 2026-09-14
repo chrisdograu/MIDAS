@@ -184,7 +184,6 @@ export default function BuscaInput({
         <input
           ref={inputRef}
           type="search"
-          role="searchbox"
           value={value}
           onChange={(e) => {
             onChange(e.target.value);

@@ -55,7 +55,7 @@ export default function Fornecedores() {
   const fetch = async () => {
     setLoading(true);
     const { data } = await supabase.from('fornecedores').select('*').order('name');
-    const { data: prods } = await supabase.from('produtos').select('supplier_id, price, stock, is_active, created_at').limit(5000);
+    const { data: prods } = await supabase.from('produtos').select('supplier_id, price, stock, is_active, created_at');
     const countMap = new Map<string, { count: number; total_value: number; active_count: number }>();
     prods?.forEach(p => {
       if (p.supplier_id) {
@@ -70,8 +70,6 @@ export default function Fornecedores() {
     // GAP-D114: Calcular avaliação baseada em entregas e produtos ativos
     const suppliers = (data || []).map(f => {
       const stats = countMap.get(f.id) || { count: 0, total_value: 0, active_count: 0 };
-      // AVISO: rating é ratio de produtos ativos, não avaliação real.
-      // avg_delivery_days é Math.random() — dado simulado.
       const rating = stats.count > 0 ? Math.min(5, Math.round((stats.active_count / stats.count) * 4 + 1)) : null;
       return {
         ...f,

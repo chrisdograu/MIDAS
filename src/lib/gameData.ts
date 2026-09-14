@@ -27,8 +27,8 @@ export function mapProdutoToGame(row: {
   title: string;
   image_url: string | null;
   price: number;
-  original_price: number | null;
-  discount: number | null;
+  original_price: number;
+  discount: number;
   category: string | null;
   platform: string[] | null;
   rating: number | null;
@@ -36,20 +36,16 @@ export function mapProdutoToGame(row: {
   release_date: string | null;
   publisher: string | null;
   tags: string[] | null;
-  stock?: number | null;
+  stock?: number;
   featured?: boolean | null;
-  created_at?: string | null;
-  type?: string | null;
-  trailer_url?: string | null;
-  system_requirements?: Record<string, string> | null;
 }): Game {
   return {
     id: row.id,
     title: row.title,
     image: row.image_url || '/placeholder.svg',
     price: Number(row.price),
-    originalPrice: Number(row.original_price ?? 0),
-    discount: Number(row.discount ?? 0),
+    originalPrice: Number(row.original_price),
+    discount: row.discount,
     category: row.category || 'Outros',
     platform: row.platform || [],
     rating: Number(row.rating) || 0,
@@ -57,12 +53,8 @@ export function mapProdutoToGame(row: {
     releaseDate: row.release_date || '',
     publisher: row.publisher || '',
     tags: row.tags || [],
-    stock: row.stock ?? 0,
+    stock: row.stock ?? 100,
     featured: !!row.featured,
-    createdAt: row.created_at || undefined,
-    type: row.type || undefined,
-    trailer_url: row.trailer_url || null,
-    systemRequirements: row.system_requirements || null,
   };
 }
 

@@ -201,14 +201,9 @@ export function ScreenshotsPanel({ productId }: { productId: string }) {
         toast.warning(`"${raw.name}" não é uma imagem e foi ignorado`);
         continue;
       }
-      if (raw.size > 5 * 1024 * 1024) {
-        toast.warning(`"${raw.name}" excede 5MB e foi ignorado`);
-        continue;
-      }
       
       const f = await stripImageExif(raw);
-      const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, ').slice(-80);
-      const path = `screenshots/${user.id}/${Date.now()}-${safeName}`;
+      const path = `screenshots/${user.id}/${Date.now()}-${f.name}`;
       const { error } = await supabase.storage.from("product-images").upload(path, f);
       if (error) { toast.error("Erro no upload"); continue; }
       const { data } = supabase.storage.from("product-images").getPublicUrl(path);

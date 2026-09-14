@@ -79,8 +79,13 @@ export default function ResetPassword() {
       return;
     }
     
-    // O e-mail virá do link de recuperação (query param) ou será digitado pelo usuário
-    // Não usar localStorage para evitar vazamento
+    // Tentar extrair o email do hash ou de algum lugar
+    // Em produção, o email viria do link de recuperação
+    // Aqui tentamos buscar do localStorage ou deixamos o usuário digitar
+    const savedEmail = localStorage.getItem('reset_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
     
     // Se não temos session mas temos token no hash, consideramos válido
     // pois o Supabase vai validar no backend
@@ -111,14 +116,14 @@ export default function ResetPassword() {
     }
     
     toast.success('Novo link de recuperação enviado para seu e-mail!');
-    // localStorage.setItem removido por segurança
+    localStorage.setItem('reset_email', email);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // GAP-584: Validar força da senha
-    if (password.length < 6 || getPasswordStrength(password).score < 2) { 
+    if (password.length < 6) { 
       toast.error('A senha deve ter no mínimo 6 caracteres'); 
       return; 
     }
@@ -148,7 +153,7 @@ export default function ResetPassword() {
       return; 
     }
     toast.success('Senha atualizada com sucesso!');
-    // localStorage.removeItem removido por segurança
+    localStorage.removeItem('reset_email');
     navigate('/');
   };
 

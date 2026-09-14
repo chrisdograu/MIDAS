@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { Loader2, ArrowLeft, BookOpen, CheckCircle2, Clock, TrendingUp, ListChecks } from 'lucide-react';
 import EstadoVazio from '@/components/EstadoVazio';
 import GameCard from '@/components/GameCard';
-import { toast } from 'sonner';
 
 export default function Backlog() {
   const { user } = useAuth();
@@ -15,46 +14,42 @@ export default function Backlog() {
 
   useEffect(() => {
     if (!user) return;
-    let cancelled = false;
     (async () => {
       setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('biblioteca_usuario')
-          .select(`
-            id,
-            product_id,
-            status,
-            acquired_at,
-            game:produtos(*)
-          `)
-          .eq('user_id', user.id)
-          .in('status', ['quero_jogar', 'jogando', 'pausado', 'zerado', 'platinado', 'abandonado'])
-          .order('acquired_at', { ascending: false });
-
-        if (cancelled) return;
-        if (error) throw error;
-
-        const backlogItems = (data || []) as any[];
-        setItems(backlogItems);
-
-        const total = backlogItems.length;
-        const completed = backlogItems.filter(i => i.status === 'zerado' || i.status === 'platinado').length;
-        const playing = backlogItems.filter(i => i.status === 'jogando').length;
-
-        setStats({
-          total,
-          completed,
-          playing,
-          completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
-        });
-      } catch {
-        if (!cancelled) toast.error('Erro ao carregar backlog. Tente novamente.');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      
+      const { data } = await supabase
+        .from('biblioteca_usuario')
+        .select(`
+          id,
+          product_id,
+          status,
+          acquired_at,
+          game:produtos(*)
+        `)
+        .eq('user_id', user.id)
+        .in('status', ['quero_jogar', 'jogando', 'pausado', 'zerado', 'platinado', 'abandonado'])
+        .order('acquired_at', { ascending: false });
+      
+      const backlogItems = (data || []).map((item) => ({
+        ...item,
+        game: item.game,
+      }));
+      
+      setItems(backlogItems);
+      
+      const total = backlogItems.length;
+      const completed = backlogItems.filter(i => i.status === 'zerado' || i.status === 'platinado').length;
+      const playing = backlogItems.filter(i => i.status === 'jogando').length;
+      
+      setStats({
+        total,
+        completed,
+        playing,
+        completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+      });
+      
+      setLoading(false);
     })();
-    return () => { cancelled = true; };
   }, [user]);
 
   if (!user) {

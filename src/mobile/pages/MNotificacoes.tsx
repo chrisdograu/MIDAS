@@ -82,31 +82,13 @@ export default function MNotificacoes() {
   const markAllAsRead = async () => {
     if (!user) return;
     setMarkingAll(true);
-    // Optimistic
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-
-    // Tenta RPC primeiro
-    let ok = false;
-    try {
-      const { error } = await supabase.rpc('mark_all_notifications_read', { user_uuid: user.id });
-      ok = !error;
-    } catch { /* RPC não existe — cai pro fallback */ }
-
-    // Fallback: UPDATE direto
-    if (!ok) {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true, read_at: new Date().toISOString() })
-        .eq('user_id', user.id)
-        .eq('is_read', false);
-      if (error) {
-        toast.error('Erro ao marcar como lidas');
-        setMarkingAll(false);
-        return;
-      }
-    }
-
+    const { error } = await supabase.rpc('mark_all_notifications_read', { user_uuid: user.id });
     setMarkingAll(false);
+    if (error) {
+      toast.error('Erro ao marcar como lidas');
+      return;
+    }
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     toast.success('Todas as notificações marcadas como lidas');
   };
 

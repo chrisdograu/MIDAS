@@ -76,10 +76,6 @@ export default function CreateTournamentDialog({ onCreated }: { onCreated?: () =
   const submit = guard(async () => {
     if (!user) { toast.error('Entre para criar torneios'); return; }
     if (!title.trim()) { toast.error('Dê um título'); return; }
-    if (bannerUrl && !/^https?:\/\//i.test(bannerUrl.trim())) {
-      toast.error('O banner precisa ser uma URL http(s) válida');
-      return;
-    }
     if (comunitario && maxParticipants > 16) { toast.error('Torneio da comunidade aceita no máximo 16 jogadores'); return; }
     if (dateError) { toast.error('Corrija a data do torneio'); return; }
     
@@ -94,7 +90,7 @@ export default function CreateTournamentDialog({ onCreated }: { onCreated?: () =
       adaptado_pcd: adaptadoPcd,
       is_community: comunitario,
       unlisted: comunitario,
-      prize: prize.trim().slice(0, 200) || null,
+      prize: prize.trim() || null,
       banner_url: bannerUrl.trim() || null,
       custom_rules: rules.trim() || null,
       created_by: user.id,

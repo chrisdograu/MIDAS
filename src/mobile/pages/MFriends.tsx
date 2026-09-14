@@ -55,18 +55,9 @@ function FollowBtn({ targetId, initiallyFollowing, onChange }: { targetId: strin
     if (loading) return;
     setLoading(true);
     if (following) {
-      // Optimistic
-      setFollowing(false);
-      onChange?.(false);
       const { error } = await supabase.from('user_follows').delete().eq('follower_id', user.id).eq('following_id', targetId);
-      if (error) {
-        // Rollback
-        setFollowing(true);
-        onChange?.(true);
-        toast.error(`Não foi possível deixar de seguir: ${error.message}`);
-        setLoading(false);
-        return;
-      }
+      if (error) { toast.error(`Não foi possível deixar de seguir: ${error.message}`); setLoading(false); return; }
+      setFollowing(false); onChange?.(false);
     } else if (pending) {
       const { error } = await supabase.from('follow_requests').delete().eq('requester_id', user.id).eq('target_id', targetId);
       if (error) { toast.error(`Não foi possível cancelar o pedido: ${error.message}`); setLoading(false); return; }
@@ -118,7 +109,7 @@ export default function MFriends() {
   // GAP-1056: Amigos em comum (cache)
   const [mutualCounts, setMutualCounts] = useState<Record<string, number>>({});
 
-  useEffect(() => { setParams({ tab }, { replace: true }); }, [tab, setParams]);
+  useEffect(() => { setParams({ tab }, { replace: true }); }, [tab]);
 
   const loadAll = async () => {
     if (!user) { setLoading(false); return; }
@@ -141,16 +132,15 @@ export default function MFriends() {
     setFollowingSet(new Set(gIds));
     setRequests((reqs || []).map((r: any) => ({ id: r.id, requester_id: r.requester_id, created_at: r.created_at, profile: map.get(r.requester_id) as Person || null })));
     
-    // GAP-1056: Amigos em comum — via RPC única (evita N+1)
-    try {
-      const { data: counts } = await supabase.rpc('get_mutual_friends_counts' as any, { _user_ids: all });
-      const map: Record<string, number> = {};
-      ((counts as any[]) || []).forEach((r: any) => { if (r.count > 0) map[r.user_id] = r.count; });
-      setMutualCounts(map);
-    } catch {
-      // RPC pode não existir ainda — falha silenciosa
-      setMutualCounts({});
+    // GAP-1056: Calcular amigos em comum para cada pessoa
+    const counts: Record<string, number> = {};
+    for (const id of all) {
+      if (id !== user.id) {
+        const count = await getMutualFriendsCount(user.id, id);
+        if (count > 0) counts[id] = count;
+      }
     }
+    setMutualCounts(counts);
     
     setLoading(false);
   };
@@ -171,18 +161,14 @@ export default function MFriends() {
       const results = (data as Person[]) || [];
       setDiscover(results);
       // GAP-1056: Calcular amigos em comum para resultados da busca
-      // GAP-1056: Usa RPC única para contagem
-      try {
-        const ids = results.map(p => p.id).filter(id => id !== user.id);
-        if (ids.length > 0) {
-          const { data: counts } = await supabase.rpc('get_mutual_friends_counts' as any, { _user_ids: ids });
-          const map: Record<string, number> = {};
-          ((counts as any[]) || []).forEach((r: any) => { if (r.count > 0) map[r.user_id] = r.count; });
-          setMutualCounts(prev => ({ ...prev, ...map }));
+      const counts: Record<string, number> = {};
+      for (const p of results) {
+        if (p.id !== user.id) {
+          const count = await getMutualFriendsCount(user.id, p.id);
+          if (count > 0) counts[p.id] = count;
         }
-      } catch {
-        // RPC ausente — skip silencioso
       }
+      setMutualCounts(prev => ({ ...prev, ...counts }));
     }, 250);
     return () => clearTimeout(t);
   }, [query, tab]);

@@ -91,8 +91,6 @@ export default function TrocasArquivadas() {
   // GAP-D343: Realtime
   useRealtimeRefresh(['trade_proposals'], () => load(true), 'admin-trocas-arquivadas');
 
-  // TODO: 4 filtros (search, sellerSearch, from, to) rodam client-side sobre rows paginados.
-  // Mover para .or() / .gte() / .lte() no servidor.
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     const sq = sellerSearch.toLowerCase();
@@ -125,7 +123,7 @@ export default function TrocasArquivadas() {
         seller: sellerMap.get(row.seller_id) || row.seller_id,
       }
     });
-    // TODO: implementar modal de detalhes. Hoje só mostra toast.
+    // Abrir modal ou navegar
     toast.info(`Visualizando troca #${row.id.slice(0, 8)}`);
   };
 
@@ -147,7 +145,7 @@ export default function TrocasArquivadas() {
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 

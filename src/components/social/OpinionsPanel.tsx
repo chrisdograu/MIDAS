@@ -223,13 +223,8 @@ export function OpinionsPanel({ productId }: { productId: string }) {
             className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition"
             onClick={() => {
               const url = prompt('URL da imagem (ou deixe em branco):');
-              const trimmed = (url || '').trim();
-              if (trimmed) {
-                if (!/^https?:\/\//i.test(trimmed)) {
-                  toast.error('A URL deve começar com http:// ou https://');
-                } else {
-                  setNewImages(prev => [...prev, trimmed]);
-                }
+              if (url && url.trim()) {
+                setNewImages(prev => [...prev, url.trim()]);
               }
             }}
           >

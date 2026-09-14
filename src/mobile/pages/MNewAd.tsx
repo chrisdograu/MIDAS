@@ -133,10 +133,7 @@ export default function MNewAd() {
   const addFiles = (list: FileList | null) => {
     if (!list) return;
     const newFiles = Array.from(list);
-    // Dedup por nome + tamanho
-    const existing = new Set(files.map(f => `${f.name}-${f.size}`));
-    const unique = newFiles.filter(f => !existing.has(`${f.name}-${f.size}`));
-    const validFiles = unique.filter(validateFile);
+    const validFiles = newFiles.filter(validateFile);
     if (validFiles.length === 0) return;
     const total = files.length + validFiles.length + existingPhotos.length;
     if (total > 6) {
@@ -148,12 +145,10 @@ export default function MNewAd() {
 
   // GAP-1091: Remover foto existente
   const removeExistingPhoto = async (url: string) => {
-    if (!editId) return;
     const { error } = await supabase
       .from('fotos_anuncio')
       .delete()
-      .eq('image_url', url)
-      .eq('anuncio_id', editId);
+      .eq('image_url', url);
     if (error) {
       toast.error('Erro ao remover foto');
       return;
@@ -182,8 +177,7 @@ export default function MNewAd() {
         game_title: gameTitle,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', adId)
-      .eq('seller_id', user.id);
+      .eq('id', adId);
     if (error) throw error;
   };
 
@@ -242,16 +236,16 @@ export default function MNewAd() {
       }
 
       // Upload de novas imagens
-      const uploadedCount = await Promise.all(files.map(async (rawFile, i) => {
-        const f = await stripImageExif(rawFile);
+      for (let i = 0; i < files.length; i++) {
+        const f = await stripImageExif(files[i]);
         const ext = f.name.split('.').pop() || 'jpg';
         const path = `${user.id}/${adId}/${Date.now()}-${i}.${ext}`;
         const { error: upErr } = await supabase.storage.from('ad-images').upload(path, f);
-        if (upErr) return false;
-        const { data: pub } = supabase.storage.from('ad-images').getPublicUrl(path);
-        await supabase.from('fotos_anuncio').insert({ anuncio_id: adId, image_url: pub.publicUrl, position: i + existingPhotos.length });
-        return true;
-      })).then(results => results.filter(Boolean).length);
+        if (!upErr) {
+          const { data: pub } = supabase.storage.from('ad-images').getPublicUrl(path);
+          await supabase.from('fotos_anuncio').insert({ anuncio_id: adId, image_url: pub.publicUrl, position: i + existingPhotos.length });
+        }
+      }
 
       toast.success(isEditing ? 'Anúncio atualizado!' : 'Anúncio publicado!');
       navigate(`/m/marketplace/${adId}`);

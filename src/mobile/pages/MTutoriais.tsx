@@ -53,7 +53,7 @@ export default function MTutoriais() {
       
       <div className="space-y-2">
         {allTutorials.map(t => (
-          <Link key={t.key} to={`/m/tutorial/${t.key}`}
+          <Link key={t.key} to={t.area === 'web' ? `/tutorial/${t.key}` : `/m/tutorial/${t.key}`}
             className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-lg">
               {t.area === 'mobile' ? '📱' : '💻'}

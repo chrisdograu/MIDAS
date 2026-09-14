@@ -235,8 +235,7 @@ export default function NotificacoesAdmin() {
   // GAP-D172: Realtime
   useRealtimeRefresh(['notifications'], () => loadNotifs(true), 'admin-notificacoes');
 
-  // AVISO: markAllAsRead atualiza TODAS as notificações do usuário no banco,
-  // mesmo as que não estão carregadas na paginação atual.
+  // GAP-D167: Marcar todas como lidas por usuário
   const markAllAsRead = async (userId: string) => {
     setMarkingAll(true);
     const { error } = await supabase
@@ -610,9 +609,7 @@ export default function NotificacoesAdmin() {
                 </div>
               ) : (
                 <div className="divide-y divide-border">
-                  {Object.entries(groupByDate(userNotifs))
-                    .sort(([a], [b]) => b.localeCompare(a))
-                    .map(([date, items]) => (
+                  {Object.entries(groupByDate(userNotifs)).map(([date, items]) => (
                     <div key={date}>
                       <div className="px-4 py-2 bg-muted/20 text-xs font-semibold text-muted-foreground flex items-center gap-2">
                         <Calendar className="h-3.5 w-3.5" />
@@ -664,7 +661,6 @@ export default function NotificacoesAdmin() {
                                     variant="ghost"
                                     size="sm"
                                     className="h-7 text-xs"
-                                    aria-label={`Marcar "${n.title}" como lida`}
                                     onClick={() => markAsRead(n.id)}
                                   >
                                     <CheckCheck className="h-3 w-3 mr-1" /> Lida

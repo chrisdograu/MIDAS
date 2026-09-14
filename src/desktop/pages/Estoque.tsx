@@ -61,8 +61,7 @@ export default function Estoque() {
   const fetchAll = async () => {
     setLoading(true);
     const [{ data: prods }, { data: rawMovs }] = await Promise.all([
-      // TODO: paginação server-side para produtos (hoje traz todos)
-      supabase.from('produtos').select('*').order('title').limit(2000),
+      supabase.from('produtos').select('*').order('title'),
       supabase.from('movimentacoes_estoque').select('*').order('created_at', { ascending: false }).limit(500),
     ]);
     setProdutos(prods || []);
@@ -148,9 +147,6 @@ export default function Estoque() {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
 
-    // TODO: migrar para RPC `adjust_stock` atômica. Hoje: insere movimentação +
-    // update produto em 2 queries. Se o update falhar, tenta deletar a movimentação
-    // como rollback — funciona, mas não é transacional.
     const { data: mov, error: eMov } = await supabase.from('movimentacoes_estoque').insert({
       product_id: fProduct, type: fType as any, quantity: qty,
       quantity_before: before, quantity_after: after,
@@ -296,7 +292,7 @@ export default function Estoque() {
                   )}
                 </div>
               </div>
-              <Button variant="outline" size="sm" aria-label="Ver todos os produtos com estoque baixo" onClick={() => {
+              <Button variant="outline" size="sm" onClick={() => {
                 // Rolagem para a aba de estoque atual com filtro
                 const tab = document.querySelector('[value="atual"]') as HTMLElement;
                 if (tab) tab.click();

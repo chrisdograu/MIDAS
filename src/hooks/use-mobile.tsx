@@ -71,7 +71,7 @@ export function useMobile(options: UseMobileOptions = {}): UseMobileReturn {
     };
   }, [breakpoint]);
 
-  const [state, setState] = useState(() => getInitialState());
+  const [state, setState] = useState(getInitialState);
 
   // GAP-UM03: Atualizar estado
   const updateState = useCallback(() => {
@@ -162,10 +162,7 @@ export function useIsMobileSSR(defaultValue = false): boolean {
   const [isMobile, setIsMobile] = useState(defaultValue);
 
   useEffect(() => {
-    const update = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
   }, []);
 
   return isMobile;

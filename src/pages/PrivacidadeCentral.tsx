@@ -243,9 +243,6 @@ export default function PrivacidadeCentral() {
 
   // GAP-570: Enviar código de confirmação por e-mail
   const sendDeleteConfirmation = async () => {
-    // AVISO: Fluxo simulado para fins acadêmicos. Em produção, usar
-    // Supabase Edge Function `send-delete-code` que envia um e-mail real
-    // e guarda o código em uma tabela com TTL. NÃO usar localStorage.
     setEmailConfirmStep('sending');
     try {
       // Simular envio de código (em produção, seria um e-mail real)
@@ -257,7 +254,7 @@ export default function PrivacidadeCentral() {
       // await supabase.functions.invoke('send-delete-code', { body: { email: user?.email, code } });
       
       setEmailConfirmStep('sent');
-      toast.info(`Código enviado para ${user?.email}`);
+      toast.info(`Código enviado para ${user?.email} (simulado: ${code})`);
     } catch {
       toast.error('Erro ao enviar código de confirmação');
       setEmailConfirmStep('idle');

@@ -85,20 +85,14 @@ export default function ParametrosSistema() {
   const openHistory = async () => {
     setHistoryOpen(true);
     setLoadingHistory(true);
-    try {
-      const { data, error } = await supabase
-        .from('config_history')
-        .select('*, profiles!changed_by(display_name)')
-        .eq('config_key', 'business_params')
-        .order('changed_at', { ascending: false })
-        .limit(50);
-      if (error) throw error;
-      setHistoryData(data || []);
-    } catch {
-      setHistoryData([]);
-    } finally {
-      setLoadingHistory(false);
-    }
+    const { data } = await supabase
+      .from('config_history')
+      .select('*, profiles!changed_by(display_name)')
+      .eq('config_key', 'business_params')
+      .order('changed_at', { ascending: false })
+      .limit(50);
+    setHistoryData(data || []);
+    setLoadingHistory(false);
   };
 
   const isFullAdmin = position === "admin";

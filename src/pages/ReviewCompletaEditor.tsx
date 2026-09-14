@@ -118,10 +118,9 @@ function PreviewModal({ open, onClose, content }: { open: boolean; onClose: () =
   if (!open) return null;
 
   const formatText = (text: string) => {
-    const escapeHtmlLocal = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[c]);
     if (!text) return '';
     // Aplicar formatação básica
-    let formatted = escapeHtmlLocal(text)
+    let formatted = text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/__(.*?)__/g, '<u>$1</u>')

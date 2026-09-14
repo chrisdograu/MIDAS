@@ -7,13 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { formatCurrency, formatDate } from '@/lib/format';
 
-// GAP-451: Escapar HTML para evitar XSS no título dos produtos
-function escapeHtml(s: unknown): string {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string
-  ));
-}
-
 // GAP-451: Gerar nota fiscal simplificada
 function generateInvoice(pedido: any) {
   if (!pedido) return;
@@ -36,14 +29,14 @@ function generateInvoice(pedido: any) {
     <body>
       <div class="header">
         <h1>MIDIAS - Nota Fiscal</h1>
-        <p><strong>Pedido:</strong> #${escapeHtml(pedido.id.slice(0, 12))}</p>
+        <p><strong>Pedido:</strong> #${pedido.id.slice(0, 12)}</p>
         <p><strong>Data:</strong> ${formatDate(pedido.created_at)}</p>
         <p><strong>Status:</strong> <span class="badge">${pedido.status}</span></p>
       </div>
       <h3>Itens</h3>
       ${(pedido.itens_pedido || []).map((item: any) => `
         <div class="row">
-          <span>${escapeHtml(item.produtos?.title || 'Produto')} x${item.quantity}</span>
+          <span>${item.produtos?.title || 'Produto'} x${item.quantity}</span>
           <span>R$ ${Number(item.price_at_purchase).toFixed(2)}</span>
         </div>
       `).join('')}

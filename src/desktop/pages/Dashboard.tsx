@@ -24,8 +24,6 @@ import { useRealtimeRefresh } from '../hooks/useRealtimeRefresh';
 import { Link } from 'react-router-dom';
 import { LifeBuoy } from 'lucide-react';
 
-// AVISO: retencaoD7, retencaoD30, recentActivity e platformStats são DADOS SIMULADOS.
-// As métricas principais (faturamento, pedidos, produtos, clientes) vêm de queries reais.
 function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -254,15 +252,6 @@ function DashboardContent() {
               <div className={`p-2 rounded-lg bg-${card.color === 'text-primary' ? 'primary' : card.color === 'text-success' ? 'success' : card.color === 'text-warning' ? 'warning' : 'destructive'}/10`}>
                 <card.icon className={`h-4 w-4 ${card.color}`} />
               </div>
-              <div>
-                <p className="text-xl font-bold">{card.value}</p>
-                <p className="text-xs text-muted-foreground">{card.label}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       {/* Ações Rápidas */}
       <Card className="border-border/50">
         <CardHeader className="pb-2">
@@ -287,6 +276,14 @@ function DashboardContent() {
           </Link>
         </CardContent>
       </Card>
+              <div>
+                <p className="text-xl font-bold">{card.value}</p>
+                <p className="text-xs text-muted-foreground">{card.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* GAP-D111: Filtro por plataforma */}
       <div className="flex items-center gap-2">

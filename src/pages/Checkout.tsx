@@ -100,7 +100,7 @@ function AddressForm({ value, onChange }: { value: any; onChange: (v: any) => vo
 }
 
 export default function Checkout() {
-  const { items, total: rawTotal, clearCart } = useCart();
+  const { items, total, clearCart } = useCart();
   const { cupom, loading: cupomLoading, error: cupomError, validarCupom, removerCupom, redeemCupom } = useCupom();
   const { criarPedido } = usePedidos();
   const { toggleFavorito } = useFavoritos();
@@ -131,29 +131,8 @@ export default function Checkout() {
   // GAP-123: Checkout com 1 clique (se cartão salvo)
   const [oneClick, setOneClick] = useState(false);
 
-  // Preços de bundles
-  const [bundlePrices, setBundlePrices] = useState<Record<string, number>>({});
-  useEffect(() => {
-    const ids = Array.from(new Set(items.map(i => i.bundleId).filter(Boolean))) as string[];
-    if (ids.length === 0) { setBundlePrices({}); return; }
-    (async () => {
-      const { data } = await supabase.from('bundles' as any).select('id, price').in('id', ids);
-      const map: Record<string, number> = {};
-      (data as any[] || []).forEach(b => { map[b.id] = Number(b.price); });
-      setBundlePrices(map);
-    })();
-  }, [items]);
-
   // GAP-116: Verificar se há itens físicos
   const hasPhysicalItems = items.some(i => i.game.type === 'physical');
-
-  // Subtotal bundle-aware
-  const subtotalItens = items
-    .filter(i => !i.bundleId)
-    .reduce((s, i) => s + i.game.price * i.quantity, 0);
-  const bundleIds = Array.from(new Set(items.map(i => i.bundleId).filter(Boolean))) as string[];
-  const subtotalBundles = bundleIds.reduce((s, bid) => s + (bundlePrices[bid] || 0), 0);
-  const total = subtotalItens + subtotalBundles;
 
   const installmentOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -176,72 +155,27 @@ export default function Checkout() {
     }
   };
 
-  // GAP-115: Validar estoque antes da compra (avulsos + bundles)
+  // GAP-115: Validar estoque antes da compra
   const validateStock = async (): Promise<boolean> => {
-    const avulsos = items.filter(i => !i.bundleId);
-    const bundleItems = items.filter(i => i.bundleId);
-
-    // 1. Validar avulsos em produtos
-    if (avulsos.length > 0) {
-      const productIds = avulsos.map(i => i.game.id);
-      const { data, error } = await supabase
-        .from('produtos')
-        .select('id, stock, title')
-        .in('id', productIds);
-      if (error) {
-        toast.error('Erro ao validar estoque');
-        return false;
-      }
-      const stockMap = new Map((data || []).map(p => [p.id, p.stock]));
-      const outOfStock = avulsos.filter(i => {
-        const available = stockMap.get(i.game.id) ?? 0;
-        return available < i.quantity;
-      });
-      if (outOfStock.length > 0) {
-        toast.error(`Produto(s) sem estoque suficiente: ${outOfStock.map(i => i.game.title).join(', ')}`);
-        return false;
-      }
+    const productIds = items.map(i => i.game.id);
+    const { data, error } = await supabase
+      .from('produtos')
+      .select('id, stock, title')
+      .in('id', productIds);
+    if (error) {
+      toast.error('Erro ao validar estoque');
+      return false;
     }
-
-    // 2. Validar bundles: checar estoque de cada jogo interno
-    if (bundleItems.length > 0) {
-      const bundleIds = Array.from(new Set(bundleItems.map(i => i.bundleId!)));
-      const { data: bundleLinks, error: linkErr } = await supabase
-        .from('bundle_items' as any)
-        .select('bundle_id, product_id')
-        .in('bundle_id', bundleIds);
-      if (linkErr) {
-        toast.error('Erro ao validar estoque do bundle');
-        return false;
-      }
-      const productIdsInBundles = Array.from(new Set(((bundleLinks as any[]) || []).map(l => l.product_id)));
-      const { data: produtosBundle, error: prodErr } = await supabase
-        .from('produtos')
-        .select('id, stock, title')
-        .in('id', productIdsInBundles);
-      if (prodErr) {
-        toast.error('Erro ao validar estoque do bundle');
-        return false;
-      }
-      const stockMapBundle = new Map(((produtosBundle as any[]) || []).map(p => [p.id, p]));
-      const bundleSemEstoque: string[] = [];
-      for (const item of bundleItems) {
-        const jogosDoBundle = ((bundleLinks as any[]) || []).filter(l => l.bundle_id === item.bundleId);
-        for (const link of jogosDoBundle) {
-          const prod = stockMapBundle.get(link.product_id);
-          const disponivel = prod?.stock ?? 0;
-          if (disponivel < item.quantity) {
-            bundleSemEstoque.push(`${item.game.title} (${prod?.title || 'item'} esgotado)`);
-            break;
-          }
-        }
-      }
-      if (bundleSemEstoque.length > 0) {
-        toast.error(`Bundle(s) com problema: ${bundleSemEstoque.join(', ')}`);
-        return false;
-      }
+    const stockMap = new Map(data.map(p => [p.id, p.stock]));
+    const outOfStock = items.filter(i => {
+      const available = stockMap.get(i.game.id) || 0;
+      return available < i.quantity;
+    });
+    if (outOfStock.length > 0) {
+      const names = outOfStock.map(i => i.game.title).join(', ');
+      toast.error(`Produto(s) sem estoque suficiente: ${names}`);
+      return false;
     }
-
     return true;
   };
 
@@ -288,8 +222,17 @@ export default function Checkout() {
 
     let pedido: any = null;
     try {
-      // GAP-121, GAP-443: Salvar cartão REMOVIDO por segurança (PCI-DSS).
-      // Em produção, seria salvo via tokenização no gateway (ex.: Stripe).
+      // GAP-121, GAP-443: Salvar cartão
+      if (paymentMethod === 'credit' && saveCard && user) {
+        // Nota: Em produção, isso seria salvo em um serviço de tokenização
+        // Aqui apenas simulamos
+        localStorage.setItem('saved_card', JSON.stringify({
+          last4: cardNumber.slice(-4),
+          expiry: cardExpiry,
+          name: cardName,
+        }));
+      }
+
       pedido = await criarPedido.mutateAsync({
         items,
         subtotal: total,
@@ -332,6 +275,14 @@ export default function Checkout() {
     );
   }
 
+  const groupedItems = items.reduce<Array<{ key: string; bundleId: string | null; items: typeof items }>>((groups, item) => {
+    const key = item.bundleId ? `bundle-${item.bundleId}` : `game-${item.game.id}`;
+    const group = groups.find(entry => entry.key === key);
+    if (group) group.items.push(item);
+    else groups.push({ key, bundleId: item.bundleId ?? null, items: [item] });
+    return groups;
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Link to="/carrinho" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
@@ -343,12 +294,17 @@ export default function Checkout() {
         <div className="lg:col-span-3 space-y-6">
           {/* Items */}
           <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-            <h2 className="font-semibold text-foreground">Itens ({items.length})</h2>
-            {items.map(item => {
+            <h2 className="font-semibold text-foreground">Itens ({groupedItems.length})</h2>
+            {groupedItems.map(group => {
+              const item = group.items[0];
+              if (group.bundleId) {
+                const price = item.bundlePrice ?? group.items.reduce((sum, entry) => sum + entry.game.price, 0);
+                return <div key={group.key} className="flex items-center gap-3 text-sm"><div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center overflow-hidden">{item.bundleImage ? <img src={item.bundleImage} alt={item.bundleTitle || 'Bundle'} className="w-full h-full object-cover" /> : <ShoppingBag className="h-4 w-4 text-primary" />}</div><div className="flex-1 min-w-0"><p className="font-semibold truncate">{item.bundleTitle || 'Bundle de jogos'}</p><p className="text-xs text-muted-foreground truncate">{group.items.map(entry => entry.game.title).join(' • ')}</p></div><span className="text-muted-foreground">x{item.quantity}</span><span className="text-price font-semibold">{formatCurrency(price * item.quantity)}</span></div>;
+              }
               // GAP-116: Badge para item digital/físico
               const isDigital = item.game.type === 'digital' || item.game.type === 'subscription';
               return (
-                <div key={item.game.id} className="flex items-center gap-3 text-sm">
+                <div key={group.key} className="flex items-center gap-3 text-sm">
                   <img src={item.game.image} alt={item.game.title} className="w-10 h-10 rounded object-cover" loading="lazy" />
                   <span className="flex-1 text-foreground truncate">{item.game.title}</span>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">

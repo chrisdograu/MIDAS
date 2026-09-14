@@ -54,10 +54,14 @@ export default function Oportunidades() {
     return () => observer.disconnect();
   }, []);
 
-  // GAP-558: Contagem de novas oportunidades
-  // TODO: integrar com RPC `get_new_opportunities_count`
+  // GAP-558: Simular contagem de novas oportunidades
   useEffect(() => {
-    setNewCount(0);
+    // Em produção, isso viria de uma query
+    const seen = getSeenItems();
+    // Simular 3 novas oportunidades
+    const mockNewItems = ['op-1', 'op-2', 'op-3'];
+    const newItems = mockNewItems.filter(id => !seen.has(id));
+    setNewCount(newItems.length);
   }, []);
 
   // GAP-559: Compartilhar

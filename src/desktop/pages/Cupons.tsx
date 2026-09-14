@@ -90,7 +90,7 @@ export default function Cupons() {
     
     setSaving(true);
     const payload = {
-      code: fCode.toUpperCase().trim().replace(/\s+/g, ''),
+      code: fCode.toUpperCase().trim(),
       discount_percent: Number(fDiscount),
       max_uses: fMaxUses ? Number(fMaxUses) : null,
       max_uses_per_user: fMaxUsesPerUser ? Number(fMaxUsesPerUser) : null,
@@ -195,8 +195,7 @@ export default function Cupons() {
       formatDate(c.created_at),
     ]);
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    // BOM UTF-8 para Excel brasileiro reconhecer acentos
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

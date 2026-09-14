@@ -20,7 +20,7 @@ export default function MGroupNew() {
   const [submitting, setSubmitting] = useState(false);
   
   // GAP-1067: Foto de capa
-  // coverUrl removido (não era usado)
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -28,21 +28,17 @@ export default function MGroupNew() {
 
   useEffect(() => {
     if (!user) return;
-    let cancelled = false;
     (async () => {
       const { data: iFollow } = await supabase.from('user_follows').select('following_id').eq('follower_id', user.id);
       const { data: followsMe } = await supabase.from('user_follows').select('follower_id').eq('following_id', user.id);
-      if (cancelled) return;
       const a = new Set((iFollow || []).map((r: any) => r.following_id));
       const b = new Set((followsMe || []).map((r: any) => r.follower_id));
       const mutual = [...a].filter(x => b.has(x));
-      if (!mutual.length) { if (!cancelled) { setFriends([]); setLoading(false); } return; }
+      if (!mutual.length) { setFriends([]); setLoading(false); return; }
       const { data: profs } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', mutual);
-      if (cancelled) return;
       setFriends((profs || []) as any);
       setLoading(false);
     })();
-    return () => { cancelled = true; };
   }, [user?.id]);
 
   // GAP-1067: Upload de capa
@@ -70,6 +66,7 @@ export default function MGroupNew() {
   const removeCover = () => {
     setCoverFile(null);
     setCoverPreview(null);
+    setCoverUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 

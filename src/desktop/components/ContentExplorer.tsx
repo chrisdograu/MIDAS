@@ -218,8 +218,7 @@ export default function ContentExplorer({ onLogRemoval }: Props) {
   };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
-  const realHasMore = (page + 1) * ITEMS_PER_PAGE < filtered.length;
+  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-4">
@@ -346,7 +345,7 @@ export default function ContentExplorer({ onLogRemoval }: Props) {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-xs flex items-center px-2">{page + 1} / {totalPages || 1}</span>
-            <Button variant="outline" size="sm" disabled={!realHasMore} onClick={() => setPage(p => p + 1)}>
+            <Button variant="outline" size="sm" disabled={!hasMore || (page + 1) * ITEMS_PER_PAGE >= filtered.length} onClick={() => setPage(p => p + 1)}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

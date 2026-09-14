@@ -70,6 +70,12 @@ function clearSearchHistory() {
   localStorage.removeItem(SEARCH_HISTORY_KEY);
 }
 
+// GAP-138: Função de highlight
+function highlightText(text: string, query: string): string {
+  if (!query || !text) return text;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(regex, '<mark class="bg-primary/20 text-primary font-semibold">$1</mark>');
+}
 
 // GAP-139, GAP-424: Correção ortográfica simples (Levenshtein aproximado)
 function getSuggestion(query: string, candidates: string[]): string | null {
@@ -97,7 +103,7 @@ function getSuggestion(query: string, candidates: string[]): string | null {
   
   if (bestMatch && bestScore <= 2) {
     // Substituir a palavra incorreta pela correta
-    const newQuery = query.replace(new RegExp(`\\b${word}\\b`, 'i'), bestMatch);
+    const newQuery = query.toLowerCase().replace(new RegExp(bestMatch, 'i'), bestMatch);
     if (newQuery !== query.toLowerCase()) {
       return newQuery;
     }
@@ -714,6 +720,9 @@ function ResultRow({ r, isMobileApp, index, active, onHover, query }: {
   const showAlt = isMobileApp ? (!r.mobileUrl && !!r.webUrl) || (!!r.mobileUrl && !!r.webUrl && r.webUrl !== r.mobileUrl)
                               : (!r.webUrl && !!r.mobileUrl) || (!!r.webUrl && !!r.mobileUrl && r.webUrl !== r.mobileUrl);
 
+  // GAP-138: Highlight do título
+  const highlightedTitle = query ? highlightText(r.title, query) : r.title;
+
   return (
     <li
       id={`search-result-${index}`}
@@ -732,23 +741,21 @@ function ResultRow({ r, isMobileApp, index, active, onHover, query }: {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             {primaryUrl ? (
-              <Link to={primaryUrl} className="font-semibold text-sm hover:text-primary truncate">
-                {query ? <HighlightedText text={r.title} query={query} /> : r.title}
-              </Link>
-            ) : (
-              <span className="font-semibold text-sm truncate">
-                {query ? <HighlightedText text={r.title} query={query} /> : r.title}
-              </span>
-            )}
+              <Link 
+                to={primaryUrl} 
+                className="font-semibold text-sm hover:text-primary truncate"
+                dangerouslySetInnerHTML={{ __html: highlightedTitle }}
+              />
+            ) : <span className="font-semibold text-sm truncate" dangerouslySetInnerHTML={{ __html: highlightedTitle }} />}
             <PlatformTag platform={r.platform} />
           </div>
           {/* GAP-138: Highlight no subtítulo também */}
           {r.subtitle && (
             <p 
               className="text-xs text-muted-foreground truncate"
-              >
+              dangerouslySetInnerHTML={{ __html: query ? highlightText(r.subtitle, query) : r.subtitle }}
             />
-          )}{query ? <HighlightedText text={r.subtitle!} query={query} /> : r.subtitle}</p>$3
+          )}
         </div>
         {showAlt && (
           <div className="shrink-0 flex flex-col gap-1">
@@ -784,22 +791,5 @@ function PlatformTag({ platform }: { platform: Platform }) {
     <span className="inline-flex items-center gap-0.5 text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
       <Monitor className="h-2.5 w-2.5" /> Web
     </span>
-  );
-}
-
-// GAP-138: Componente de highlight seguro (sem dangerouslySetInnerHTML)
-function HighlightedText({ text, query }: { text: string; query: string }) {
-  if (!query || !text) return <>{text}</>;
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
-  const lowerQuery = query.toLowerCase();
-  return (
-    <>
-      {parts.map((p, i) =>
-        p.toLowerCase() === lowerQuery
-          ? <mark key={i} className="bg-primary/20 text-primary font-semibold">{p}</mark>
-          : <span key={i}>{p}</span>
-      )}
-    </>
   );
 }

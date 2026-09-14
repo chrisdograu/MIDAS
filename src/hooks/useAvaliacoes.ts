@@ -39,18 +39,24 @@ export function useAvaliacoes(productId: string | undefined) {
   const submitRating = useMutation({
     mutationFn: async (rating: number) => {
       if (!user || !productId) throw new Error('Missing data');
-      if (rating < 0.5 || rating > 5) throw new Error('Rating deve estar entre 0.5 e 5');
-      const { error } = await supabase.from('avaliacoes').upsert(
-        { user_id: user.id, product_id: productId, rating },
-        { onConflict: 'user_id,product_id' }
-      );
-      if (error) throw error;
+      if (userRating) {
+        // Update existing
+        const { error } = await supabase.from('avaliacoes').update({ rating }).eq('id', userRating.id);
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase.from('avaliacoes').insert({
+          user_id: user.id,
+          product_id: productId,
+          rating,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rating', productId] });
       queryClient.invalidateQueries({ queryKey: ['my-rating', productId] });
     },
-    onError: (e: any) => console.warn('[useAvaliacoes] erro:', e?.message),
   });
 
   return {

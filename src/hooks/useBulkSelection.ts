@@ -10,22 +10,22 @@ export function useBulkSelection<T>({ items, getId }: UseBulkSelectionOptions<T>
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const toggle = useCallback((id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  }, [selectedIds]);
 
   const toggleAll = useCallback(() => {
-    setSelectedIds(prev => {
-      if (items.length > 0 && items.every(item => prev.has(getId(item)))) {
-        return new Set();
-      }
-      return new Set(items.map(getId));
-    });
-  }, [items, getId]);
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map(getId)));
+    }
+  }, [selectedIds, items, getId]);
 
   const clear = useCallback(() => {
     setSelectedIds(new Set());
@@ -50,6 +50,6 @@ export function useBulkSelection<T>({ items, getId }: UseBulkSelectionOptions<T>
     selectAll,
     isSelected,
     getSelectedItems,
-    isAllSelected: items.length > 0 && items.every(item => selectedIds.has(getId(item))),
+    isAllSelected: selectedIds.size === items.length && items.length > 0,
   };
 }

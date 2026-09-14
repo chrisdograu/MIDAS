@@ -12,7 +12,7 @@ interface AuthContextType {
   loading: boolean;
   profile: { display_name: string | null; avatar_url: string | null; banned_until: string | null; email_confirmed: boolean | null } | null;
   isEmailVerified: boolean;
-  signUp: (email: string, password: string, displayName: string, extra?: { birth_date?: string }) => Promise<{ error: string | null; data?: { user: User | null } }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
@@ -35,33 +35,46 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const lastUserId = useRef<string | null>(null);
   const refreshTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // GAP-UA02: persistência gerenciada pelo Supabase (sb-*-auth-token).
-  // Removida a persistência custom em localStorage por segurança (LGPD).
-  const fetchProfile = useCallback(async (userId: string) => {
-    if (loadedProfileFor.current === userId) return;
-    loadedProfileFor.current = userId;
-    const { data } = await supabase
-      .from('profiles')
-      .select('display_name, avatar_url, banned_until, email_confirmed')
-      .eq('id', userId)
-      .single();
-    if (data) {
-      setProfile(data);
-      // GAP-UA03: Atualizar status de email verificado do profile
-      setIsEmailVerified(!!data.email_confirmed);
+  // GAP-UA02: Persistência de sessão
+  const SESSION_KEY = 'midias-session';
+
+  const saveSession = (session: Session | null) => {
+    try {
+      if (session) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+          user: session.user,
+          expires_at: session.expires_at,
+        }));
+      } else {
+        localStorage.removeItem(SESSION_KEY);
+      }
+    } catch {
+      // Silently fail
     }
-    // Rodada 22: login reativa conta pausada e registra o acesso no histórico.
-    void (async () => {
-      try {
-        await supabase.rpc('resume_my_account' as any);
-        await supabase.rpc('record_login' as any, { _user_agent: navigator.userAgent });
-      } catch { /* não bloqueia o login */ }
-    })();
-  }, []);
+  };
+
+  const loadSession = (): Session | null => {
+    try {
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      if (parsed.expires_at && parsed.expires_at * 1000 < Date.now()) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+      return parsed as Session;
+    } catch {
+      return null;
+    }
+  };
 
   const applySession = useCallback((session: Session | null) => {
     const nextUserId = session?.user?.id ?? null;
     setSession(session);
+    
+    // GAP-UA02: Persistir sessão
+    saveSession(session);
+    
     if (nextUserId !== lastUserId.current) {
       lastUserId.current = nextUserId;
       setUser(session?.user ?? null);
@@ -76,12 +89,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }
     }
     setLoading(false);
-  }, [fetchProfile]);
+  }, []);
 
   // GAP-UA01: Auto-refresh token
   const setupTokenRefresh = useCallback((session: Session) => {
     if (refreshTimer.current) {
-      clearTimeout(refreshTimer.current);
+      clearInterval(refreshTimer.current);
       refreshTimer.current = null;
     }
 
@@ -103,15 +116,20 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, [applySession]);
 
   useEffect(() => {
-    // Supabase restaura a sessão automaticamente do storage interno.
+    // GAP-UA02: Tentar restaurar sessão
+    const savedSession = loadSession();
+    if (savedSession) {
+      applySession(savedSession);
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       applySession(session);
       if (session) {
         setupTokenRefresh(session);
       } else if (refreshTimer.current) {
-      clearTimeout(refreshTimer.current);
-      refreshTimer.current = null;
-    }
+        clearInterval(refreshTimer.current);
+        refreshTimer.current = null;
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -129,27 +147,41 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
   }, [applySession, setupTokenRefresh]);
 
-  const signUp = async (
-    email: string,
-    password: string,
-    displayName: string,
-    extra?: { birth_date?: string },
-  ) => {
-    const { data, error } = await supabase.auth.signUp({
+  const fetchProfile = async (userId: string) => {
+    if (loadedProfileFor.current === userId) return;
+    loadedProfileFor.current = userId;
+    const { data } = await supabase
+      .from('profiles')
+      .select('display_name, avatar_url, banned_until, email_confirmed')
+      .eq('id', userId)
+      .single();
+    if (data) {
+      setProfile(data);
+      // GAP-UA03: Atualizar status de email verificado do profile
+      setIsEmailVerified(!!data.email_confirmed);
+    }
+    // Rodada 22: login reativa conta pausada e registra o acesso no histórico.
+    void (async () => {
+      try {
+        await supabase.rpc('resume_my_account' as any);
+        await supabase.rpc('record_login' as any, { _user_agent: navigator.userAgent });
+      } catch { /* não bloqueia o login */ }
+    })();
+  };
+
+  const signUp = async (email: string, password: string, displayName: string) => {
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: authRedirectBase(),
-        data: {
-          display_name: displayName,
-          ...(extra?.birth_date ? { birth_date: extra.birth_date } : {}),
-        },
+        data: { display_name: displayName },
       },
     });
     if (!error) {
       toast.success('Cadastro realizado! Verifique seu email para confirmar.');
     }
-    return { error: error?.message ?? null, data };
+    return { error: error?.message ?? null };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -166,8 +198,9 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setSession(null);
     setProfile(null);
     setIsEmailVerified(false);
+    localStorage.removeItem(SESSION_KEY);
     if (refreshTimer.current) {
-      clearTimeout(refreshTimer.current);
+      clearInterval(refreshTimer.current);
       refreshTimer.current = null;
     }
   };

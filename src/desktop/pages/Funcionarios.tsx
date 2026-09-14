@@ -109,9 +109,6 @@ export default function Funcionarios() {
       .select('id, display_name, phone, created_at')
       .in('id', userIds);
     
-    // TODO: SEGURANÇA — supabase.auth.admin.listUsers() exige service_role key e NÃO
-    // deve ser chamado no client. Mover para Edge Function `list-employees` que
-    // roda com service_role no servidor. Por ora, mantido só pra não quebrar a demo.
     const { data: authUsers } = await supabase.auth.admin.listUsers();
     const emailMap = new Map<string, string>();
     (authUsers as any)?.users?.forEach((u: any) => { emailMap.set(u.id, u.email || ''); });

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Gamepad2, Mail, Lock, User, Eye, EyeOff, Calendar, Check, Shield, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -126,17 +126,11 @@ export default function Auth() {
         return;
       }
       
-      const { error, data: signUpData } = await signUp(email, password, name, { birth_date: birthDate });
-      if (!error && signUpData?.user?.id) {
-        // Salva direto se a sessão já existir (confirmação de e-mail desativada)
-        // Se não, o trigger/edge function deve ler user_metadata.birth_date
-        try {
-          const { data: sess } = await supabase.auth.getSession();
-          const uid = sess.session?.user?.id;
-          if (uid) {
-            await supabase.from('profiles').update({ birth_date: birthDate } as any).eq('id', uid);
-          }
-        } catch { /* silent: metadata já carrega birth_date */ }
+      const { error } = await signUp(email, password, name);
+      if (!error) {
+        const { data: sess } = await supabase.auth.getSession();
+        const uid = sess.session?.user?.id;
+        if (uid) await supabase.from('profiles').update({ birth_date: birthDate } as any).eq('id', uid);
       }
       setLoading(false);
       if (error) { toast.error(error); return; }
@@ -144,16 +138,11 @@ export default function Auth() {
       return;
     }
 
-    try {
-      const { error } = await signIn(email, password);
-      if (error) { toast.error('E-mail ou senha incorretos'); return; }
-      toast.success('Login realizado com sucesso!');
-      navigate('/');
-    } catch {
-      toast.error('Erro de conexão. Verifique sua internet.');
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    if (error) { toast.error('E-mail ou senha incorretos'); return; }
+    toast.success('Login realizado com sucesso!');
+    navigate('/');
   };
 
   const titles = {
@@ -246,30 +235,28 @@ export default function Auth() {
               </>
             )}
             <div>
-              <label htmlFor="auth-email" className="text-sm text-muted-foreground mb-1 block">E-mail</label>
+              <label className="text-sm text-muted-foreground mb-1 block">E-mail</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input id="auth-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" required autoComplete="email"
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" required
                   className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
               </div>
             </div>
             {mode !== 'forgot' && (
               <div>
-                <label htmlFor="auth-password" className="text-sm text-muted-foreground mb-1 block">Senha</label>
+                <label className="text-sm text-muted-foreground mb-1 block">Senha</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input 
-                    id="auth-password"
                     type={showPassword ? 'text' : 'password'} 
                     value={password} 
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••" 
                     required 
                     minLength={6}
-                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                     className="w-full pl-10 pr-10 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" 
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2">
                     {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                   </button>
                 </div>

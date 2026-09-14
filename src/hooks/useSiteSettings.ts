@@ -21,18 +21,13 @@ export function useSiteSettings<T extends Record<string, any>>(key: SettingsKey)
   const save = async (newValue: T) => {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { data: updated, error } = await supabase
+    const { error } = await supabase
       .from('site_settings')
       .update({ value: newValue as any, updated_by: user?.id })
-      .eq('key', key)
-      .select();
+      .eq('key', key);
     setSaving(false);
     if (error) {
       toast.error('Erro ao salvar configurações');
-      return false;
-    }
-    if (!updated || updated.length === 0) {
-      toast.error('Configuração não encontrada ou sem permissão');
       return false;
     }
     setValue(newValue);

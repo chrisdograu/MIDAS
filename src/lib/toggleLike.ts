@@ -11,10 +11,7 @@ export type LikeResult = { liked: boolean; total: number };
 
 export async function toggleLike(kind: LikeKind, targetId: string): Promise<LikeResult | null> {
   const { data, error } = await supabase.rpc('toggle_like', { p_kind: kind, p_target: targetId });
-  if (error) {
-    console.warn('[toggleLike]', kind, targetId, error.message);
-    return null;
-  }
+  if (error) return null;
   const r = (data ?? {}) as { liked?: boolean; total?: number };
   return { liked: !!r.liked, total: Number(r.total ?? 0) };
 }
@@ -25,10 +22,7 @@ export async function toggleMessageReaction(messageId: string, emoji: string): P
     p_message_id: messageId,
     p_emoji: emoji,
   });
-  if (error) {
-    console.warn('[toggleMessageReaction]', messageId, error.message);
-    return null;
-  }
+  if (error) return null;
   const r = (data ?? {}) as { emoji?: string | null };
   return { emoji: r.emoji ?? null };
 }

@@ -224,25 +224,14 @@ export default function BibliotecaJogo() {
     }
   };
 
-  const handleAbandonarConfirm = async (motivo: string) => {
-    const abandonNote = `[ABANDONEI] ${motivo}`;
-    const newNote = note ? `${note}\n\n${abandonNote}` : abandonNote;
+  const handleAbandonarConfirm = (motivo: string) => {
     setStatus('abandonado');
-    setNote(newNote);
+    // Salvar o motivo no diário ou nota
+    const abandonNote = `[ABANDONEI] ${motivo}`;
+    setNote(prev => prev ? `${prev}\n\n${abandonNote}` : abandonNote);
     setAbandonarOpen(false);
     setPendingStatus(null);
-
-    try {
-      const { error } = await supabase
-        .from('biblioteca_usuario')
-        .update({ status: 'abandonado', personal_note: newNote })
-        .eq('user_id', user!.id)
-        .eq('product_id', productId!);
-      if (error) throw error;
-      toast.info('Jogo marcado como abandonado. Motivo registrado no diário.');
-    } catch {
-      toast.error('Status alterado localmente, mas falhou ao salvar. Clique em "Salvar jornada".');
-    }
+    toast.info('Jogo marcado como abandonado. Motivo registrado no diário.');
   };
 
   // GAP-410: Exportar jornada
@@ -396,16 +385,7 @@ export default function BibliotecaJogo() {
                 <Stat icon={<Star className="h-4 w-4 text-warning" />} label="Minha nota" value={personalRating ? `${personalRating}★` : '—'} />
                 <Stat icon={<Camera className="h-4 w-4" />} label="Screenshots" value={String(screenshots.length)} />
                 {/* GAP-409: Tempo médio de jogo (simplificado) */}
-                {/* GAP-409: Tempo médio de jogo por dia desde o início */}
-                <Stat
-                  icon={<Clock className="h-4 w-4 text-accent" />}
-                  label="Média/dia"
-                  value={
-                    hours > 0 && startedAt
-                      ? `${Math.round((hours / Math.max(1, Math.ceil((Date.now() - new Date(startedAt).getTime()) / 86400000))) * 10) / 10}h`
-                      : '—'
-                  }
-                />
+                <Stat icon={<Clock className="h-4 w-4 text-accent" />} label="Média estimada" value={hours > 0 ? `${Math.round(hours / Math.max(1, Object.keys(moodTags).length || 1))}h` : '—'} />
               </div>
             </div>
           </div>
@@ -514,7 +494,6 @@ export default function BibliotecaJogo() {
                   size="sm" 
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingFile}
-                  aria-label="Enviar screenshot do computador"
                 >
                   {uploadingFile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 </Button>

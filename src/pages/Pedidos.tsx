@@ -22,13 +22,6 @@ interface TrackingInfo {
   events: { date: string; description: string; location?: string }[];
 }
 
-// Escapar HTML para evitar XSS no título dos produtos
-function escapeHtml(s: unknown): string {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string
-  ));
-}
-
 export default function Pedidos() {
   const { pedidos, isLoading, refetch } = usePedidos();
   const { addItem } = useCart();
@@ -97,7 +90,7 @@ export default function Pedidos() {
         is_active: true,
       };
       for (let i = 0; i < item.quantity; i++) {
-        addItem(game as any, { bundleId: item.bundle_id ?? null });
+        addItem(game as any);
         addedCount++;
       }
     }
@@ -161,14 +154,14 @@ export default function Pedidos() {
       <body>
         <div class="header">
           <h1>MIDIAS - Nota Fiscal</h1>
-          <p><strong>Pedido:</strong> #${escapeHtml(pedido.id.slice(0, 12))}</p>
+          <p><strong>Pedido:</strong> #${pedido.id.slice(0, 12)}</p>
           <p><strong>Data:</strong> ${formatDate(pedido.created_at)}</p>
-          <p><strong>Status:</strong> <span class="badge">${escapeHtml(pedido.status)}</span></p>
+          <p><strong>Status:</strong> <span class="badge">${pedido.status}</span></p>
         </div>
         <h3>Itens</h3>
         ${pedido.itens_pedido?.map((item: any) => `
           <div class="row">
-            <span>${escapeHtml(item.produtos?.title || 'Produto')} x${item.quantity}</span>
+            <span>${item.produtos?.title || 'Produto'} x${item.quantity}</span>
             <span>R$ ${Number(item.price_at_purchase).toFixed(2)}</span>
           </div>
         `).join('')}

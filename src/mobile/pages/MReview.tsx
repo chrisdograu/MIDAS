@@ -110,15 +110,12 @@ export default function MReview() {
     }
 
     if (prod) {
-      // Inclui reviews aprovadas + a própria review (mesmo pendente)
-      const reviewQuery = supabase
+      const { data: revs } = await supabase
         .from('avaliacoes')
         .select('id, rating, comment, created_at, user_id, is_spoiler, spoiler_achievement_name')
         .eq('product_id', productId)
+        .eq('is_approved', true)
         .order('created_at', { ascending: false });
-      const { data: revs } = user
-        ? await reviewQuery.or(`is_approved.eq.true,user_id.eq.${user.id}`)
-        : await reviewQuery.eq('is_approved', true);
 
       const userIds = [...new Set((revs || []).map(r => r.user_id))];
       const reviewIds = (revs || []).map(r => r.id);
@@ -281,19 +278,6 @@ export default function MReview() {
     }
   };
 
-  // Preenche myRating/myComment com review existente quando carrega
-  useEffect(() => {
-    if (!user) return;
-    const mine = reviews.find(r => r.user_id === user.id);
-    if (mine) {
-      setMyRating(mine.rating);
-      setMyComment(mine.comment || '');
-      setMySpoiler(mine.is_spoiler);
-      setMyAchievement(mine.spoiler_achievement_name);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, reviews.length]);
-
   const submitReview = async () => {
     if (!user) { toast.error('Entre para avaliar'); navigate('/m/auth'); return; }
     if (!productId) return;
@@ -317,8 +301,7 @@ export default function MReview() {
     if (error) { toast.error(error.message); return; }
     
     toast.success(existing ? '✏️ Review atualizada' : '⭐ Review publicada');
-    // Não reseta myRating (deixa o valor pra edição), mas limpa spoiler/achievement
-    setMySpoiler(false); setMyAchievement(null);
+    setMyComment(''); setMySpoiler(false); setMyAchievement(null);
     load();
   };
 

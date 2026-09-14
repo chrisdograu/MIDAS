@@ -62,16 +62,22 @@ export default function GameTimeline({
 
     try {
       // Buscar eventos da timeline (exemplo — adaptar para sua estrutura real)
-      let query = supabase.from('game_timeline_events' as any).select('*').eq('user_id', userId);
-      if (filter !== 'all') query = (query as any).eq('type', filter);
-      const { data, error } = await query.order('created_at', { ascending: false }).range(offset, offset + ITEMS_PER_PAGE - 1);
+      const { data, error } = await supabase
+        .from('game_timeline_events' as any)
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + ITEMS_PER_PAGE - 1);
 
       if (error) throw error;
 
       const newEvents = (data || []) as TimelineEvent[];
       
-      // Filtro ja aplicado no servidor
+      // GAP-638: Aplicar filtro por tipo
       let filteredEvents = newEvents;
+      if (filter !== 'all') {
+        filteredEvents = newEvents.filter(e => e.type === filter);
+      }
 
       // Remover eventos excluídos (GAP-639)
       filteredEvents = filteredEvents.filter(e => {
@@ -99,8 +105,7 @@ export default function GameTimeline({
   // Recarregar quando filtro ou eventos excluídos mudarem
   useEffect(() => {
     loadEvents(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, filter, deletedEvents.size]);
+  }, [userId, filter, deletedEvents]);
 
   // GAP-637: Carregar mais
   const loadMore = () => {
@@ -207,7 +212,7 @@ export default function GameTimeline({
                     {!deletedEvents.has(eventKey) && (
                       <button
                         onClick={() => handleDelete(event)}
-                        className="p-1 rounded hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        className="p-1 rounded hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
                         title="Ocultar evento"
                       >
                         <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />

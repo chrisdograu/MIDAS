@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -57,15 +57,15 @@ export default function DeveloperProfile() {
     })();
   }, [id]);
 
-  const platforms = useMemo(() => {
-    const set = new Set<string>();
-    games.forEach((g: any) => {
+  const getPlatforms = () => {
+    const platforms = new Set<string>();
+    games.forEach(g => {
       if (g.platform) {
-        (g.platform as string[]).forEach(p => set.add(p));
+        g.platform.forEach(p => platforms.add(p));
       }
     });
-    return ['all', ...Array.from(set).sort()];
-  }, [games]);
+    return ['all', ...Array.from(platforms).sort()];
+  };
 
   const filteredGames = games
     .filter(g => platformFilter === 'all' || (g.platform && g.platform.includes(platformFilter)))
@@ -74,6 +74,8 @@ export default function DeveloperProfile() {
       if (sortBy === 'price') return a.price - b.price;
       return new Date(b.release_date || 0).getTime() - new Date(a.release_date || 0).getTime();
     });
+
+  const platforms = getPlatforms();
 
   if (loading) {
     return (
@@ -245,7 +247,7 @@ export default function DeveloperProfile() {
                   {platforms.map(p => (
                     <button
                       key={p}
-                      onClick={() => setPlatformFilter(p)} aria-pressed={platformFilter === p}
+                      onClick={() => setPlatformFilter(p)}
                       className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${platformFilter === p ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                       {p === 'all' ? 'Todos' : p}

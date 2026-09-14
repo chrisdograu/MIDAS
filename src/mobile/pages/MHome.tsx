@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Flame, ShoppingBag, ThumbsUp, MessageSquare, ChevronDown, Loader2 } from 'lucide-react';
@@ -56,7 +56,6 @@ export default function MHome() {
   const [filter, setFilter] = useState<Filter>('all');
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(0);
-  const pageRef = useRef(0);
   const [allItems, setAllItems] = useState<FeedItem[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -68,12 +67,8 @@ export default function MHome() {
   }, [user?.id]);
 
   // GAP-1074: Realtime
-  const realtimeDebounce = useRef<NodeJS.Timeout | null>(null);
   const handleRealtimeUpdate = useCallback(() => {
-    if (realtimeDebounce.current) clearTimeout(realtimeDebounce.current);
-    realtimeDebounce.current = setTimeout(() => {
-      setReloadTrigger(prev => prev + 1);
-    }, 800);
+    setReloadTrigger(prev => prev + 1);
   }, []);
 
   useRealtimeFeed(handleRealtimeUpdate);
@@ -139,8 +134,7 @@ export default function MHome() {
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    const nextPage = pageRef.current + 1;
-    pageRef.current = nextPage;
+    const nextPage = page + 1;
     const offset = nextPage * LIMIT;
 
     const [{ data: posts }, { data: reviews }, { data: ads }] = await Promise.all([
@@ -196,10 +190,8 @@ export default function MHome() {
 
   useEffect(() => {
     if (data) {
-      // Só sobrescreve se não houver itens carregados via paginação
-      setAllItems(prev => prev.length === 0 ? data.feed : prev);
+      setAllItems(data.feed);
       setHasMore(data.hasMore || false);
-      pageRef.current = 0;
       setPage(0);
     }
   }, [data]);
@@ -218,11 +210,10 @@ export default function MHome() {
     const reviews = base.filter(i => i.kind === 'review');
     const ads = base.filter(i => i.kind === 'ad');
     const out: FeedItem[] = [];
-    let fi = 0, ri = 0, ai = 0;
-    while (fi < forum.length || ri < reviews.length || ai < ads.length) {
-      for (let i = 0; i < 4 && fi < forum.length; i++) out.push(forum[fi++]);
-      for (let i = 0; i < 3 && ri < reviews.length; i++) out.push(reviews[ri++]);
-      for (let i = 0; i < 3 && ai < ads.length; i++) out.push(ads[ai++]);
+    while (forum.length || reviews.length || ads.length) {
+      for (let i = 0; i < 4 && forum.length; i++) out.push(forum.shift()!);
+      for (let i = 0; i < 3 && reviews.length; i++) out.push(reviews.shift()!);
+      for (let i = 0; i < 3 && ads.length; i++) out.push(ads.shift()!);
     }
     return out;
   }, [feed, filter, followingIds]);

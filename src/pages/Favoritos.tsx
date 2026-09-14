@@ -90,7 +90,7 @@ export default function Favoritos() {
     // Verificar drops a cada 30 segundos (em produção seria um job)
     const interval = setInterval(async () => {
       const drops = await checkPriceDrops(favoritos, prices);
-      for (const drop of drops) {
+      drops.forEach(drop => {
         toast.info(`🎉 ${favGames.find(g => g.id === drop.productId)?.title} atingiu seu preço-alvo!`, {
           duration: 10000,
           action: {
@@ -98,12 +98,7 @@ export default function Favoritos() {
             onClick: () => window.location.href = `/jogo/${drop.productId}`
           }
         });
-        // Marcar como já alertado pra não repetir
-        await supabase
-          .from('favoritos')
-          .update({ price_alert_sent: true })
-          .eq('product_id', drop.productId);
-      }
+      });
     }, 30000);
     
     return () => clearInterval(interval);
