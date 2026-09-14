@@ -100,7 +100,7 @@ function AddressForm({ value, onChange }: { value: any; onChange: (v: any) => vo
 }
 
 export default function Checkout() {
-  const { items, total: rawTotal, clearCart } = useCart();
+  const { items, total, clearCart } = useCart();
   const { cupom, loading: cupomLoading, error: cupomError, validarCupom, removerCupom, redeemCupom } = useCupom();
   const { criarPedido } = usePedidos();
   const { toggleFavorito } = useFavoritos();
@@ -131,29 +131,8 @@ export default function Checkout() {
   // GAP-123: Checkout com 1 clique (se cartão salvo)
   const [oneClick, setOneClick] = useState(false);
 
-  // Preços de bundles
-  const [bundlePrices, setBundlePrices] = useState<Record<string, number>>({});
-  useEffect(() => {
-    const ids = Array.from(new Set(items.map(i => i.bundleId).filter(Boolean))) as string[];
-    if (ids.length === 0) { setBundlePrices({}); return; }
-    (async () => {
-      const { data } = await supabase.from('bundles' as any).select('id, price').in('id', ids);
-      const map: Record<string, number> = {};
-      (data as any[] || []).forEach(b => { map[b.id] = Number(b.price); });
-      setBundlePrices(map);
-    })();
-  }, [items]);
-
   // GAP-116: Verificar se há itens físicos
   const hasPhysicalItems = items.some(i => i.game.type === 'physical');
-
-  // Subtotal bundle-aware
-  const subtotalItens = items
-    .filter(i => !i.bundleId)
-    .reduce((s, i) => s + i.game.price * i.quantity, 0);
-  const bundleIds = Array.from(new Set(items.map(i => i.bundleId).filter(Boolean))) as string[];
-  const subtotalBundles = bundleIds.reduce((s, bid) => s + (bundlePrices[bid] || 0), 0);
-  const total = subtotalItens + subtotalBundles;
 
   const installmentOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -296,6 +275,14 @@ export default function Checkout() {
     );
   }
 
+  const groupedItems = items.reduce<Array<{ key: string; bundleId: string | null; items: typeof items }>>((groups, item) => {
+    const key = item.bundleId ? `bundle-${item.bundleId}` : `game-${item.game.id}`;
+    const group = groups.find(entry => entry.key === key);
+    if (group) group.items.push(item);
+    else groups.push({ key, bundleId: item.bundleId ?? null, items: [item] });
+    return groups;
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Link to="/carrinho" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
@@ -307,12 +294,17 @@ export default function Checkout() {
         <div className="lg:col-span-3 space-y-6">
           {/* Items */}
           <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-            <h2 className="font-semibold text-foreground">Itens ({items.length})</h2>
-            {items.map(item => {
+            <h2 className="font-semibold text-foreground">Itens ({groupedItems.length})</h2>
+            {groupedItems.map(group => {
+              const item = group.items[0];
+              if (group.bundleId) {
+                const price = item.bundlePrice ?? group.items.reduce((sum, entry) => sum + entry.game.price, 0);
+                return <div key={group.key} className="flex items-center gap-3 text-sm"><div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center overflow-hidden">{item.bundleImage ? <img src={item.bundleImage} alt={item.bundleTitle || 'Bundle'} className="w-full h-full object-cover" /> : <ShoppingBag className="h-4 w-4 text-primary" />}</div><div className="flex-1 min-w-0"><p className="font-semibold truncate">{item.bundleTitle || 'Bundle de jogos'}</p><p className="text-xs text-muted-foreground truncate">{group.items.map(entry => entry.game.title).join(' • ')}</p></div><span className="text-muted-foreground">x{item.quantity}</span><span className="text-price font-semibold">{formatCurrency(price * item.quantity)}</span></div>;
+              }
               // GAP-116: Badge para item digital/físico
               const isDigital = item.game.type === 'digital' || item.game.type === 'subscription';
               return (
-                <div key={item.game.id} className="flex items-center gap-3 text-sm">
+                <div key={group.key} className="flex items-center gap-3 text-sm">
                   <img src={item.game.image} alt={item.game.title} className="w-10 h-10 rounded object-cover" loading="lazy" />
                   <span className="flex-1 text-foreground truncate">{item.game.title}</span>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
