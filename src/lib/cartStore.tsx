@@ -24,31 +24,47 @@ export const CartProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, [items]);
 
-  const addItem = useCallback((game: Game, opts?: { bundleId?: string | null }) => {
+  const addItem = useCallback((game: Game, opts?: { bundleId?: string | null; bundleTitle?: string | null; bundlePrice?: number | null; bundleImage?: string | null }) => {
     const bundleId = opts?.bundleId ?? null;
     setItems(prev => {
       const existing = prev.find(i => i.game.id === game.id && (i.bundleId ?? null) === bundleId);
       if (existing) return prev.map(i => (i.game.id === game.id && (i.bundleId ?? null) === bundleId) ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, { game, quantity: 1, bundleId }];
+      return [...prev, { game, quantity: 1, bundleId, bundleTitle: opts?.bundleTitle ?? null, bundlePrice: opts?.bundlePrice ?? null, bundleImage: opts?.bundleImage ?? null }];
     });
   }, []);
 
-  const removeItem = useCallback((gameId: string) => {
-    setItems(prev => prev.filter(i => i.game.id !== gameId));
+  const removeItem = useCallback((gameId: string, bundleId?: string | null) => {
+    setItems(prev => bundleId
+      ? prev.filter(i => i.bundleId !== bundleId)
+      : prev.filter(i => i.game.id !== gameId));
   }, []);
 
-  const updateQuantity = useCallback((gameId: string, quantity: number) => {
+  const updateQuantity = useCallback((gameId: string, quantity: number, bundleId?: string | null) => {
     if (quantity <= 0) {
-      setItems(prev => prev.filter(i => i.game.id !== gameId));
+      setItems(prev => bundleId ? prev.filter(i => i.bundleId !== bundleId) : prev.filter(i => i.game.id !== gameId));
     } else {
-      setItems(prev => prev.map(i => i.game.id === gameId ? { ...i, quantity } : i));
+      setItems(prev => prev.map(i => bundleId ? (i.bundleId === bundleId ? { ...i, quantity } : i) : (i.game.id === gameId ? { ...i, quantity } : i)));
     }
   }, []);
 
   const clearCart = useCallback(() => setItems([]), []);
 
-  const total = items.reduce((sum, i) => sum + i.game.price * i.quantity, 0);
-  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const seenBundles = new Set<string>();
+  const total = items.reduce((sum, i) => {
+    if (!i.bundleId) return sum + i.game.price * i.quantity;
+    if (seenBundles.has(i.bundleId)) return sum;
+    seenBundles.add(i.bundleId);
+    const bundleItems = items.filter(x => x.bundleId === i.bundleId);
+    const fallbackPrice = bundleItems.reduce((value, x) => value + x.game.price, 0);
+    return sum + (i.bundlePrice ?? fallbackPrice) * i.quantity;
+  }, 0);
+  const countedBundles = new Set<string>();
+  const itemCount = items.reduce((sum, i) => {
+    if (!i.bundleId) return sum + i.quantity;
+    if (countedBundles.has(i.bundleId)) return sum;
+    countedBundles.add(i.bundleId);
+    return sum + i.quantity;
+  }, 0);
 
   return (
     <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}>

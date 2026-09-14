@@ -153,14 +153,20 @@ export default function BundleDetail() {
       return;
     }
     
-    for (const it of bundle!.items) {
+    if (!bundle) return;
+    for (const it of bundle.items) {
       cart.addItem({
         id: it.product_id, title: it.title, price: it.price,
         image: it.image_url || '', category: it.category || '', platform: [], rating: 0,
         originalPrice: it.price, discount: 0, description: '',
-      } as any, { bundleId: bundle!.id });
+      } as any, {
+        bundleId: bundle.id,
+        bundleTitle: bundle.title,
+        bundlePrice: bundle.price,
+        bundleImage: bundle.image_url,
+      });
     }
-    toast.success(`Bundle "${bundle!.title}" adicionado ao carrinho`);
+    toast.success(`Bundle "${bundle.title}" adicionado ao carrinho`);
   });
 
   // GAP-416: Compartilhar bundle

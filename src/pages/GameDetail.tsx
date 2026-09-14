@@ -159,6 +159,15 @@ export default function GameDetail() {
     if (user && id) userOwnsGame(user.id, id).then(setOwns);
   }, [user?.id, id]);
 
+  useDocumentMeta({
+    title: game ? `${game.title} · MIDIAS` : 'Jogo · MIDIAS',
+    description: game
+      ? (game.description || `Compre ${game.title} na MIDIAS — entrega instantânea por e-mail.`).slice(0, 160)
+      : undefined,
+    image: game?.image,
+    type: 'product',
+  });
+
   // GAP-023, GAP-113: Tratamento de erro específico
   if (isError) {
     return (
@@ -232,15 +241,6 @@ export default function GameDetail() {
 
   const installments = Math.min(12, Math.max(2, Math.ceil(game.price / 10)));
   const installmentValue = formatCurrency(game.price / installments);
-
-  useDocumentMeta({
-    title: game ? `${game.title} · MIDIAS` : 'Jogo · MIDIAS',
-    description: game
-      ? (game.description || `Compre ${game.title} na MIDIAS — entrega instantânea por e-mail.`).slice(0, 160)
-      : undefined,
-    image: game?.image,
-    type: 'product',
-  });
 
   return (
     <div className="container mx-auto px-4 py-8" data-game-cosmetic={game.id}>
@@ -381,16 +381,12 @@ export default function GameDetail() {
         <div className="space-y-3">
           <h2 className="text-lg font-bold text-foreground">Detalhes</h2>
           <div className="bg-card border border-border rounded-xl p-4 space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Publicadora</span>
-              <span className="text-foreground">{game.publisher}</span>
-            
-                  {game.publisher && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Publicadora</span>
-                      <span className="text-foreground">{game.publisher}</span>
-                    </div>
-                  )}</div>
+            {game.publisher && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Publicadora</span>
+                <span className="text-foreground">{game.publisher}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Lançamento</span>
               <span className="text-foreground">

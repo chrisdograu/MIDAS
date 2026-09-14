@@ -206,9 +206,9 @@ const App = () => (
     }}
   >
     <QueryClientProvider client={themeQueryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <AuthProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <TooltipProvider>
             <TutorialProvider>
               <CartProvider>
                 <Toaster />
@@ -230,9 +230,9 @@ const App = () => (
                 </BrowserRouter>
               </CartProvider>
             </TutorialProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </ThemeProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );
