@@ -1,0 +1,70 @@
+// Product type matching the database schema
+export interface Game {
+  id: string;
+  title: string;
+  image: string;
+  price: number;
+  originalPrice: number;
+  discount: number;
+  category: string;
+  platform: string[];
+  rating: number;
+  description: string;
+  releaseDate: string;
+  publisher: string;
+  tags: string[];
+  stock: number;
+  featured?: boolean;
+  createdAt?: string;
+  type?: string;
+  trailer_url?: string | null;
+  systemRequirements?: Record<string, string> | null;
+}
+
+// Map database row to Game interface
+export function mapProdutoToGame(row: {
+  id: string;
+  title: string;
+  image_url: string | null;
+  price: number;
+  original_price: number | null;
+  discount: number | null;
+  category: string | null;
+  platform: string[] | null;
+  rating: number | null;
+  description: string | null;
+  release_date: string | null;
+  publisher: string | null;
+  tags: string[] | null;
+  stock?: number | null;
+  featured?: boolean | null;
+  created_at?: string | null;
+  type?: string | null;
+  trailer_url?: string | null;
+  system_requirements?: Record<string, string> | null;
+}): Game {
+  return {
+    id: row.id,
+    title: row.title,
+    image: row.image_url || '/placeholder.svg',
+    price: Number(row.price),
+    originalPrice: Number(row.original_price ?? 0),
+    discount: Number(row.discount ?? 0),
+    category: row.category || 'Outros',
+    platform: row.platform || [],
+    rating: Number(row.rating) || 0,
+    description: row.description || '',
+    releaseDate: row.release_date || '',
+    publisher: row.publisher || '',
+    tags: row.tags || [],
+    stock: row.stock ?? 0,
+    featured: !!row.featured,
+    createdAt: row.created_at || undefined,
+    type: row.type || undefined,
+    trailer_url: row.trailer_url || null,
+    systemRequirements: row.system_requirements || null,
+  };
+}
+
+export const categories = ["Todos", "RPG", "Ação", "Aventura", "Esportes", "Corrida", "Estratégia", "Terror", "Indie"];
+export const platforms = ["Todos", "PC", "PS5", "Xbox", "Switch"];

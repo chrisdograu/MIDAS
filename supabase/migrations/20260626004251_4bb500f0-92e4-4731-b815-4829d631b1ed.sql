@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS always_hide_spoilers boolean NOT NULL DEFAULT false;
