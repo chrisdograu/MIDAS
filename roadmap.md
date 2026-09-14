@@ -1,3 +1,4 @@
+- [ ] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
 - [ ] Corrigir os erros React que derrubam fórum e tutorial.
