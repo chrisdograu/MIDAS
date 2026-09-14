@@ -4,7 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useProdutos } from "@/hooks/useProdutos";
 import GameCard from "@/components/GameCard";
 import { motion } from "framer-motion";
-import { ChevronRight, Flame, TrendingUp, Zap, Sparkles, Clock, Package, PackageSearch, RefreshCw, Calendar } from "lucide-react";
+import {
+  ChevronRight,
+  Flame,
+  TrendingUp,
+  Zap,
+  Sparkles,
+  Clock,
+  Package,
+  PackageSearch,
+  RefreshCw,
+  Calendar,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import OrbitRadar from "@/components/radar/OrbitRadar";
 import RadarPessoalSection from "@/components/radar/RadarPessoalSection";
@@ -13,7 +24,7 @@ import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import EstadoVazio from "@/components/EstadoVazio";
 import ErroCarregamento from "@/components/ErroCarregamento";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency } from "@/lib/format";
 
 interface FlashPromo {
   id: string;
@@ -33,26 +44,108 @@ interface BundleItemRow {
   product_id: string;
 }
 
-// GAP-101: Componente de timestamp
-function LastUpdated({ time }: { time: Date }) {
+interface FlashProduct {
+  id: string;
+  title: string;
+  image: string;
+  price: number;
+}
+
+// GAP-101: Componente de timestamp — FIX: aceita number|Date e valida
+function LastUpdated({ time }: { time: number | Date }) {
+  const d = time instanceof Date ? time : new Date(time);
+  if (!Number.isFinite(d.getTime())) return null;
   return (
     <div className="container mx-auto px-4 py-4">
       <p className="text-xs text-muted-foreground flex items-center gap-1 justify-center">
         <RefreshCw className="h-3 w-3" />
-        Última atualização: {time.toLocaleString('pt-BR')}
+        Última atualização: {d.toLocaleString("pt-BR")}
       </p>
     </div>
+  );
+}
+
+// FIX: componente isolado — o timer de 1s só re-renderiza este card,
+// não a página inteira.
+function FlashPromoSection({ promo, product }: { promo: FlashPromo; product: FlashProduct }) {
+  const [remaining, setRemaining] = useState(() => new Date(promo.ends_at).getTime() - Date.now());
+
+  useEffect(() => {
+    const target = new Date(promo.ends_at).getTime();
+    setRemaining(target - Date.now());
+    if (!Number.isFinite(target) || target <= Date.now()) return;
+    const id = setInterval(() => setRemaining(target - Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [promo.ends_at]);
+
+  if (remaining <= 0) return null;
+
+  const h = Math.floor(remaining / 3600000);
+  const m = Math.floor((remaining % 3600000) / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  const promoPrice = product.price * (1 - promo.discount_percent / 100);
+
+  return (
+    <section className="container mx-auto px-4 pt-8">
+      <Link to={`/jogo/${product.id}`} className="block group">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-2xl border border-price/30 bg-gradient-to-r from-price/15 via-background to-accent/10"
+        >
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 sm:gap-6 p-4 sm:p-5">
+            <img
+              src={product.image}
+              alt={product.title}
+              className="w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-lg shadow-lg"
+              loading="lazy"
+            />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="inline-flex items-center gap-1 bg-price text-price-foreground rounded px-2 py-0.5 text-[11px] font-bold tracking-wide">
+                  <Zap className="h-3 w-3" /> RELÂMPAGO
+                </span>
+                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">
+                  −{promo.discount_percent}%
+                </span>
+              </div>
+              <h3 className="font-bold text-base sm:text-lg text-foreground truncate group-hover:text-primary transition-colors">
+                {product.title}
+              </h3>
+              <div className="flex items-baseline gap-2 mt-1 flex-wrap">
+                <span className="text-muted-foreground text-sm line-through">{formatCurrency(product.price)}</span>
+                <span className="text-price font-bold text-xl">{formatCurrency(promoPrice)}</span>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <span className="text-[10px] uppercase text-muted-foreground tracking-wider hidden sm:block">
+                Termina em
+              </span>
+              <div className="flex items-center gap-1.5 text-price">
+                <Clock className="h-4 w-4" />
+                <span className="font-mono font-bold text-base sm:text-lg tabular-nums">
+                  {String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </Link>
+    </section>
   );
 }
 
 export default function Index() {
   const { data: games = [], isLoading, isError, refetch, isRefetching } = useProdutos();
   const inStock = useMemo(() => games.filter((g) => g.stock > 0), [games]);
-  
-  // GAP-103, GAP-513: Lançamentos recentes (ordenados por data de lançamento)
+
+  // GAP-103, GAP-513: Lançamentos recentes — FIX: valida releaseDate
   const recentReleases = useMemo(() => {
     return [...inStock]
-      .filter((g) => g.releaseDate)
+      .filter((g) => {
+        if (!g.releaseDate) return false;
+        return Number.isFinite(new Date(g.releaseDate).getTime());
+      })
       .sort((a, b) => new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime())
       .slice(0, 6);
   }, [inStock]);
@@ -72,13 +165,19 @@ export default function Index() {
     return inStock[dayOfYear % inStock.length];
   }, [inStock]);
   const [pickOverride, setPickOverride] = useState<{ product_id: string; reason: string | null } | null>(null);
+  // FIX: se o override aponta para produto fora de estoque, cai no fallback
+  // mas zera o `reason` para não mostrar razão "do produto errado".
   const dailyPick = useMemo(() => {
-    if (pickOverride) return inStock.find((g) => g.id === pickOverride.product_id) ?? fallbackPick;
+    if (pickOverride) {
+      const overridden = inStock.find((g) => g.id === pickOverride.product_id);
+      if (overridden) return overridden;
+    }
     return fallbackPick;
   }, [pickOverride, inStock, fallbackPick]);
-  const pickReason = pickOverride?.reason ?? null;
-
-  const [now, setNow] = useState(Date.now());
+  const pickReason = useMemo(() => {
+    if (!pickOverride) return null;
+    return inStock.some((g) => g.id === pickOverride.product_id) ? pickOverride.reason : null;
+  }, [pickOverride, inStock]);
 
   // Side data
   const sideData = useQuery({
@@ -108,7 +207,12 @@ export default function Index() {
           .limit(6),
         supabase.from("bundle_items" as any).select("bundle_id, product_id"),
       ]);
-      return { fp: fp as FlashPromo | null, po: po as any, bd: (bd as unknown as BundleRow[]) || [], bi: (bi as unknown as BundleItemRow[]) || [] };
+      return {
+        fp: fp as FlashPromo | null,
+        po: po as any,
+        bd: (bd as unknown as BundleRow[]) || [],
+        bi: (bi as unknown as BundleItemRow[]) || [],
+      };
     },
   });
 
@@ -117,14 +221,7 @@ export default function Index() {
     setPickOverride(sideData.data.po ?? null);
   }, [sideData.data]);
 
-  useEffect(() => {
-    const fp = sideData.data?.fp;
-    if (!fp) return;
-    const endsAt = new Date(fp.ends_at).getTime();
-    if (endsAt <= Date.now()) return;
-    const tick = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(tick);
-  }, [sideData.data?.fp]);
+  // FIX: timer removido do Index — agora isolado em <FlashPromoSection />
 
   const flashPromo = useMemo(() => {
     const fp = sideData.data?.fp;
@@ -133,8 +230,10 @@ export default function Index() {
     return product ? { promo: fp, product } : null;
   }, [sideData.data?.fp, inStock]);
 
+  // FIX: deps enxutas + type guard correto (sem `as typeof games`)
   const bundles = useMemo(() => {
     if (!sideData.data) return [];
+    const productMap = new Map(inStock.map((g) => [g.id, g] as const));
     const itemsByBundle = new Map<string, string[]>();
     sideData.data.bi.forEach((i) => {
       const arr = itemsByBundle.get(i.bundle_id) || [];
@@ -145,11 +244,11 @@ export default function Index() {
       .map((b) => ({
         bundle: b,
         products: (itemsByBundle.get(b.id) || [])
-          .map((pid) => inStock.find((g) => g.id === pid))
-          .filter(Boolean) as typeof games,
+          .map((pid) => productMap.get(pid))
+          .filter((p): p is NonNullable<typeof p> => p !== undefined),
       }))
       .filter((b) => b.products.length >= 2);
-  }, [sideData.data, inStock, games]);
+  }, [sideData.data, inStock]);
 
   // GAP-100: Estado de erro com retry
   if (isError) {
@@ -176,7 +275,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <OnboardingDialog />
-      
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-background">
         <div className="container mx-auto px-4 py-16 md:py-24 relative">
@@ -195,76 +294,18 @@ export default function Index() {
           </motion.div>
         </div>
       </section>
-      
+
       {/* Radar de Órbita */}
       <OrbitRadar limit={4} />
-      
+
       {/* Radar Pessoal */}
       <div className="container mx-auto px-4 pt-8">
         <RadarPessoalSection limit={6} />
       </div>
-      
-      {/* Flash Promo */}
-      {flashPromo &&
-        (() => {
-          const remainingMs = new Date(flashPromo.promo.ends_at).getTime() - now;
-          if (remainingMs <= 0) return null;
-          const h = Math.floor(remainingMs / 3600000);
-          const m = Math.floor((remainingMs % 3600000) / 60000);
-          const s = Math.floor((remainingMs % 60000) / 1000);
-          const promoPrice = flashPromo.product.price * (1 - flashPromo.promo.discount_percent / 100);
-          return (
-            <section className="container mx-auto px-4 pt-8">
-              <Link to={`/jogo/${flashPromo.product.id}`} className="block group">
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="relative overflow-hidden rounded-2xl border border-price/30 bg-gradient-to-r from-price/15 via-background to-accent/10"
-                >
-                  <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 sm:gap-6 p-4 sm:p-5">
-                    <img
-                      src={flashPromo.product.image}
-                      alt={flashPromo.product.title}
-                      className="w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-lg shadow-lg"
-                      loading="lazy"
-                    />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="inline-flex items-center gap-1 bg-price text-price-foreground rounded px-2 py-0.5 text-[11px] font-bold tracking-wide">
-                          <Zap className="h-3 w-3" /> RELÂMPAGO
-                        </span>
-                        <span className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                          −{flashPromo.promo.discount_percent}%
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-base sm:text-lg text-foreground truncate group-hover:text-primary transition-colors">
-                        {flashPromo.product.title}
-                      </h3>
-                      <div className="flex items-baseline gap-2 mt-1 flex-wrap">
-                        <span className="text-muted-foreground text-sm line-through">
-                          {formatCurrency(flashPromo.product.price)}
-                        </span>
-                        <span className="text-price font-bold text-xl">{formatCurrency(promoPrice)}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-[10px] uppercase text-muted-foreground tracking-wider hidden sm:block">
-                        Termina em
-                      </span>
-                      <div className="flex items-center gap-1.5 text-price">
-                        <Clock className="h-4 w-4" />
-                        <span className="font-mono font-bold text-base sm:text-lg tabular-nums">
-                          {String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
-            </section>
-          );
-        })()}
-      
+
+      {/* Flash Promo — FIX: componente isolado, sem re-render da página */}
+      {flashPromo && <FlashPromoSection promo={flashPromo.promo} product={flashPromo.product} />}
+
       {/* Daily Pick */}
       {dailyPick && (
         <section className="container mx-auto px-4 pt-8">
@@ -310,7 +351,7 @@ export default function Index() {
           </Link>
         </section>
       )}
-      
+
       {/* Catálogo vazio */}
       {inStock.length === 0 && (
         <div className="container mx-auto px-4 py-12">
@@ -318,11 +359,11 @@ export default function Index() {
             icone={PackageSearch}
             titulo="Nenhum jogo disponível no momento"
             descricao="Volte em breve — estamos preparando novidades para você."
-            acao={{ label: 'Ver catálogo', to: '/catalogo' }}
+            acao={{ label: "Ver catálogo", to: "/catalogo" }}
           />
         </div>
       )}
-      
+
       {/* Bundles */}
       {bundles.length > 0 && (
         <section className="container mx-auto px-4 pt-12">
@@ -343,7 +384,13 @@ export default function Index() {
                 >
                   <div className="relative aspect-[16/9] grid grid-cols-3 bg-secondary/30">
                     {products.slice(0, 3).map((p) => (
-                      <img key={p.id} src={p.image} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
+                      <img
+                        key={p.id}
+                        src={p.image}
+                        alt={p.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     ))}
                     {pct > 0 && (
                       <span className="absolute top-2 right-2 bg-price text-price-foreground text-xs font-bold px-2 py-0.5 rounded">
@@ -369,45 +416,47 @@ export default function Index() {
           </div>
         </section>
       )}
-      
-      {/* Destaques */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="flex items-center gap-2 mb-6">
-          <Flame className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-bold text-foreground">Destaques</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {featured.map((game, i) => (
-            <motion.div
-              key={game.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Link to={`/jogo/${game.id}`} className="group block relative rounded-xl overflow-hidden aspect-[16/9]">
-                <img
-                  src={game.image}
-                  alt={game.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="text-lg font-bold text-on-media mb-1">{game.title}</h3>
-                  <div className="flex items-center gap-2">
-                    {game.discount > 0 && (
-                      <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
-                        -{game.discount}%
-                      </span>
-                    )}
-                    <span className="text-price font-bold">{formatCurrency(game.price)}</span>
+
+      {/* Destaques — FIX: guard de vazio */}
+      {featured.length > 0 && (
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center gap-2 mb-6">
+            <Flame className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Destaques</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {featured.map((game, i) => (
+              <motion.div
+                key={game.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <Link to={`/jogo/${game.id}`} className="group block relative rounded-xl overflow-hidden aspect-[16/9]">
+                  <img
+                    src={game.image}
+                    alt={game.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 className="text-lg font-bold text-on-media mb-1">{game.title}</h3>
+                    <div className="flex items-center gap-2">
+                      {game.discount > 0 && (
+                        <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
+                          -{game.discount}%
+                        </span>
+                      )}
+                      <span className="text-price font-bold">{formatCurrency(game.price)}</span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* GAP-103, GAP-513: Lançamentos Recentes */}
       {recentReleases.length > 0 && (
@@ -428,46 +477,50 @@ export default function Index() {
           </div>
         </section>
       )}
-      
-      {/* Best Deals */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-price" />
-            <h2 className="text-xl font-bold text-foreground">Melhores Ofertas</h2>
-          </div>
-          <Link to="/ofertas" className="text-sm text-primary hover:underline flex items-center gap-1">
-            Ver todas <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {bestDeals.map((game, i) => (
-            <GameCard key={game.id} game={game} index={i} />
-          ))}
-        </div>
-      </section>
-      
-      {/* Top Rated */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-success" />
-            <h2 className="text-xl font-bold text-foreground">Mais Bem Avaliados</h2>
-          </div>
-          <Link to="/catalogo" className="text-sm text-primary hover:underline flex items-center gap-1">
-            Ver todos <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {topRated.map((game, i) => (
-            <GameCard key={game.id} game={game} index={i} />
-          ))}
-        </div>
-      </section>
 
-      {/* GAP-101: Última atualização */}
-      <LastUpdated time={new Date()} />
-      
+      {/* Best Deals — FIX: guard de vazio */}
+      {bestDeals.length > 0 && (
+        <section className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-price" />
+              <h2 className="text-xl font-bold text-foreground">Melhores Ofertas</h2>
+            </div>
+            <Link to="/ofertas" className="text-sm text-primary hover:underline flex items-center gap-1">
+              Ver todas <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {bestDeals.map((game, i) => (
+              <GameCard key={game.id} game={game} index={i} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Top Rated — FIX: guard de vazio */}
+      {topRated.length > 0 && (
+        <section className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-success" />
+              <h2 className="text-xl font-bold text-foreground">Mais Bem Avaliados</h2>
+            </div>
+            <Link to="/catalogo" className="text-sm text-primary hover:underline flex items-center gap-1">
+              Ver todos <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {topRated.map((game, i) => (
+              <GameCard key={game.id} game={game} index={i} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* GAP-101: Última atualização — FIX: usa dataUpdatedAt do react-query */}
+      <LastUpdated time={sideData.dataUpdatedAt || Date.now()} />
+
       <ScrollToTopButton />
     </div>
   );
