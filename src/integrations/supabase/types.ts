@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      _fk_validation_report: {
+        Row: {
+          coluna: string | null
+          conname: string | null
+          orfaos: number | null
+          ref_coluna: string | null
+          ref_tabela: string | null
+          tabela: string | null
+          validada: boolean | null
+        }
+        Insert: {
+          coluna?: string | null
+          conname?: string | null
+          orfaos?: number | null
+          ref_coluna?: string | null
+          ref_tabela?: string | null
+          tabela?: string | null
+          validada?: boolean | null
+        }
+        Update: {
+          coluna?: string | null
+          conname?: string | null
+          orfaos?: number | null
+          ref_coluna?: string | null
+          ref_tabela?: string | null
+          tabela?: string | null
+          validada?: boolean | null
+        }
+        Relationships: []
+      }
       admin_logs: {
         Row: {
           action: string
@@ -51,7 +81,36 @@ export type Database = {
           reverted_at?: string | null
           reverted_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_admin_logs_admin_id"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_admin_logs_admin_id"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_admin_logs_reverted_by"
+            columns: ["reverted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_admin_logs_reverted_by"
+            columns: ["reverted_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       admin_notifications: {
         Row: {
@@ -183,7 +242,43 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_anuncios_duplicate_of"
+            columns: ["duplicate_of"]
+            isOneToOne: false
+            referencedRelation: "anuncios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_anuncios_seller_id"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_anuncios_seller_id"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_anuncios_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_anuncios_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       avaliacoes: {
         Row: {
@@ -370,7 +465,36 @@ export type Database = {
           status?: Database["public"]["Enums"]["ban_appeal_status"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_ban_appeals_moderator_id"
+            columns: ["moderator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_ban_appeals_moderator_id"
+            columns: ["moderator_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_ban_appeals_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_ban_appeals_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       biblioteca_diario: {
         Row: {
@@ -400,7 +524,29 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_biblioteca_diario_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_biblioteca_diario_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_biblioteca_diario_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       biblioteca_lista_itens: {
         Row: {
@@ -456,7 +602,22 @@ export type Database = {
           nome?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_biblioteca_listas_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_biblioteca_listas_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       biblioteca_usuario: {
         Row: {
@@ -562,7 +723,36 @@ export type Database = {
           id?: string
           scope?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_blocked_users_blocked_id"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_blocked_users_blocked_id"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_blocked_users_blocker_id"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_blocked_users_blocker_id"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bundle_items: {
         Row: {
@@ -757,7 +947,64 @@ export type Database = {
           snippet?: string | null
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_chat_ai_alerts_conversation_id"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_chat_ai_alerts_message_id"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "mensagens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_chat_ai_alerts_minor_id"
+            columns: ["minor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_chat_ai_alerts_minor_id"
+            columns: ["minor_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_chat_ai_alerts_peer_id"
+            columns: ["peer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_chat_ai_alerts_peer_id"
+            columns: ["peer_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_chat_ai_alerts_reviewed_by"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_chat_ai_alerts_reviewed_by"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       close_friends: {
         Row: {
@@ -778,7 +1025,36 @@ export type Database = {
           id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_close_friends_friend_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_close_friends_friend_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_close_friends_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_close_friends_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       config_history: {
         Row: {
@@ -853,7 +1129,22 @@ export type Database = {
           user_id?: string
           username?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_connected_platforms_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_connected_platforms_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversas: {
         Row: {
@@ -1208,6 +1499,20 @@ export type Database = {
             referencedRelation: "public_profiles_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_denuncias_reporter_id"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_denuncias_reporter_id"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       developers: {
@@ -1304,7 +1609,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_device_tokens_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_device_tokens_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favoritos: {
         Row: {
@@ -1398,7 +1718,29 @@ export type Database = {
           product_id?: string
           starts_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_flash_promotions_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_flash_promotions_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_flash_promotions_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       follow_requests: {
         Row: {
@@ -1544,7 +1886,29 @@ export type Database = {
           post_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_forum_post_likes_post_id"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_forum_post_likes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_forum_post_likes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       forum_posts: {
         Row: {
@@ -1696,7 +2060,29 @@ export type Database = {
           reply_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_forum_reply_likes_reply_id"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "forum_replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_forum_reply_likes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_forum_reply_likes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fotos_anuncio: {
         Row: {
@@ -1761,7 +2147,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_friend_activity_states_friend_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_friend_activity_states_friend_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_friend_activity_states_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_friend_activity_states_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       friend_favorites: {
         Row: {
@@ -1779,7 +2194,36 @@ export type Database = {
           friend_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_friend_favorites_friend_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_friend_favorites_friend_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_friend_favorites_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_friend_favorites_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       game_clips: {
         Row: {
@@ -1881,6 +2325,34 @@ export type Database = {
           text?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_game_opinion_replies_responder_id"
+            columns: ["responder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_opinion_replies_responder_id"
+            columns: ["responder_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_opinion_replies_sender_id"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_opinion_replies_sender_id"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "game_opinion_replies_conversation_id_fkey"
             columns: ["conversation_id"]
@@ -2133,7 +2605,43 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_game_suggestions_created_product_id"
+            columns: ["created_product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_suggestions_requested_by"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_suggestions_requested_by"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_suggestions_reviewed_by"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_suggestions_reviewed_by"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       game_timeline_events: {
         Row: {
@@ -2167,6 +2675,20 @@ export type Database = {
           visibility?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_game_timeline_events_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_timeline_events_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "game_timeline_events_product_id_fkey"
             columns: ["product_id"]
@@ -2233,6 +2755,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_group_blocks_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_group_blocks_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "group_blocks_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
@@ -2271,6 +2807,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_group_events_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_group_events_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "group_events_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
@@ -2303,6 +2853,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_group_members_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_group_members_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "group_members_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
@@ -2334,6 +2898,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_group_poll_votes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_group_poll_votes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "group_poll_votes_poll_id_fkey"
             columns: ["poll_id"]
@@ -2372,6 +2950,20 @@ export type Database = {
           question?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_group_polls_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_group_polls_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "group_polls_group_id_fkey"
             columns: ["group_id"]
@@ -2425,6 +3017,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_groups_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_groups_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "groups_owner_id_fkey"
             columns: ["owner_id"]
@@ -2487,7 +3093,50 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_guardian_link_requests_guardian_id"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_guardian_link_requests_guardian_id"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_guardian_link_requests_minor_id"
+            columns: ["minor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_guardian_link_requests_minor_id"
+            columns: ["minor_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_guardian_link_requests_reviewed_by"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_guardian_link_requests_reviewed_by"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integration_webhooks: {
         Row: {
@@ -2605,7 +3254,29 @@ export type Database = {
           product_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_library_custom_covers_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_library_custom_covers_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_library_custom_covers_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lista_visibilidade: {
         Row: {
@@ -2659,7 +3330,22 @@ export type Database = {
           user_agent?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_login_history_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_login_history_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mensagens: {
         Row: {
@@ -2771,7 +3457,36 @@ export type Database = {
           source_id?: string
           source_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_mentions_mentioned_by"
+            columns: ["mentioned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mentions_mentioned_by"
+            columns: ["mentioned_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mentions_mentioned_user_id"
+            columns: ["mentioned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mentions_mentioned_user_id"
+            columns: ["mentioned_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_reactions: {
         Row: {
@@ -2796,6 +3511,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_message_reactions_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_message_reactions_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "message_reactions_message_id_fkey"
             columns: ["message_id"]
@@ -2839,7 +3568,36 @@ export type Database = {
           reference_type?: string | null
           target_user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_moderation_history_moderator_id"
+            columns: ["moderator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_moderation_history_moderator_id"
+            columns: ["moderator_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_moderation_history_target_user_id"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_moderation_history_target_user_id"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       movimentacoes_estoque: {
         Row: {
@@ -3020,7 +3778,22 @@ export type Database = {
           type?: Database["public"]["Enums"]["notification_type"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_notifications_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_notifications_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       opinion_conversations: {
         Row: {
@@ -3048,6 +3821,34 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_opinion_conversations_author_id"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_opinion_conversations_author_id"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_opinion_conversations_responder_id"
+            columns: ["responder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_opinion_conversations_responder_id"
+            columns: ["responder_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "opinion_conversations_opinion_id_fkey"
             columns: ["opinion_id"]
@@ -3082,7 +3883,43 @@ export type Database = {
           target_user_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_opinion_mutes_target_product_id"
+            columns: ["target_product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_opinion_mutes_target_user_id"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_opinion_mutes_target_user_id"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_opinion_mutes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_opinion_mutes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pedidos: {
         Row: {
@@ -3130,7 +3967,36 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_pedidos_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_pedidos_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_pedidos_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_pedidos_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       price_history: {
         Row: {
@@ -3157,7 +4023,15 @@ export type Database = {
           product_id?: string
           recorded_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_price_history_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       privacy_grants: {
         Row: {
@@ -3181,7 +4055,36 @@ export type Database = {
           scope?: string
           viewer_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_privacy_grants_owner_id"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_privacy_grants_owner_id"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_privacy_grants_viewer_id"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_privacy_grants_viewer_id"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_keys: {
         Row: {
@@ -3279,7 +4182,29 @@ export type Database = {
           user_id?: string | null
           viewed_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_product_views_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_product_views_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_product_views_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       produto_imagens: {
         Row: {
@@ -3303,7 +4228,15 @@ export type Database = {
           position?: number
           product_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_produto_imagens_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       produtos: {
         Row: {
@@ -3448,7 +4381,22 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_profile_highlights_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_profile_highlights_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -3745,7 +4693,22 @@ export type Database = {
           user_id?: string
           window_start?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_rate_limits_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_rate_limits_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reembolsos: {
         Row: {
@@ -3776,6 +4739,20 @@ export type Database = {
           valor?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_reembolsos_processado_por"
+            columns: ["processado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_reembolsos_processado_por"
+            columns: ["processado_por"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reembolsos_pedido_id_fkey"
             columns: ["pedido_id"]
@@ -3909,7 +4886,15 @@ export type Database = {
           review_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_review_metadata_review_id"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "avaliacoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_screenshots: {
         Row: {
@@ -3939,7 +4924,22 @@ export type Database = {
           review_id?: string
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_review_screenshots_owner_id"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_review_screenshots_owner_id"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews_completas: {
         Row: {
@@ -4008,7 +5008,29 @@ export type Database = {
           user_id?: string
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_reviews_completas_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_reviews_completas_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_reviews_completas_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seller_profiles: {
         Row: {
@@ -4071,7 +5093,22 @@ export type Database = {
           vacation_message?: string | null
           vacation_mode?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_seller_profiles_user_id"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_seller_profiles_user_id"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_settings: {
         Row: {
@@ -4146,7 +5183,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_social_content_states_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_social_content_states_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_favorites: {
         Row: {
@@ -4167,7 +5219,22 @@ export type Database = {
           created_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_social_favorites_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_social_favorites_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -4289,7 +5356,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tickets_assigned_to"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tickets_assigned_to"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tickets_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tickets_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_bans: {
         Row: {
@@ -4357,7 +5453,29 @@ export type Database = {
           tournament_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_chat_messages_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_chat_messages_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_chat_messages_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_chat_mutes: {
         Row: {
@@ -4388,6 +5506,34 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_tournament_chat_mutes_muted_by"
+            columns: ["muted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_chat_mutes_muted_by"
+            columns: ["muted_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_chat_mutes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_chat_mutes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tournament_chat_mutes_tournament_id_fkey"
             columns: ["tournament_id"]
@@ -4463,7 +5609,22 @@ export type Database = {
           tournament_id?: string
           user_ids?: string[]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_duplicate_alerts_resolved_by"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_duplicate_alerts_resolved_by"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_highlights: {
         Row: {
@@ -4499,7 +5660,22 @@ export type Database = {
           tournament_id?: string
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_highlights_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_highlights_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_live_events: {
         Row: {
@@ -4575,7 +5751,22 @@ export type Database = {
           payload?: Json | null
           tournament_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_match_events_match_id"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_match_events_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_matches: {
         Row: {
@@ -4661,6 +5852,76 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_tournament_matches_mvp_user_id"
+            columns: ["mvp_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_mvp_user_id"
+            columns: ["mvp_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_player_a"
+            columns: ["player_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_player_a"
+            columns: ["player_a"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_player_b"
+            columns: ["player_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_player_b"
+            columns: ["player_b"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_reported_by"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_reported_by"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_winner"
+            columns: ["winner"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_matches_winner"
+            columns: ["winner"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tournament_matches_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
@@ -4726,7 +5987,50 @@ export type Database = {
           voted_for_id?: string
           voter_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_mvp_votes_match_id"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_mvp_votes_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_mvp_votes_voted_for_id"
+            columns: ["voted_for_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_mvp_votes_voted_for_id"
+            columns: ["voted_for_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_mvp_votes_voter_id"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_mvp_votes_voter_id"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_participants: {
         Row: {
@@ -4764,6 +6068,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_tournament_participants_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_participants_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tournament_participants_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
@@ -4797,7 +6115,50 @@ export type Database = {
           tournament_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_predictions_match_id"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_predictions_predicted_winner_id"
+            columns: ["predicted_winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_predictions_predicted_winner_id"
+            columns: ["predicted_winner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_predictions_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_predictions_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_predictions_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_reactions: {
         Row: {
@@ -4824,7 +6185,36 @@ export type Database = {
           tournament_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_reactions_match_id"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_reactions_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_reactions_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_reactions_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_reminder_log: {
         Row: {
@@ -4849,6 +6239,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_tournament_reminder_log_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_reminder_log_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tournament_reminder_log_tournament_id_fkey"
             columns: ["tournament_id"]
@@ -4886,7 +6290,22 @@ export type Database = {
           narrative?: string
           tournament_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournament_storylines_match_id"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_storylines_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_waitlist: {
         Row: {
@@ -4917,6 +6336,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_tournament_waitlist_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_waitlist_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tournament_waitlist_tournament_id_fkey"
             columns: ["tournament_id"]
@@ -5083,7 +6516,92 @@ export type Database = {
           xp_match_win?: number
           xp_signup?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tournaments_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_forum_thread_id"
+            columns: ["forum_thread_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_prize_badge_id"
+            columns: ["prize_badge_id"]
+            isOneToOne: false
+            referencedRelation: "badge_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_prize_coupon_id"
+            columns: ["prize_coupon_id"]
+            isOneToOne: false
+            referencedRelation: "cupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_prize_game_id"
+            columns: ["prize_game_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_runner_up_id"
+            columns: ["runner_up_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_runner_up_id"
+            columns: ["runner_up_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_third_place_id"
+            columns: ["third_place_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_third_place_id"
+            columns: ["third_place_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_winner_id"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournaments_winner_id"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_proposals: {
         Row: {
@@ -5160,6 +6678,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_trade_proposals_proposer_id"
+            columns: ["proposer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_trade_proposals_proposer_id"
+            columns: ["proposer_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trade_proposals_anuncio_id_fkey"
             columns: ["anuncio_id"]
             isOneToOne: false
@@ -5190,7 +6722,22 @@ export type Database = {
           tutorial_key?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tutorials_seen_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tutorials_seen_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_achievements: {
         Row: {
@@ -5223,7 +6770,29 @@ export type Database = {
           unlocked_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_achievements_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_achievements_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_achievements_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_badges: {
         Row: {
@@ -5245,6 +6814,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_user_badges_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_badges_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_badges_badge_id_fkey"
             columns: ["badge_id"]
@@ -5278,6 +6861,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_user_cosmetic_loadout_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_cosmetic_loadout_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_cosmetic_loadout_reward_id_fkey"
             columns: ["reward_id"]
             isOneToOne: false
@@ -5305,7 +6902,36 @@ export type Database = {
           following_id?: string
           id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_follows_follower_id"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_follows_follower_id"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_follows_following_id"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_follows_following_id"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_game_mutes: {
         Row: {
@@ -5327,6 +6953,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_user_game_mutes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_game_mutes_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_game_mutes_product_id_fkey"
             columns: ["product_id"]
@@ -5362,6 +7002,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_user_game_page_loadout_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_game_page_loadout_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_game_page_loadout_product_id_fkey"
             columns: ["product_id"]
@@ -5399,6 +7053,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_user_game_rewards_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_game_rewards_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_game_rewards_reward_id_fkey"
             columns: ["reward_id"]
             isOneToOne: false
@@ -5435,7 +7103,29 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_playtime_product_id"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_playtime_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_playtime_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -5456,7 +7146,22 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_roles_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_roles_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_titles: {
         Row: {
@@ -5489,7 +7194,43 @@ export type Database = {
           unlock_rule?: Json | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_titles_awarded_by"
+            columns: ["awarded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_titles_awarded_by"
+            columns: ["awarded_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_titles_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_titles_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_titles_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_xp_log: {
         Row: {
@@ -5522,7 +7263,22 @@ export type Database = {
           user_id?: string
           xp?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_xp_log_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_xp_log_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       xp_levels: {
         Row: {
@@ -5604,13 +7360,46 @@ export type Database = {
         }
         Relationships: []
       }
+      public_site_settings: {
+        Row: {
+          key: string | null
+          updated_at: string | null
+          value: Json | null
+        }
+        Insert: {
+          key?: string | null
+          updated_at?: string | null
+          value?: Json | null
+        }
+        Update: {
+          key?: string | null
+          updated_at?: string | null
+          value?: Json | null
+        }
+        Relationships: []
+      }
       user_xp_totals: {
         Row: {
           actions_count: number | null
           total_xp: number | null
           user_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_xp_log_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_xp_log_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_friendships: {
         Row: {
@@ -5618,7 +7407,36 @@ export type Database = {
           since: string | null
           user_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_follows_follower_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_follows_follower_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_follows_following_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_follows_following_id"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -5692,6 +7510,7 @@ export type Database = {
         }
         Returns: number
       }
+      anonimizar_usuario: { Args: { target_id: string }; Returns: undefined }
       apply_tournament_penalty: {
         Args: { _skip_next: number; _user_id: string }
         Returns: undefined
@@ -6204,6 +8023,10 @@ export type Database = {
               status: string
             }[]
           }
+      stats_blocked: {
+        Args: { _owner: string; _tipo: string }
+        Returns: boolean
+      }
       submit_ban_appeal: {
         Args: {
           _description: string
