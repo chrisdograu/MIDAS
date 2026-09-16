@@ -7,3 +7,10 @@
 - [x] Representar cada bundle como um único item no carrinho, com preço do pacote.
 - [x] Manter a compra segura e a entrega dos jogos internos do bundle.
 - [ ] Validar fórum, tutoriais, carrinho e checkout no navegador.
+
+# Preenchimento completo do banco
+
+- [ ] Inventariar tabelas vazias, vínculos obrigatórios e regras de acesso.
+- [ ] Definir volume e escopo dos dados fictícios com o usuário.
+- [ ] Popular todos os módulos de forma segura e sem duplicações.
+- [ ] Validar contagens, relacionamentos e funcionamento nas telas.
