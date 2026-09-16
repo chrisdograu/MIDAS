@@ -1,37 +1,47 @@
-# Corrigir fórum mobile, tutoriais e bundles
+# Preencher o banco com uma demonstração completa
 
 ## Objetivo
-Eliminar as falhas visíveis, reduzir a poluição dos filtros do fórum e fazer bundles funcionarem como um pacote único do carrinho até a compra.
+Popular o Supabase externo com dados fictícios coerentes em todos os módulos visíveis, preservando integralmente os registros atuais.
+
+## Escopo definido
+- Criar contas fictícias suficientes para simular amizades, chats, grupos, vendas, compras, avaliações e torneios.
+- Usar volume de demonstração: dezenas de registros por área, sem gerar carga artificial de milhares de linhas.
+- Incluir pedidos, cupons, estoque, reembolsos, moderação, denúncias e chaves de produto claramente fictícias.
+- Não preencher artificialmente tabelas puramente técnicas, como limites temporários, filas internas e relatórios de validação, salvo quando um fluxo real exigir esses registros.
 
 ## Implementação
 
-### 1. Corrigir os erros React
-- Ajustar o botão compartilhado para que o modo de link (`asChild`) entregue exatamente um elemento ao componente interno, eliminando `React.Children.only`.
-- Mover os hooks de metadados da página de jogo para antes dos retornos condicionais, mantendo sempre a mesma ordem de hooks e eliminando o erro React #310.
-- Revisar as telas do fórum relacionadas para remover outros usos equivalentes que possam disparar os mesmos erros.
+### 1. Inventário e segurança
+- Ler colunas, tipos, relacionamentos, valores permitidos, gatilhos e regras de acesso das tabelas envolvidas.
+- Separar dados reais dos registros de demonstração com identificadores previsíveis.
+- Corrigir os seeds existentes que usam nomes de colunas antigos antes de executá-los.
 
-### 2. Melhorar os filtros de `/m/forum` e `/m/forum/jogo/:gameId`
-- Reaproveitar o padrão do marketplace: botão compacto com contador de filtros ativos e painel inferior expansível.
-- Colocar ordenação e período dentro desse painel, com ações “Limpar” e “Aplicar”.
-- Manter apenas os seletores principais de conteúdo na tela, reduzindo o espaço ocupado.
-- Garantir que as duas rotas do fórum por jogo usem o mesmo comportamento.
+### 2. Contas e perfis
+- Criar um conjunto variado de usuários fictícios por uma função protegida, sem senhas fixas no código ou no banco.
+- Completar perfis, preferências, papéis não administrativos, títulos, selos, conquistas, XP, privacidade e plataformas conectadas.
+- Preservar contas e permissões já existentes; nenhuma conta real será substituída.
 
-### 3. Separar corretamente mobile e web nos tutoriais
-- Links de tutoriais mobile continuam dentro de `/m/tutorial/...`.
-- Links de tutoriais web saem diretamente para `/tutorial/...`, sem tentar renderizar conteúdo web dentro da tela mobile.
-- Manter uma mensagem de transição apenas como segurança para links antigos.
+### 3. Catálogo e comércio
+- Ampliar jogos, produtos, imagens, categorias, publicadoras, desenvolvedoras, fornecedores, bundles, cupons e promoções.
+- Criar estoque, histórico de preços, chaves falsas, pedidos em estados variados, itens, usos de cupons e reembolsos de demonstração.
+- Manter preços, quantidades e relacionamentos consistentes entre catálogo, carrinho e pedidos.
 
-### 4. Corrigir bundles no carrinho e checkout
-- Evoluir o item do carrinho para representar um bundle como uma única linha, contendo título, imagem, preço fechado e os jogos incluídos.
-- Ao adicionar um bundle, impedir duplicação e aumentar a quantidade do pacote, em vez de adicionar três jogos avulsos.
-- Exibir e calcular o preço do bundle no carrinho e checkout; os jogos internos aparecem como conteúdo do pacote, não como itens separados.
-- Na criação do pedido, expandir o pacote nos produtos internos somente no envio seguro ao Supabase, preservando validação de estoque, preço oficial e entrega de todos os jogos.
-- Manter compatibilidade com carrinhos antigos salvos no navegador.
+### 4. Marketplace e comunidade
+- Preencher vendedores, certificados, anúncios, fotos, favoritos, propostas, avaliações e conversas de negociação.
+- Criar bibliotecas, listas, diário, tempo de jogo, opiniões, reviews, comentários, curtidas, screenshots, clips e atividades sociais.
+- Criar amizades, solicitações, grupos, membros, eventos, enquetes, mensagens, reações e notificações.
 
-## Validação
-- Rodar verificação de tipos e testes relevantes.
-- Abrir no navegador `/m/forum`, as duas formas da rota de fórum por jogo, tutoriais mobile/web, bundle, carrinho e checkout.
-- Confirmar ausência dos dois erros React e conferir visualmente filtros recolhíveis, agrupamento e total do bundle.
+### 5. Torneios, suporte e moderação
+- Criar torneios em diferentes estados, participantes, partidas, previsões, votos, chat, destaques e eventos ao vivo.
+- Criar tickets e respostas, sugestões, denúncias, recursos de banimento, alertas e históricos administrativos fictícios.
+- Evitar qualquer ação real de cobrança, webhook externo ou envio de notificações para terceiros.
 
-## Observação
-A sessão autenticada automatizada não está disponível para este Supabase externo; os fluxos públicos serão testados integralmente e as etapas protegidas serão validadas até o redirecionamento/login e por testes locais de estado.
+### 6. Validação
+- Executar o preenchimento de forma repetível, sem duplicar dados quando rodado novamente.
+- Conferir contagens, referências quebradas e erros do banco após a execução.
+- Abrir amostras das telas web, mobile e administrativas para confirmar que os dados aparecem corretamente.
+
+## Detalhes técnicos
+- Uma função administrativa protegida criará as contas pelo serviço de autenticação e preencherá os módulos em uma ordem compatível com as dependências.
+- Operações de catálogo independentes de usuário poderão ser adicionadas diretamente, sempre sem apagar registros atuais.
+- Chaves de demonstração terão prefixo explícito e não representarão licenças reais.
