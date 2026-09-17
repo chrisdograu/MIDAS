@@ -1,12 +1,12 @@
 // Edge Function: seed-admin-friends
-// Cria 6 amigos artificiais para a conta admin master (admin2@midias.com)
+// Cria 6 amigos artificiais para a conta admin que executa a função
 // e popula biblioteca, torneios, conversas, opiniões, screenshots, certificados.
 // IDEMPOTENTE — pode ser chamada várias vezes.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const ALLOWED_ORIGINS = [
   'https://midias-midas.lovable.app',
-  'https://id-preview--c1cfbae2-5609-422d-b6ab-69f5e8880b6d.lovable.app',
+  'https://id-preview--54ba6c34-546e-4505-b3e7-b28b28ff1a8e.lovable.app',
   'http://localhost:8080',
   'http://localhost:5173',
 ];
@@ -20,8 +20,6 @@ function corsFor(req: Request) {
     'Vary': 'Origin',
   };
 }
-
-const ADMIN_EMAIL = 'admin2@midias.com';
 
 // Senha aleatória gerada por execução (nunca hardcoded).
 function generatePassword(): string {
@@ -41,9 +39,12 @@ Deno.serve(async (req) => {
   const corsHeaders = corsFor(req);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-    const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const ANON = Deno.env.get('SUPABASE_ANON_KEY');
+    if (!SUPABASE_URL || !SERVICE_ROLE || !ANON) {
+      throw new Error('Configuração do Supabase indisponível');
+    }
     const authHeader = req.headers.get('Authorization') ?? '';
 
     const userClient = createClient(SUPABASE_URL, ANON, { global: { headers: { Authorization: authHeader } } });
@@ -54,11 +55,10 @@ Deno.serve(async (req) => {
     const { data: roleRow } = await admin.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
     if (!roleRow) return json({ error: 'Apenas admins' }, 403, corsHeaders);
 
-    // 1) Localizar admin master
+    // 1) A conta autenticada e autorizada é o admin principal do seed
     const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    const adminMaster = list?.users?.find(u => u.email === ADMIN_EMAIL);
-    if (!adminMaster) return json({ error: `Admin master ${ADMIN_EMAIL} não encontrado` }, 404, corsHeaders);
-    const ADMIN_ID = adminMaster.id;
+    const ADMIN_ID = user.id;
+    const adminEmail = user.email ?? 'admin autenticado';
 
     // 2) Criar/recuperar os 6 amigos (senha aleatória por conta criada nesta execução)
     const friendIds: Record<string, string> = {};
@@ -135,8 +135,8 @@ Deno.serve(async (req) => {
           .select('id').eq('user_id', fid).eq('product_id', p.id).limit(1);
         if (!ex || ex.length === 0) {
           await admin.from('game_timeline_events').insert([
-            { user_id: fid, product_id: p.id, event_type: 'status_change', payload: { status: 'jogando', hours: 12 } as any },
-            { user_id: fid, product_id: p.id, event_type: 'achievement', payload: { name: 'Primeira vitória', icon: '🏆' } as any },
+            { user_id: fid, product_id: p.id, kind: 'status_change', payload: { status: 'jogando', hours: 12 } as any },
+            { user_id: fid, product_id: p.id, kind: 'achievement', payload: { name: 'Primeira vitória', icon: '🏆' } as any },
           ]);
         }
       }
@@ -320,10 +320,10 @@ Deno.serve(async (req) => {
     return json({
       ok: true,
       message: 'Seed completo! Conta admin agora tem 6 amigos com biblioteca, torneios, conversas e opiniões.',
-      admin: ADMIN_EMAIL,
+      admin: adminEmail,
       friends: Object.entries(friendIds).map(([persona, id]) => {
-        const f = FRIENDS.find(x => x.persona === persona)!;
-        return { persona, name: f.display_name, email: f.email, id };
+        const f = FRIENDS.find(x => x.persona === persona);
+        return { persona, name: f?.display_name ?? persona, email: f?.email ?? '', id };
       }),
       // Credenciais devolvidas APENAS para contas criadas nesta execução.
       // Anote agora — não são armazenadas em log nem retornadas em chamadas futuras.
