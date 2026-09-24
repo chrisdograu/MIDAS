@@ -31,6 +31,12 @@ const initDeviceDetection = () => {
 // GAP-MA01: Registro do Service Worker
 const registerServiceWorker = async () => {
   if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    // O domínio temporário de preview não serve o worker de forma estável.
+    if (window.location.hostname.startsWith('id-preview--')) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.allSettled(registrations.map((registration) => registration.unregister()));
+      return;
+    }
     try {
       const registration = await navigator.serviceWorker.register('/service-worker.js', {
         scope: '/',
@@ -139,7 +145,7 @@ if ('serviceWorker' in navigator) {
       swUpdateInterval = setInterval(() => {
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.ready.then((registration) => {
-            registration.update();
+            void registration.update().catch(() => undefined);
           });
         }
       }, 5 * 60 * 1000);
@@ -154,7 +160,7 @@ if ('serviceWorker' in navigator) {
     swUpdateInterval = setInterval(() => {
       if (navigator.serviceWorker.controller) {
         navigator.serviceWorker.ready.then((registration) => {
-          registration.update();
+        void registration.update().catch(() => undefined);
         });
       }
     }, 5 * 60 * 1000);
