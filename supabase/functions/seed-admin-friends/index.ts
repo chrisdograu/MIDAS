@@ -131,13 +131,24 @@ Deno.serve(async (req) => {
     // 5b) Timeline events para cada amigo
     for (const fid of Object.values(friendIds)) {
       for (const p of prods.slice(0, 3)) {
-        const { data: ex } = await admin.from('game_timeline_events')
-          .select('id').eq('user_id', fid).eq('product_id', p.id).limit(1);
-        if (!ex || ex.length === 0) {
-          await admin.from('game_timeline_events').insert([
-            { user_id: fid, product_id: p.id, kind: 'status_change', payload: { status: 'jogando', hours: 12 } as any },
-            { user_id: fid, product_id: p.id, kind: 'achievement', payload: { name: 'Primeira vitória', icon: '🏆' } as any },
-          ]);
+        const events = [
+          { kind: 'status_change', payload: { status: 'jogando', hours: 12 } as any },
+          { kind: 'achievement', payload: { name: 'Primeira vitória', icon: '🏆' } as any },
+        ];
+        for (const event of events) {
+          const { data: existingEvent } = await admin.from('game_timeline_events')
+            .select('id')
+            .eq('user_id', fid)
+            .eq('product_id', p.id)
+            .eq('kind', event.kind)
+            .limit(1);
+          if (!existingEvent || existingEvent.length === 0) {
+            await admin.from('game_timeline_events').insert({
+              user_id: fid,
+              product_id: p.id,
+              ...event,
+            });
+          }
         }
       }
     }
@@ -162,12 +173,21 @@ Deno.serve(async (req) => {
             opinion_id: opId, responder_id: ADMIN_ID,
           }, { onConflict: 'opinion_id,responder_id' }).select('id').single();
           if (conv?.id) {
-            await admin.from('game_opinion_replies').insert({
-              opinion_id: opId, conversation_id: conv.id,
-              sender_id: ADMIN_ID, responder_id: ADMIN_ID,
-              text: 'Concordo! Esse jogo é uma obra-prima.',
-            });
-            opCount++;
+            const replyText = 'Concordo! Esse jogo é uma obra-prima.';
+            const { data: existingReply } = await admin.from('game_opinion_replies')
+              .select('id')
+              .eq('opinion_id', opId)
+              .eq('sender_id', ADMIN_ID)
+              .eq('text', replyText)
+              .limit(1);
+            if (!existingReply || existingReply.length === 0) {
+              await admin.from('game_opinion_replies').insert({
+                opinion_id: opId, conversation_id: conv.id,
+                sender_id: ADMIN_ID, responder_id: ADMIN_ID,
+                text: replyText,
+              });
+              opCount++;
+            }
           }
         }
       }

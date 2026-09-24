@@ -63,7 +63,7 @@ function PWAUpdateHandler() {
 
   useEffect(() => {
     // GAP-AP03: Service worker update detection
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && !window.location.hostname.startsWith('id-preview--')) {
       navigator.serviceWorker.ready.then((registration) => {
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
@@ -81,7 +81,7 @@ function PWAUpdateHandler() {
       const interval = setInterval(() => {
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.ready.then((registration) => {
-            registration.update();
+            void registration.update().catch(() => undefined);
           });
         }
       }, 60 * 60 * 1000); // Check every hour

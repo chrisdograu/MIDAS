@@ -10,7 +10,8 @@
 
 # Preenchimento completo do banco
 
-- [ ] Inventariar tabelas vazias, vínculos obrigatórios e regras de acesso.
-- [ ] Definir volume e escopo dos dados fictícios com o usuário.
-- [ ] Popular todos os módulos de forma segura e sem duplicações.
-- [ ] Validar contagens, relacionamentos e funcionamento nas telas.
+- [x] Inventariar tabelas vazias, vínculos obrigatórios e regras de acesso.
+- [x] Definir volume e escopo dos dados fictícios com o usuário.
+- [x] Popular os módulos que não dependem de novas contas, sem duplicações.
+- [x] Validar contagens, relacionamentos e regras administrativas.
+- [ ] Criar contas fictícias e os dados que dependem delas — aguardando o usuário criar as contas.
