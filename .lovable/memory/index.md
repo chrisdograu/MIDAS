@@ -57,7 +57,7 @@
 - [Moderação e Banimento](mem://features/moderacao-banimento) — banned_until + is_user_banned() bloqueia ações sensíveis via RLS
 - [Banner banimento global](mem://features/banimento-header-global) — Barra vermelha no Header quando conta suspensa
 - [Estoque gráfico com filtros](mem://features/estoque-grafico-filtros) — Gráfico entradas vs saídas com filtros 7/30/90 dias
-- [Seed de dados de teste](mem://features/seed-de-testes) — Edge function seed-test-users + botão admin em /desktop/configuracoes
+- [Seed de dados de teste](mem://features/seed-de-testes) — Dados demonstrativos prontos; contas fictícias aguardam criação manual pelo usuário
 - [Badges menu Desktop](mem://features/desktop-badges-pendencias) — Contagens em tempo real de denúncias/certificados/pedidos/propostas pendentes
 - [Alertas em tempo real Desktop](mem://features/desktop-realtime-alerts) — Toasts (sonner) para inserts em denuncias/pedidos/certificados/propostas, filtrados por cargo
 - [Trigger banned_until](mem://features/banned-until-trigger) — Só admin pode alterar status de banimento via SQL
