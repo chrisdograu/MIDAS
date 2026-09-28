@@ -1,0 +1,3 @@
+DROP POLICY "produtos_age_gate_restrictive" ON public.produtos;
+CREATE POLICY "produtos_age_gate_anon" ON public.produtos AS RESTRICTIVE FOR SELECT TO anon USING (classificacao_indicativa IS NULL OR classificacao_indicativa IN ('L', '10', '12'));
+CREATE POLICY "produtos_age_gate_authenticated" ON public.produtos AS RESTRICTIVE FOR SELECT TO authenticated USING (classificacao_indicativa IS NULL OR public.pode_acessar_conteudo(auth.uid(), classificacao_indicativa));
