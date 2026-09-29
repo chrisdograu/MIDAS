@@ -3666,6 +3666,7 @@ export type Database = {
       notification_preferences: {
         Row: {
           created_at: string
+          email_notifications: boolean
           forum_mentions: boolean
           forum_replies: boolean
           forum_topics: boolean
@@ -3674,6 +3675,7 @@ export type Database = {
           library_review_completa: boolean
           library_screenshot: boolean
           midias_especiais: boolean
+          notification_frequency: string
           social_follows: boolean
           social_likes: boolean
           social_replies: boolean
@@ -3688,6 +3690,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email_notifications?: boolean
           forum_mentions?: boolean
           forum_replies?: boolean
           forum_topics?: boolean
@@ -3696,6 +3699,7 @@ export type Database = {
           library_review_completa?: boolean
           library_screenshot?: boolean
           midias_especiais?: boolean
+          notification_frequency?: string
           social_follows?: boolean
           social_likes?: boolean
           social_replies?: boolean
@@ -3710,6 +3714,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email_notifications?: boolean
           forum_mentions?: boolean
           forum_replies?: boolean
           forum_topics?: boolean
@@ -3718,6 +3723,7 @@ export type Database = {
           library_review_completa?: boolean
           library_screenshot?: boolean
           midias_especiais?: boolean
+          notification_frequency?: string
           social_follows?: boolean
           social_likes?: boolean
           social_replies?: boolean
@@ -4424,6 +4430,7 @@ export type Database = {
           favorite_genres: string[] | null
           frequent_seller_at: string | null
           frequent_seller_notice_dismissed_at: string | null
+          friend_list_visibility: string
           gamer_personality: string | null
           guardian_user_id: string | null
           hide_adult_content: boolean
@@ -4433,12 +4440,14 @@ export type Database = {
           is_paused: boolean
           is_private: boolean
           is_verified_account: boolean
+          last_activity_visibility: string
           library_visibility: string
           minor_chat_approval_mode: string
           minor_chat_level: string | null
           monthly_favorites: string[] | null
           notifications_snoozed_until: string | null
           onboarded_at: string | null
+          online_status_visibility: string
           opinions_visibility: string
           paused_at: string | null
           personal_theme: Json
@@ -4449,6 +4458,7 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           require_follow_approval: boolean
+          reviews_visibility: string
           screenshots_visibility: string
           seller_bio: string | null
           stats_hidden_types: string[]
@@ -4486,6 +4496,7 @@ export type Database = {
           favorite_genres?: string[] | null
           frequent_seller_at?: string | null
           frequent_seller_notice_dismissed_at?: string | null
+          friend_list_visibility?: string
           gamer_personality?: string | null
           guardian_user_id?: string | null
           hide_adult_content?: boolean
@@ -4495,12 +4506,14 @@ export type Database = {
           is_paused?: boolean
           is_private?: boolean
           is_verified_account?: boolean
+          last_activity_visibility?: string
           library_visibility?: string
           minor_chat_approval_mode?: string
           minor_chat_level?: string | null
           monthly_favorites?: string[] | null
           notifications_snoozed_until?: string | null
           onboarded_at?: string | null
+          online_status_visibility?: string
           opinions_visibility?: string
           paused_at?: string | null
           personal_theme?: Json
@@ -4511,6 +4524,7 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           require_follow_approval?: boolean
+          reviews_visibility?: string
           screenshots_visibility?: string
           seller_bio?: string | null
           stats_hidden_types?: string[]
@@ -4548,6 +4562,7 @@ export type Database = {
           favorite_genres?: string[] | null
           frequent_seller_at?: string | null
           frequent_seller_notice_dismissed_at?: string | null
+          friend_list_visibility?: string
           gamer_personality?: string | null
           guardian_user_id?: string | null
           hide_adult_content?: boolean
@@ -4557,12 +4572,14 @@ export type Database = {
           is_paused?: boolean
           is_private?: boolean
           is_verified_account?: boolean
+          last_activity_visibility?: string
           library_visibility?: string
           minor_chat_approval_mode?: string
           minor_chat_level?: string | null
           monthly_favorites?: string[] | null
           notifications_snoozed_until?: string | null
           onboarded_at?: string | null
+          online_status_visibility?: string
           opinions_visibility?: string
           paused_at?: string | null
           personal_theme?: Json
@@ -4573,6 +4590,7 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           require_follow_approval?: boolean
+          reviews_visibility?: string
           screenshots_visibility?: string
           seller_bio?: string | null
           stats_hidden_types?: string[]
@@ -5045,6 +5063,7 @@ export type Database = {
           handle: string
           id: string
           is_private: boolean
+          is_public: boolean | null
           rating: number
           total_sales: number
           total_trades: number
@@ -5065,6 +5084,7 @@ export type Database = {
           handle: string
           id?: string
           is_private?: boolean
+          is_public?: boolean | null
           rating?: number
           total_sales?: number
           total_trades?: number
@@ -5085,6 +5105,7 @@ export type Database = {
           handle?: string
           id?: string
           is_private?: boolean
+          is_public?: boolean | null
           rating?: number
           total_sales?: number
           total_trades?: number
@@ -6889,18 +6910,21 @@ export type Database = {
           follower_id: string
           following_id: string
           id: string
+          status: string | null
         }
         Insert: {
           created_at?: string
           follower_id: string
           following_id: string
           id?: string
+          status?: string | null
         }
         Update: {
           created_at?: string
           follower_id?: string
           following_id?: string
           id?: string
+          status?: string | null
         }
         Relationships: [
           {
@@ -7659,6 +7683,7 @@ export type Database = {
           favorite_genres: string[] | null
           frequent_seller_at: string | null
           frequent_seller_notice_dismissed_at: string | null
+          friend_list_visibility: string
           gamer_personality: string | null
           guardian_user_id: string | null
           hide_adult_content: boolean
@@ -7668,12 +7693,14 @@ export type Database = {
           is_paused: boolean
           is_private: boolean
           is_verified_account: boolean
+          last_activity_visibility: string
           library_visibility: string
           minor_chat_approval_mode: string
           minor_chat_level: string | null
           monthly_favorites: string[] | null
           notifications_snoozed_until: string | null
           onboarded_at: string | null
+          online_status_visibility: string
           opinions_visibility: string
           paused_at: string | null
           personal_theme: Json
@@ -7684,6 +7711,7 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           require_follow_approval: boolean
+          reviews_visibility: string
           screenshots_visibility: string
           seller_bio: string | null
           stats_hidden_types: string[]
@@ -7737,6 +7765,7 @@ export type Database = {
           favorite_genres: string[] | null
           frequent_seller_at: string | null
           frequent_seller_notice_dismissed_at: string | null
+          friend_list_visibility: string
           gamer_personality: string | null
           guardian_user_id: string | null
           hide_adult_content: boolean
@@ -7746,12 +7775,14 @@ export type Database = {
           is_paused: boolean
           is_private: boolean
           is_verified_account: boolean
+          last_activity_visibility: string
           library_visibility: string
           minor_chat_approval_mode: string
           minor_chat_level: string | null
           monthly_favorites: string[] | null
           notifications_snoozed_until: string | null
           onboarded_at: string | null
+          online_status_visibility: string
           opinions_visibility: string
           paused_at: string | null
           personal_theme: Json
@@ -7762,6 +7793,7 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           require_follow_approval: boolean
+          reviews_visibility: string
           screenshots_visibility: string
           seller_bio: string | null
           stats_hidden_types: string[]
@@ -7822,6 +7854,7 @@ export type Database = {
           handle: string
           id: string
           is_private: boolean
+          is_public: boolean | null
           rating: number
           total_sales: number
           total_trades: number
@@ -7905,6 +7938,7 @@ export type Database = {
           favorite_genres: string[] | null
           frequent_seller_at: string | null
           frequent_seller_notice_dismissed_at: string | null
+          friend_list_visibility: string
           gamer_personality: string | null
           guardian_user_id: string | null
           hide_adult_content: boolean
@@ -7914,12 +7948,14 @@ export type Database = {
           is_paused: boolean
           is_private: boolean
           is_verified_account: boolean
+          last_activity_visibility: string
           library_visibility: string
           minor_chat_approval_mode: string
           minor_chat_level: string | null
           monthly_favorites: string[] | null
           notifications_snoozed_until: string | null
           onboarded_at: string | null
+          online_status_visibility: string
           opinions_visibility: string
           paused_at: string | null
           personal_theme: Json
@@ -7930,6 +7966,7 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           require_follow_approval: boolean
+          reviews_visibility: string
           screenshots_visibility: string
           seller_bio: string | null
           stats_hidden_types: string[]
