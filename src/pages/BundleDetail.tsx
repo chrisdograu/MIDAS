@@ -9,23 +9,11 @@ import { Button } from '@/components/ui/button';
 import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/format';
-import { InteractiveHalfStar, HalfStarDisplay } from '@/components/HalfStarRating';
 
 interface BundleData {
   id: string; title: string; description: string | null; price: number; image_url: string | null;
   images: string[];
   items: { product_id: string; title: string; image_url: string | null; price: number; category: string | null; stock?: number }[];
-}
-
-// GAP-417: Avaliação do bundle
-async function getBundleRating(bundleId: string): Promise<{ avg: number; count: number }> {
-  const { data } = await supabase
-    .from('bundle_ratings' as any)
-    .select('rating')
-    .eq('bundle_id', bundleId);
-  if (!data || data.length === 0) return { avg: 0, count: 0 };
-  const avg = data.reduce((s, r: any) => s + r.rating, 0) / data.length;
-  return { avg, count: data.length };
 }
 
 // GAP-415: Recomendações baseadas no bundle
@@ -58,9 +46,6 @@ export default function BundleDetail() {
   const [loading, setLoading] = useState(true);
   const cart = useCart();
   const { submitting, guard } = useSubmitGuard();
-  // GAP-417: Avaliação do bundle
-  const [bundleRating, setBundleRating] = useState<{ avg: number; count: number }>({ avg: 0, count: 0 });
-  const [userRating, setUserRating] = useState<number>(0);
   // GAP-413: Estoques
   const [stockIssues, setStockIssues] = useState<string[]>([]);
   // GAP-415: Recomendações
@@ -108,10 +93,6 @@ export default function BundleDetail() {
       });
       setActiveImg(0);
       
-      // GAP-417: Buscar avaliação do bundle
-      const rating = await getBundleRating(id);
-      setBundleRating(rating);
-      
       // GAP-415: Buscar recomendações
       const recs = await getBundleRecommendations(pids);
       setRecommendations(recs);
@@ -120,30 +101,6 @@ export default function BundleDetail() {
     })();
     return () => { cancelled = true; };
   }, [id]);
-
-  // GAP-417: Avaliar bundle
-  const submitRating = async (rating: number) => {
-    if (!user) {
-      toast.error('Faça login para avaliar');
-      return;
-    }
-    const { error } = await supabase
-      .from('bundle_ratings' as any)
-      .upsert({
-        bundle_id: id,
-        user_id: user.id,
-        rating,
-        updated_at: new Date().toISOString(),
-      });
-    if (error) {
-      toast.error('Erro ao avaliar');
-      return;
-    }
-    setUserRating(rating);
-    const newRating = await getBundleRating(id!);
-    setBundleRating(newRating);
-    toast.success('Avaliação registrada!');
-  };
 
   // GAP-413: Adicionar ao carrinho com validação de estoque
   const addAll = guard(async () => {
@@ -265,21 +222,6 @@ export default function BundleDetail() {
           </span>
           <h1 className="text-3xl font-display font-bold mb-2">{bundle.title}</h1>
           {bundle.description && <p className="text-muted-foreground mb-4">{bundle.description}</p>}
-
-          {/* GAP-417: Avaliação do bundle */}
-          {bundleRating.count > 0 && (
-            <div className="flex items-center gap-2 mb-3">
-              <HalfStarDisplay rating={bundleRating.avg} size={16} />
-              <span className="text-sm text-foreground">{bundleRating.avg.toFixed(1)}</span>
-              <span className="text-xs text-muted-foreground">({bundleRating.count} avaliações)</span>
-            </div>
-          )}
-          {user && (
-            <div className="mb-3">
-              <p className="text-xs text-muted-foreground mb-1">Avalie este bundle:</p>
-              <InteractiveHalfStar value={userRating || 0} onChange={submitRating} />
-            </div>
-          )}
 
           {/* GAP-413: Alerta de estoque */}
           {hasStockIssues && (
