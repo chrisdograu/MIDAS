@@ -152,6 +152,12 @@ export default function PublicProfile() {
   const queryClient = useQueryClient();
   const { data: games = [] } = useProdutos();
 
+  useDocumentMeta({
+    title: profileTitle(userId),
+    description: 'Perfil de jogador na comunidade MIDIAS.',
+    type: 'profile',
+  });
+
   // Perfil público (RPC segura)
   const { data: profile, isLoading } = useQuery({
     queryKey: ['public-profile', userId],
@@ -437,13 +443,6 @@ export default function PublicProfile() {
 
   // GAP-578: Ver se pode ver amigos em comum
   const canSeeMutualFriends = mutualFriends.length > 0;
-
-  useDocumentMeta({
-    title: profile.display_name ? `${profile.display_name} · MIDIAS` : 'Perfil · MIDIAS',
-    description: (profile.bio || `Perfil de ${profile.display_name || 'gamer'} no MIDIAS.`).slice(0, 160),
-    image: profile.avatar_url || coverUrl || undefined,
-    type: 'profile',
-  });
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl" style={accentStyle}>

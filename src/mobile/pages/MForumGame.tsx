@@ -93,7 +93,7 @@ export default function MForumGame() {
     if (!content.trim()) { toast.error('Conteúdo não pode ficar vazio'); return; }
     const { error } = await supabase
       .from('forum_posts')
-      .update({ content: content.trim(), edited_at: new Date().toISOString() })
+      .update({ content: content.trim() })
       .eq('id', postId);
     if (error) { toast.error('Erro ao editar'); return; }
     setPosts(prev => prev.map(p => 
@@ -109,7 +109,7 @@ export default function MForumGame() {
     if (!user) return;
     const { error } = await supabase
       .from('avaliacoes')
-      .update({ rating, comment: comment.trim() || null, edited_at: new Date().toISOString() })
+      .update({ rating, comment: comment.trim() || null })
       .eq('id', reviewId);
     if (error) { toast.error('Erro ao editar review'); return; }
     setReviews(prev => prev.map(r => 
@@ -151,8 +151,8 @@ export default function MForumGame() {
     const sinceISO = since ? since.toISOString() : '1970-01-01';
 
     const [{ data: ps }, { data: rs }] = await Promise.all([
-      supabase.from('forum_posts').select('id, content, created_at, likes_count, user_id, product_id, is_spoiler, spoiler_achievement_name, edited_at').eq('product_id', gameId).gte('created_at', sinceISO).order('created_at', { ascending: false }).range(offset, offset + LIMIT - 1),
-      supabase.from('avaliacoes').select('id, rating, comment, created_at, user_id, is_spoiler, spoiler_achievement_name, edited_at').eq('product_id', gameId).eq('is_approved', true).gte('created_at', sinceISO).order('created_at', { ascending: false }).range(offset, offset + LIMIT - 1),
+      supabase.from('forum_posts').select('id, content, created_at, likes_count, user_id, product_id, is_spoiler, spoiler_achievement_name').eq('product_id', gameId).gte('created_at', sinceISO).order('created_at', { ascending: false }).range(offset, offset + LIMIT - 1),
+      supabase.from('avaliacoes').select('id, rating, comment, created_at, user_id, is_spoiler, spoiler_achievement_name').eq('product_id', gameId).eq('is_approved', true).gte('created_at', sinceISO).order('created_at', { ascending: false }).range(offset, offset + LIMIT - 1),
     ]);
 
     const userIds = new Set<string>();
@@ -188,7 +188,7 @@ export default function MForumGame() {
       replies: rc.get(p.id) || 0, author: pm.get(p.user_id) || 'Usuário',
       iLiked: postLikedSet.has(p.id),
       is_spoiler: !!p.is_spoiler, spoiler_achievement_name: p.spoiler_achievement_name || null,
-      edited_at: p.edited_at || null,
+      edited_at: null,
     }));
     const newReviews = (rs || []).map((r: any) => {
       const likeSet = likesMap.get(r.id) || new Set();
@@ -201,7 +201,7 @@ export default function MForumGame() {
         user_id: r.user_id, author: pm.get(r.user_id) || 'Usuário',
         likes: likeSet.size, dislikes: disSet.size, myReaction,
         is_spoiler: !!r.is_spoiler, spoiler_achievement_name: r.spoiler_achievement_name || null,
-        edited_at: r.edited_at || null,
+        edited_at: null,
       };
     });
 
