@@ -7580,6 +7580,10 @@ export type Database = {
         Args: { _owner: string; _viewer: string }
         Returns: boolean
       }
+      can_view_library_item: {
+        Args: { _owner: string; _viewer: string }
+        Returns: boolean
+      }
       can_view_post: {
         Args: {
           _kind: string
