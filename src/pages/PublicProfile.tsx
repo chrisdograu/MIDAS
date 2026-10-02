@@ -152,12 +152,6 @@ export default function PublicProfile() {
   const queryClient = useQueryClient();
   const { data: games = [] } = useProdutos();
 
-  useDocumentMeta({
-    title: profileTitle(userId),
-    description: 'Perfil de jogador na comunidade MIDIAS.',
-    type: 'profile',
-  });
-
   // Perfil público (RPC segura)
   const { data: profile, isLoading } = useQuery({
     queryKey: ['public-profile', userId],
@@ -327,6 +321,13 @@ export default function PublicProfile() {
   });
 
   const isOwn = user?.id === userId;
+
+  useDocumentMeta({
+    title: profile?.display_name ? `${profile.display_name} · MIDIAS` : 'Perfil · MIDIAS',
+    description: (profile?.bio || `Perfil de ${profile?.display_name || 'gamer'} no MIDIAS.`).slice(0, 160),
+    image: profile?.avatar_url || profile?.profile_cover_url || undefined,
+    type: 'profile',
+  });
 
   // GAP-580: Verificar se o usuário está online (4 níveis)
   const onlineVisibility = (profile as any)?.online_status_visibility || 'friends';
