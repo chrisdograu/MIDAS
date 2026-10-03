@@ -154,9 +154,9 @@ export default function MProfile() {
     if (!ids.length) { setFollowList([]); return; }
     const profs = await Promise.all(ids.slice(0, 100).map(async id => {
       const { data } = await supabase.rpc('get_public_profile', { _uid: id }).maybeSingle();
-      return data;
+      return data as { id: string; display_name: string | null; avatar_url: string | null } | null;
     }));
-    setFollowList(profs.filter((p): p is NonNullable<typeof p> => p != null).map(p => ({ id: p.id, display_name: p.display_name, avatar_url: p.avatar_url })));
+    setFollowList(profs.filter((p): p is NonNullable<typeof p> => p != null));
   };
 
   const handleBlock = async () => {
