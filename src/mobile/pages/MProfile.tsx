@@ -156,7 +156,7 @@ export default function MProfile() {
       const { data } = await supabase.rpc('get_public_profile', { _uid: id }).maybeSingle();
       return data;
     }));
-    setFollowList(profs.filter((p): p is NonNullable<typeof p> => p != null));
+    setFollowList(profs.filter((p): p is NonNullable<typeof p> => p != null).map(p => ({ id: p.id, display_name: p.display_name, avatar_url: p.avatar_url })));
   };
 
   const handleBlock = async () => {
