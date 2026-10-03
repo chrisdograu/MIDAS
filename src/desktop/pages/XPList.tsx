@@ -162,12 +162,10 @@ export default function XPList({ platform }: Props) {
     if (xp > 10000) return toast.error('XP máximo por concessão é 10.000');
     if (form.reason.trim().length < 4) return toast.error('Justificativa obrigatória (mínimo 4 caracteres)');
 
-    const { error } = await supabase.rpc('award_xp' as any, { 
-      _user_id: form.user_id, 
-      _action: 'admin_grant', 
-      _xp: xp, 
-      _ref_type: 'admin', 
-      _ref_id: null 
+    const { error } = await supabase.rpc('admin_grant_xp', {
+      _user_id: form.user_id,
+      _xp: xp,
+      _reason: form.reason.trim(),
     });
     if (error) return toast.error(error.message);
 

@@ -70,7 +70,9 @@ export default function MProfile() {
     (async () => {
       setLoading(true);
       const [{ data: p }, { data: revs }, { data: adsRaw }, { data: myReviews }, { data: myPosts }, { data: myLib }, { data: sp }] = await Promise.all([
-        supabase.from('profiles').select('id, display_name, avatar_url, bio, seller_bio, username, is_private, created_at').eq('id', targetId).maybeSingle(),
+        isOwn
+          ? supabase.from('profiles').select('id, display_name, avatar_url, bio, seller_bio, username, is_private, created_at').eq('id', targetId).maybeSingle()
+          : supabase.rpc('get_public_profile', { _uid: targetId }).maybeSingle(),
         supabase.from('avaliacoes_usuario').select('rating').eq('reviewed_id', targetId),
         supabase.from('anuncios').select('id, title, price').eq('seller_id', targetId).eq('status', 'active').limit(20),
         supabase.from('avaliacoes').select('id, product_id, rating, comment, created_at').eq('user_id', targetId).eq('is_approved', true).order('created_at', { ascending: false }).limit(30),
@@ -150,8 +152,11 @@ export default function MProfile() {
     const { data } = await supabase.from('user_follows').select(col).eq(filter, targetId);
     const ids = (data || []).map((d: any) => d[col]);
     if (!ids.length) { setFollowList([]); return; }
-    const { data: profs } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', ids);
-    setFollowList(profs || []);
+    const profs = await Promise.all(ids.slice(0, 100).map(async id => {
+      const { data } = await supabase.rpc('get_public_profile', { _uid: id }).maybeSingle();
+      return data as { id: string; display_name: string | null; avatar_url: string | null } | null;
+    }));
+    setFollowList(profs.filter((p): p is NonNullable<typeof p> => p != null));
   };
 
   const handleBlock = async () => {
