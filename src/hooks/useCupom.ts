@@ -45,29 +45,5 @@ export function useCupom() {
 
   const removerCupom = () => { setCupom(null); setError(null); };
 
-  /**
-   * Resgate atômico do cupom no fechamento do pedido.
-   * Usa `validate_and_use_coupon` RPC (com `SELECT ... FOR UPDATE`) para
-   * impedir corrida onde 2 pedidos simultâneos estourariam `max_uses`.
-   * Retorna o coupon_id em sucesso, ou joga o erro em falha.
-   */
-  const redeemCupom = async (orderId: string): Promise<string | null> => {
-    if (!cupom) return null;
-    const { data, error: err } = await (supabase as any).rpc('validate_and_use_coupon', {
-      _code: cupom.code,
-      _order_id: orderId,
-    });
-    if (err) {
-      const msg = err.message || '';
-      if (msg.includes('rate_limit_exceeded')) setError('Muitas tentativas. Aguarde alguns minutos e tente de novo.');
-      else if (msg.includes('coupon_exhausted')) setError('Cupom esgotado');
-      else if (msg.includes('coupon_expired')) setError('Cupom expirado');
-      else if (msg.includes('coupon_not_found')) setError('Cupom inválido');
-      else setError(msg || 'Falha ao resgatar cupom');
-      return null;
-    }
-    return data as string;
-  };
-
-  return { cupom, loading, error, validarCupom, removerCupom, redeemCupom };
+  return { cupom, loading, error, validarCupom, removerCupom };
 }
