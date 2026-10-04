@@ -17,7 +17,6 @@ import RequiresConnection from '@/components/RequiresConnection';
 import EstadoVazio from '@/components/EstadoVazio';
 import { ShoppingBag } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
-import { dbWrite } from '@/lib/dbWrite';
 import SelectSimples from '@/components/SelectSimples';
 
 type PaymentMethod = 'credit' | 'pix' | 'boleto';
@@ -101,7 +100,7 @@ function AddressForm({ value, onChange }: { value: any; onChange: (v: any) => vo
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
-  const { cupom, loading: cupomLoading, error: cupomError, validarCupom, removerCupom, redeemCupom } = useCupom();
+  const { cupom, loading: cupomLoading, error: cupomError, validarCupom, removerCupom } = useCupom();
   const { criarPedido } = usePedidos();
   const { toggleFavorito } = useFavoritos();
   const { user } = useAuth();
@@ -244,15 +243,6 @@ export default function Checkout() {
         // GAP-122: Endereço de entrega
         address: hasPhysicalItems ? address : null,
       });
-
-      if (cupom && pedido?.id) {
-        const couponId = await redeemCupom(pedido.id);
-        if (!couponId) {
-          await dbWrite(supabase.from('pedidos').update({ status: 'cancelled' as any }).eq('id', pedido.id));
-          toast.error('Cupom não pôde ser aplicado. Pedido cancelado.');
-          return;
-        }
-      }
 
       clearCart();
       toast.success('Compra realizada com sucesso!');

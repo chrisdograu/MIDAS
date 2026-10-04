@@ -121,19 +121,42 @@ export default function FriendProfile() {
     },
   });
 
-  // GAP-493: Verificar se está silenciado
+  const getOrCreateConversation = async () => {
+    if (!user || !userId) throw new Error('not_authenticated');
+
+    const { data: existing, error: existingError } = await supabase
+      .from('conversas')
+      .select('id')
+      .or(`and(participant_1.eq.${user.id},participant_2.eq.${userId}),and(participant_1.eq.${userId},participant_2.eq.${user.id})`)
+      .eq('status', 'accepted')
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (existing?.id) return existing.id as string;
+
+    const { data: created, error: createError } = await supabase
+      .from('conversas')
+      .insert({ participant_1: user.id, participant_2: userId, status: 'accepted' })
+      .select('id')
+      .single();
+    if (createError) throw createError;
+    return created.id as string;
+  };
+
+  // GAP-493: Verificar se a conversa está silenciada
   const { data: mutedStatus } = useQuery({
     queryKey: ['friend-muted', user?.id, userId],
-    enabled: !!user && !!userId,
+    enabled: !!user && !!userId && !!isMutual,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('friend_settings' as any)
+      const conversationId = await getOrCreateConversation();
+      const { data, error } = await supabase
+        .from('conversation_settings')
         .select('is_muted')
-        .eq('user_id', user!.id)
-        .eq('friend_id', userId!)
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user?.id)
         .maybeSingle();
-      setIsMuted(!!data?.is_muted);
-      return !!data?.is_muted;
+      if (error) throw error;
+      setIsMuted(!!data?.muted);
+      return !!data?.muted;
     },
   });
 
@@ -141,14 +164,15 @@ export default function FriendProfile() {
   const muteMutation = useMutation({
     mutationFn: async (muted: boolean) => {
       if (!user || !userId) return;
+      const conversationId = await getOrCreateConversation();
       const { error } = await supabase
-        .from('friend_settings' as any)
+        .from('conversation_settings')
         .upsert({
+          conversation_id: conversationId,
           user_id: user.id,
-          friend_id: userId,
-          is_muted: muted,
+          muted,
           updated_at: new Date().toISOString(),
-        });
+        }, { onConflict: 'conversation_id,user_id' });
       if (error) throw error;
     },
     onSuccess: (_, muted) => {
@@ -165,38 +189,34 @@ export default function FriendProfile() {
   const handleSendMessage = async () => {
     if (!user || !userId) return;
     try {
-      // Verificar se já existe conversa
-      const { data: existing } = await supabase
-        .from('conversas')
-        .select('id')
-        .or(`and(participant_1.eq.${user.id},participant_2.eq.${userId}),and(participant_1.eq.${userId},participant_2.eq.${user.id})`)
-        .eq('status', 'accepted')
-        .maybeSingle();
-      
-      if (existing) {
-        navigate(`/m/chat/${existing.id}`);
-        return;
-      }
-      
-      // Criar nova conversa
-      const { data: newConv, error } = await supabase
-        .from('conversas')
-        .insert({ participant_1: user.id, participant_2: userId, status: 'accepted' })
-        .select('id')
-        .single();
-      
-      if (error) throw error;
-      navigate(`/m/chat/${newConv.id}`);
+      const conversationId = await getOrCreateConversation();
+      navigate(`/m/chat/${conversationId}`);
     } catch {
       toast.error('Erro ao iniciar conversa');
     }
   };
 
-  // GAP-490: Chamar para jogar (abre modal de convite - simplificado)
-  const handleInviteToPlay = () => {
-    toast.info('🎮 Convite para jogar enviado!', {
-      description: `${profile?.display_name || 'Amigo'} receberá sua solicitação.`,
-    });
+  // GAP-490: Chamar para jogar por uma mensagem real na conversa
+  const handleInviteToPlay = async () => {
+    if (!user || !userId) return;
+    try {
+      const conversationId = await getOrCreateConversation();
+      const content = '🎮 Quer jogar comigo?';
+      const { error } = await supabase.from('mensagens').insert({
+        sender_id: user.id,
+        receiver_id: userId,
+        content,
+        message_type: 'text',
+      });
+      if (error) throw error;
+      await supabase.from('conversas').update({
+        last_message: content,
+        last_message_at: new Date().toISOString(),
+      }).eq('id', conversationId);
+      toast.success('Convite para jogar enviado!');
+    } catch {
+      toast.error('Não foi possível enviar o convite');
+    }
   };
 
   // Verificar se está online (GAP-489)
@@ -210,11 +230,10 @@ export default function FriendProfile() {
     queryKey: ['friend-profile', userId],
     enabled: !!userId,
     queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select(
-        'id, display_name, avatar_url, bio, banner_url, username, is_private, active_title_id, seller_bio, gamer_personality, favorite_genres, current_game_id, monthly_favorites, backlog_note, library_visibility, theme_color, profile_cover_url, trophy_showcase, always_hide_spoilers, created_at, updated_at, last_seen_at'
-      ).eq('id', userId!).maybeSingle();
+      if (!userId) return null;
+      const { data, error } = await (supabase as any).rpc('get_public_profile', { _uid: userId });
       if (error) throw error;
-      return data;
+      return (Array.isArray(data) ? data[0] : data) ?? null;
     },
   });
 

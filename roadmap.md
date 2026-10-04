@@ -1,6 +1,9 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
+- [x] Corrigir aplicação e contabilização atômica de cupons no checkout.
+- [x] Impedir clientes de alterarem diretamente valores ou status de pedidos.
+- [x] Corrigir perfil de amigos para usar perfil público seguro, silenciamento da conversa e convite real.
 - [x] Corrigir os erros React que derrubam fórum e tutorial.
 - [x] Aplicar filtros recolhíveis do marketplace em `/m/forum` e `/m/forum/:gameId`.
 - [x] Encaminhar tutoriais web diretamente para a experiência web.
