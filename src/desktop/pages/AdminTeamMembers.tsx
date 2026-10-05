@@ -17,10 +17,12 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { adminLog, exportCsv } from '../lib/adminLog';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
+import { useDesktopAuth } from '@/hooks/useDesktopAuth';
 
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminTeamMembers() {
+  const { position } = useDesktopAuth();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -69,7 +71,7 @@ export default function AdminTeamMembers() {
     }
   };
 
-  useEffect(() => { load(); }, [search]);
+  useEffect(() => { if (position === 'admin') load(); }, [search, position]);
 
   const generateSlug = (name) => {
     return name
@@ -296,6 +298,8 @@ export default function AdminTeamMembers() {
     setExporting(false);
     toast.success('Dados exportados!');
   };
+
+  if (position !== 'admin') return <div className="p-6 text-muted-foreground">Somente administradores podem editar a equipe.</div>;
 
   if (loading) {
     return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;

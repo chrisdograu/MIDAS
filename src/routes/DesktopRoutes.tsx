@@ -54,6 +54,8 @@ const VendedoresAdmin = lazy(() => import("@/desktop/pages/VendedoresAdmin"));
 const VerificacaoResponsaveis = lazy(() => import("@/desktop/pages/VerificacaoResponsaveis"));
 const ChatAlertsQueue = lazy(() => import("@/desktop/pages/ChatAlertsQueue"));
 const ParametrosSistema = lazy(() => import("@/desktop/pages/ParametrosSistema"));
+const AdminDevelopers = lazy(() => import("@/desktop/pages/AdminDevelopers"));
+const AdminTeamMembers = lazy(() => import("@/desktop/pages/AdminTeamMembers"));
 
 export const desktopRoutes = (
   <>
@@ -65,6 +67,8 @@ export const desktopRoutes = (
       <Route path="clientes" element={<Clientes />} />
       <Route path="fornecedores" element={<Fornecedores />} />
       <Route path="categorias" element={<Categorias />} />
+      <Route path="desenvolvedores" element={<AdminDevelopers />} />
+      <Route path="equipe" element={<AdminTeamMembers />} />
       <Route path="cupons" element={<Cupons />} />
       <Route path="estoque" element={<Estoque />} />
       <Route path="pedidos" element={<PedidosOnline />} />

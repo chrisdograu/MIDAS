@@ -1,6 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
+- [x] Fazer páginas Equipe e Desenvolvedores exibirem dados editáveis pelo painel desktop.
 - [x] Corrigir aplicação e contabilização atômica de cupons no checkout.
 - [x] Impedir clientes de alterarem diretamente valores ou status de pedidos.
 - [x] Corrigir perfil de amigos para usar perfil público seguro, silenciamento da conversa e convite real.

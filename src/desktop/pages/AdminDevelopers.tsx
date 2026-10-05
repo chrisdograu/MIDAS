@@ -16,6 +16,7 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { adminLog, exportCsv } from '../lib/adminLog';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
+import { useDesktopAuth } from '@/hooks/useDesktopAuth';
 
 interface Developer {
   id: string;
@@ -49,6 +50,7 @@ interface Developer {
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminDevelopers() {
+  const { position } = useDesktopAuth();
   const [developers, setDevelopers] = useState<Developer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -149,7 +151,7 @@ export default function AdminDevelopers() {
     }
   };
 
-  useEffect(() => { load(); }, [search]);
+  useEffect(() => { if (position === 'admin') load(); }, [search, position]);
 
   const resetForm = () => {
     setForm({
@@ -376,6 +378,8 @@ export default function AdminDevelopers() {
 
   const totalPages = Math.ceil(developers.length / ITEMS_PER_PAGE);
   const paginated = developers.slice(0, (page + 1) * ITEMS_PER_PAGE);
+
+  if (position !== 'admin') return <div className="p-6 text-muted-foreground">Somente administradores podem editar desenvolvedores.</div>;
 
   if (loading) {
     return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;

@@ -7,6 +7,7 @@ import {
   Sun, Moon, Settings, Loader2, Ticket, Lightbulb, Trophy, Zap,
   Library, FileText, AlertTriangle, LifeBuoy, Plug, Sparkles, Boxes, Store,
   Search, Command, Wifi, WifiOff,
+  Building2,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/hooks/useTheme';
@@ -78,6 +79,8 @@ const navSections: {
       { title: 'Clientes', url: '/desktop/clientes', icon: Users, route: 'clientes' },
       { title: 'Fornecedores', url: '/desktop/fornecedores', icon: Truck, route: 'fornecedores' },
       { title: 'Categorias', url: '/desktop/categorias', icon: Tags, route: 'categorias' },
+      { title: 'Desenvolvedores', url: '/desktop/desenvolvedores', icon: Building2, route: 'desenvolvedores' },
+      { title: 'Equipe', url: '/desktop/equipe', icon: Users, route: 'equipe' },
     ],
   },
   {
