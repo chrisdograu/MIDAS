@@ -1,20 +1,36 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Github, Linkedin, Mail, Users } from 'lucide-react';
+import { ArrowLeft, Github, Linkedin, Mail, Users, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import EstadoVazio from '@/components/EstadoVazio';
+import ErroCarregamento from '@/components/ErroCarregamento';
 
-const teamMembers = [
-  {
-    id: '1',
-    name: 'Christopher',
-    role: 'Desenvolvedor Full Stack',
-    photo: null,
-    bio: 'Responsável pela arquitetura da plataforma, desenvolvimento web e mobile, e integrações com Supabase.',
-    github: 'https://github.com',
-    linkedin: 'https://linkedin.com',
-    email: 'chris@midias.com.br',
-  },
-];
+type SocialLinks = { github?: string; linkedin?: string; email?: string };
+
+function safeLink(value?: string) {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function Equipe() {
+  const { data: teamMembers = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ['public-team-members'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id, name, role, photo_url, bio, social_links')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
@@ -31,12 +47,20 @@ export default function Equipe() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {teamMembers.map((member) => (
-          <div key={member.id} className="bg-card border border-border rounded-2xl p-6 text-center hover:border-primary/40 transition-colors">
+      {isLoading ? (
+        <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+      ) : isError ? (
+        <ErroCarregamento titulo="Não foi possível carregar a equipe" onRetry={() => refetch()} />
+      ) : teamMembers.length === 0 ? (
+        <EstadoVazio icone={Users} titulo="Equipe ainda não cadastrada" />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {teamMembers.map((member) => {
+            const links = (member.social_links ?? {}) as SocialLinks;
+            return <div key={member.id} className="bg-card border border-border rounded-2xl p-6 text-center hover:border-primary/40 transition-colors">
             <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-3xl font-bold text-primary-foreground mb-4">
-              {member.photo ? (
-                <img src={member.photo} alt={member.name} className="w-full h-full object-cover rounded-full" loading="lazy" />
+              {member.photo_url ? (
+                <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover rounded-full" loading="lazy" />
               ) : (
                 member.name[0]
               )}
@@ -47,25 +71,26 @@ export default function Equipe() {
               <p className="text-sm text-muted-foreground mt-2">{member.bio}</p>
             )}
             <div className="flex items-center justify-center gap-3 mt-4">
-              {member.github && (
-                <a href={member.github} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
+              {safeLink(links.github) && (
+                <a href={safeLink(links.github) ?? undefined} aria-label={`GitHub de ${member.name}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
                   <Github className="h-4 w-4" />
                 </a>
               )}
-              {member.linkedin && (
-                <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
+              {safeLink(links.linkedin) && (
+                <a href={safeLink(links.linkedin) ?? undefined} aria-label={`LinkedIn de ${member.name}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
                   <Linkedin className="h-4 w-4" />
                 </a>
               )}
-              {member.email && (
-                <a href={`mailto:${member.email}`} className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
+              {links.email && (
+                <a href={`mailto:${encodeURIComponent(links.email)}`} aria-label={`E-mail de ${member.name}`} className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
                   <Mail className="h-4 w-4" />
                 </a>
               )}
             </div>
-          </div>
-        ))}
-      </div>
+          </div>;
+          })}
+        </div>
+      )}
 
       <div className="mt-12 p-6 bg-card border border-border rounded-2xl text-center">
         <p className="text-sm text-muted-foreground">

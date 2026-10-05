@@ -147,11 +147,18 @@ export default function FriendProfile() {
     queryKey: ['friend-muted', user?.id, userId],
     enabled: !!user && !!userId && !!isMutual,
     queryFn: async () => {
-      const conversationId = await getOrCreateConversation();
+      const { data: conversation, error: conversationError } = await supabase
+        .from('conversas')
+        .select('id')
+        .or(`and(participant_1.eq.${user?.id},participant_2.eq.${userId}),and(participant_1.eq.${userId},participant_2.eq.${user?.id})`)
+        .eq('status', 'accepted')
+        .maybeSingle();
+      if (conversationError) throw conversationError;
+      if (!conversation) return false;
       const { data, error } = await supabase
         .from('conversation_settings')
-        .select('is_muted')
-        .eq('conversation_id', conversationId)
+        .select('muted')
+        .eq('conversation_id', conversation.id)
         .eq('user_id', user?.id)
         .maybeSingle();
       if (error) throw error;
