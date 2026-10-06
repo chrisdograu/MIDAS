@@ -36,13 +36,14 @@ const NewsletterSection = () => {
       <p className="text-sm text-muted-foreground mb-3">
         Receba ofertas exclusivas e novidades
       </p>
-      <form onSubmit={handleSubscribe} className="flex gap-2">
+      <form onSubmit={handleSubscribe} className="flex flex-col gap-2 max-w-sm">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Seu e-mail"
-          className="flex-1 px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          aria-label="Seu e-mail"
+          className="w-full min-w-0 px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           required
         />
         <button
@@ -107,7 +108,7 @@ export default function Footer() {
     <>
       <footer className="border-t border-border mt-16">
         <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Brand */}
             <div className="lg:col-span-1">
               <Link to="/" className="flex items-center gap-2 mb-4">
@@ -130,16 +131,7 @@ export default function Footer() {
                     <social.icon className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
                   </a>
                 ))}
-              
-              <Link to="/privacidade" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                Política de Privacidade
-              </Link>
-              <Link to="/equipe" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                Equipe
-              </Link>
-              <Link to="/desenvolvedores" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                Desenvolvedores
-              </Link></div>
+              </div>
             </div>
 
             {/* Navegação */}
@@ -150,6 +142,9 @@ export default function Footer() {
                 <li><Link to="/catalogo" className="hover:text-primary transition-colors">Catálogo</Link></li>
                 <li><Link to="/ofertas" className="hover:text-primary transition-colors">Ofertas</Link></li>
                 {user && <li><Link to="/biblioteca" className="hover:text-primary transition-colors">Biblioteca</Link></li>}
+                <li><Link to="/equipe" className="hover:text-primary transition-colors">Equipe</Link></li>
+                <li><Link to="/desenvolvedores" className="hover:text-primary transition-colors">Desenvolvedores</Link></li>
+                <li><Link to="/privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link></li>
               </ul>
             </div>
 
