@@ -1,7 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
-- [ ] Corrigir e testar páginas individuais de desenvolvedores e revisar textos e informações públicas da equipe.
+- [x] Corrigir e testar páginas individuais de desenvolvedores e revisar textos e informações públicas da equipe.
 
 - [x] Fazer páginas Equipe e Desenvolvedores exibirem dados editáveis pelo painel desktop.
 - [x] Corrigir aplicação e contabilização atômica de cupons no checkout.
