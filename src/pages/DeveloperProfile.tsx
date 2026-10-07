@@ -8,54 +8,79 @@ import {
 } from 'lucide-react';
 import EstadoVazio from '@/components/EstadoVazio';
 import GameCard from '@/components/GameCard';
-import { HalfStarDisplay } from '@/components/HalfStarRating';
+import { Game, mapProdutoToGame } from '@/lib/gameData';
+import ErroCarregamento from '@/components/ErroCarregamento';
+import { Button } from '@/components/ui/button';
+
+interface Developer {
+  id: string;
+  name: string;
+  banner_url: string | null;
+  logo_url: string | null;
+  founded_year: number | null;
+  country: string | null;
+  headquarters: string | null;
+  employees: number | null;
+  parent_company: string | null;
+  website: string | null;
+  wikipedia_url: string | null;
+  bio: string | null;
+  description: string | null;
+  notable_games: string[] | null;
+  social_links: { twitter?: string; youtube?: string; instagram?: string } | null;
+}
 
 export default function DeveloperProfile() {
   const { id } = useParams();
-  const [developer, setDeveloper] = useState(null);
-  const [games, setGames] = useState([]);
-  const [stats, setStats] = useState(null);
+  const [developer, setDeveloper] = useState<Developer | null>(null);
+  const [games, setGames] = useState<Game[]>([]);
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
   const [loading, setLoading] = useState(true);
   const [platformFilter, setPlatformFilter] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
 
   useEffect(() => {
-    if (!id) return;
+    let cancelled = false;
     (async () => {
       setLoading(true);
-      
-      const { data: dev } = await supabase
+      setError(false);
+      setDeveloper(null);
+      setGames([]);
+      if (!id) { setLoading(false); return; }
+      try {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const { data: dev, error: devError } = await supabase
         .from('developers')
         .select('*')
-        .eq('id', id)
+        .eq(isUuid ? 'id' : 'slug', id)
         .maybeSingle();
-      
+      if (cancelled) return;
+      if (devError) throw devError;
       if (!dev) {
-        setLoading(false);
         return;
       }
       
       setDeveloper(dev);
       
-      const { data: prods } = await supabase
+      const { data: prods, error: productsError } = await supabase
         .from('produtos')
         .select('*')
-        .eq('developer_id', id)
+        .eq('developer_id', dev.id)
         .eq('is_active', true)
         .order('release_date', { ascending: false });
       
-      setGames(prods || []);
-      
-      const { data: statsData } = await supabase
-        .rpc('get_developer_stats', { _developer_id: id });
-      
-      if (statsData) {
-        setStats(statsData);
+      if (cancelled) return;
+      if (productsError) throw productsError;
+      setGames((prods || []).map(mapProdutoToGame));
+      } catch {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      
-      setLoading(false);
     })();
-  }, [id]);
+    return () => { cancelled = true; };
+  }, [id, retry]);
 
   const getPlatforms = () => {
     const platforms = new Set<string>();
@@ -72,10 +97,15 @@ export default function DeveloperProfile() {
     .sort((a, b) => {
       if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
       if (sortBy === 'price') return a.price - b.price;
-      return new Date(b.release_date || 0).getTime() - new Date(a.release_date || 0).getTime();
+      return new Date(b.releaseDate || 0).getTime() - new Date(a.releaseDate || 0).getTime();
     });
 
   const platforms = getPlatforms();
+  const ratedGames = games.filter(game => game.rating > 0);
+  const averageRating = ratedGames.length ? ratedGames.reduce((sum, game) => sum + game.rating, 0) / ratedGames.length : null;
+  const platformCounts = new Map<string, number>();
+  games.forEach(game => game.platform.forEach(platform => platformCounts.set(platform, (platformCounts.get(platform) ?? 0) + 1)));
+  const mostCommonPlatform = [...platformCounts].sort((a, b) => b[1] - a[1])[0]?.[0];
 
   if (loading) {
     return (
@@ -85,6 +115,10 @@ export default function DeveloperProfile() {
     );
   }
 
+  if (error) {
+    return <div className="container mx-auto px-4 py-20"><ErroCarregamento titulo="Não foi possível carregar o desenvolvedor" onRetry={() => setRetry(value => value + 1)} /></div>;
+  }
+
   if (!developer) {
     return (
       <div className="container mx-auto px-4 py-20">
@@ -92,7 +126,7 @@ export default function DeveloperProfile() {
           icone={Building2}
           titulo="Desenvolvedor não encontrado"
           descricao="O estúdio que você procura pode não estar cadastrado."
-          acao={{ label: 'Voltar ao catálogo', to: '/catalogo' }}
+          acao={{ label: 'Ver desenvolvedores', to: '/desenvolvedores' }}
         />
       </div>
     );
@@ -194,7 +228,7 @@ export default function DeveloperProfile() {
           )}
           {developer.notable_games && developer.notable_games.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-4 mt-4">
-              <h3 className="text-sm font-semibold text-foreground mb-2">Jogos Famosos</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Jogos de destaque</h3>
               <div className="flex flex-wrap gap-2">
                 {developer.notable_games.map((game, i) => (
                   <span key={i} className="px-3 py-1 rounded-full bg-secondary text-xs text-foreground">
@@ -216,17 +250,12 @@ export default function DeveloperProfile() {
               </div>
               <div className="text-center p-3 bg-secondary/40 rounded-lg">
                 <Star className="h-5 w-5 text-warning mx-auto mb-1" />
-                <p className="text-xl font-bold">{stats?.average_rating?.toFixed(1) || '-'}</p>
+                <p className="text-xl font-bold">{averageRating?.toFixed(1) || '—'}</p>
                 <p className="text-[10px] text-muted-foreground">Média</p>
               </div>
               <div className="text-center p-3 bg-secondary/40 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-accent mx-auto mb-1" />
-                <p className="text-xl font-bold">{stats?.total_views || 0}</p>
-                <p className="text-[10px] text-muted-foreground">Visualizações</p>
-              </div>
-              <div className="text-center p-3 bg-secondary/40 rounded-lg">
                 <Award className="h-5 w-5 text-price mx-auto mb-1" />
-                <p className="text-xl font-bold">{stats?.most_played_platform || '-'}</p>
+                <p className="text-xl font-bold">{mostCommonPlatform || '—'}</p>
                 <p className="text-[10px] text-muted-foreground">Plataforma</p>
               </div>
             </div>
@@ -245,13 +274,16 @@ export default function DeveloperProfile() {
               {platforms.length > 1 && (
                 <div className="flex items-center gap-1 bg-secondary/40 rounded-lg p-1">
                   {platforms.map(p => (
-                    <button
+                    <Button
                       key={p}
+                      variant={platformFilter === p ? 'default' : 'ghost'}
+                      size="sm"
+                      aria-pressed={platformFilter === p}
                       onClick={() => setPlatformFilter(p)}
                       className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${platformFilter === p ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                       {p === 'all' ? 'Todos' : p}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
