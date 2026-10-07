@@ -47,6 +47,7 @@ const PrivacidadeCentral = lazy(() => import("@/pages/PrivacidadeCentral"));
 const VendedorConfig = lazy(() => import("@/pages/VendedorConfig"));
 const Oportunidades = lazy(() => import("@/pages/Oportunidades"));
 const DevelopersList = lazy(() => import("@/pages/DevelopersList"));
+const DeveloperProfile = lazy(() => import("@/pages/DeveloperProfile"));
 const Equipe = lazy(() => import("@/pages/Equipe"));
 
 type Meta = { title: string; description: string; type?: 'website' | 'profile' | 'article' | 'product' };
@@ -108,6 +109,7 @@ const entries: { path: string; el: React.ReactNode; meta: Meta }[] = [
   { path: '/vendedor', el: <ProtectedRoute><VendedorConfig /></ProtectedRoute>, meta: { title: 'Configuração de vendedor | MIDIAS', description: 'Gerencie seu perfil de vendedor, modo férias e privacidade dos seus anúncios.' } },
   { path: '/oportunidades', el: <Oportunidades />, meta: { title: 'Oportunidades | MIDIAS', description: 'Achados do marketplace e da loja: melhores preços, trocas e itens raros disponíveis agora.' } },
   { path: '/desenvolvedores', el: <DevelopersList />, meta: { title: 'Desenvolvedores | MIDIAS', description: 'Conheça os estúdios responsáveis pelos jogos do catálogo MIDIAS.' } },
+  { path: '/desenvolvedor/:id', el: <DeveloperProfile />, meta: { title: 'Desenvolvedor | MIDIAS', description: 'Conheça o estúdio e os seus jogos disponíveis no catálogo MIDIAS.' } },
   { path: '/equipe', el: <Equipe />, meta: { title: 'Equipe | MIDIAS', description: 'Conheça a equipe do projeto MIDIAS.' } },
 ];
 

@@ -128,7 +128,7 @@ export default function AdminTeamMembers() {
 
   const save = async () => {
     if (!form.name.trim() || !form.role.trim()) {
-      toast.error('Nome e cargo sao obrigatorios');
+      toast.error('Nome e cargo são obrigatórios');
       return;
     }
 
@@ -267,11 +267,11 @@ export default function AdminTeamMembers() {
         action: 'delete_team_member',
         entity: 'team_members',
         entity_id: deleteTarget.id,
-        reason: `Membro "${deleteTarget.name}" excluido`,
+        reason: `Membro "${deleteTarget.name}" excluído`,
         payload: { name: deleteTarget.name },
       });
 
-      toast.success('Membro excluido!');
+      toast.success('Membro excluído!');
       setDeleteTarget(null);
       load();
     } catch (error) {
@@ -286,7 +286,7 @@ export default function AdminTeamMembers() {
     const data = members.map((m) => ({
       Nome: m.name,
       Cargo: m.role,
-      Ativo: m.is_active ? 'Sim' : 'Nao',
+      Ativo: m.is_active ? 'Sim' : 'Não',
       Ordem: m.display_order || 0,
       Bio: m.bio || '',
       GitHub: m.social_links?.github || '',
@@ -318,7 +318,7 @@ export default function AdminTeamMembers() {
               {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Exportar'}
             </Button>
             <Button onClick={openCreate}>
-              <Plus className="h-4 w-4 mr-1" /> Novo Membro
+              <Plus className="h-4 w-4 mr-1" /> Novo membro
             </Button>
           </div>
         }
@@ -347,7 +347,7 @@ export default function AdminTeamMembers() {
                 <TableHead>Membro</TableHead>
                 <TableHead>Cargo</TableHead>
                 <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-right">Acoes</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -410,7 +410,7 @@ export default function AdminTeamMembers() {
       <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) setDialogOpen(false); }}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? 'Editar Membro' : 'Novo Membro'}</DialogTitle>
+             <DialogTitle>{editing ? 'Editar membro' : 'Novo membro'}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
@@ -462,7 +462,7 @@ export default function AdminTeamMembers() {
               <Label>Ativo</Label>
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>Bio (curta)</Label>
+              <Label>Biografia curta</Label>
               <Textarea
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -470,7 +470,7 @@ export default function AdminTeamMembers() {
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>Descricao Longa</Label>
+              <Label>Descrição completa</Label>
               <Textarea
                 value={form.long_description}
                 onChange={(e) => setForm({ ...form, long_description: e.target.value })}
@@ -494,7 +494,7 @@ export default function AdminTeamMembers() {
               <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>E-mail</Label>
               <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
           </div>
