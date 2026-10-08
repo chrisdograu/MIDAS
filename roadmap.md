@@ -1,6 +1,11 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
+- [ ] Permitir envio de fotos e edição completa da equipe e desenvolvedores, exibindo os campos públicos.
+- [ ] Criar publicações oficiais e comentários somente no perfil web dos desenvolvedores.
+- [ ] Permitir ao administrador delegar e revogar a gestão apenas do canal de cada desenvolvedor.
+- [ ] Validar permissões, fotos e publicação/comentário; fluxos com login dependem de acesso de teste.
+
 - [x] Corrigir e testar páginas individuais de desenvolvedores e revisar textos e informações públicas da equipe.
 
 - [x] Fazer páginas Equipe e Desenvolvedores exibirem dados editáveis pelo painel desktop.
