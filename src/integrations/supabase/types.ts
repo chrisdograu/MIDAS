@@ -1515,6 +1515,156 @@ export type Database = {
           },
         ]
       }
+      developer_channel_managers: {
+        Row: {
+          created_at: string
+          developer_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          developer_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          developer_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_channel_managers_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_channel_managers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_channel_managers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developer_update_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          update_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          update_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          update_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_update_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_update_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_update_comments_update_id_fkey"
+            columns: ["update_id"]
+            isOneToOne: false
+            referencedRelation: "developer_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developer_updates: {
+        Row: {
+          author_id: string
+          body: string
+          comments_open: boolean
+          created_at: string
+          developer_id: string
+          id: string
+          images: string[]
+          is_pinned: boolean
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          comments_open?: boolean
+          created_at?: string
+          developer_id: string
+          id?: string
+          images?: string[]
+          is_pinned?: boolean
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          comments_open?: boolean
+          created_at?: string
+          developer_id?: string
+          id?: string
+          images?: string[]
+          is_pinned?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_updates_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_updates_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_updates_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       developers: {
         Row: {
           banner_url: string | null
@@ -7469,6 +7619,10 @@ export type Database = {
         Args: { _request_id: string }
         Returns: undefined
       }
+      admin_assign_developer_channel: {
+        Args: { _developer_id: string; _username: string }
+        Returns: undefined
+      }
       admin_ban_user: {
         Args: { _reason: string; _until?: string; _user_id: string }
         Returns: undefined
@@ -7570,6 +7724,10 @@ export type Database = {
       }
       can_equip_title: {
         Args: { _title: string; _user: string }
+        Returns: boolean
+      }
+      can_manage_developer_channel: {
+        Args: { _developer_id: string }
         Returns: boolean
       }
       can_view_friend_content: {
