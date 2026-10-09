@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { defaultDeveloperFilters, filterDeveloperGames, releaseYear } from '@/lib/developerCatalog';
 import type { Game } from '@/lib/gameData';
-const game = (changes: Partial<Game>): Game => ({ id: '1', title: 'Ação', image: '', price: 40, originalPrice: 80, discount: 50, category: 'Aventura', platform: ['PC'], rating: 4.5, description: '', releaseDate: '2024-01-01', publisher: '', tags: ['Exploração'], stock: 3, ...changes });
+const game = (changes: Partial<Game>): Game => ({ id: '1', title: 'Árvore', image: '', price: 40, originalPrice: 80, discount: 50, category: 'Aventura', platform: ['PC'], rating: 4.5, description: '', releaseDate: '2024-01-01', publisher: '', tags: ['Exploração'], stock: 3, ...changes });
 const games = [game({}), game({ id: '2', title: 'Beta', platform: ['Switch'], price: 0, originalPrice: 0, rating: 3, releaseDate: '2023-01-01', stock: 0 }), game({ id: '3', title: 'Novo', price: 120, originalPrice: 120, releaseDate: '' })];
 describe('developer catalog', () => {
   it('searches titles and tags without accents', () => {
-    expect(filterDeveloperGames(games, { ...defaultDeveloperFilters, search: 'acao' }).map(g => g.id)).toEqual(['1']);
+    expect(filterDeveloperGames(games, { ...defaultDeveloperFilters, search: 'arvore' }).map(g => g.id)).toEqual(['1']);
     expect(filterDeveloperGames(games, { ...defaultDeveloperFilters, search: 'exploracao' })).toHaveLength(3);
   });
   it('combines platform, category, year, price, rating and availability', () => {
