@@ -1,0 +1,5 @@
+ALTER FUNCTION public.can_manage_developer_channel(uuid) SECURITY INVOKER;
+ALTER FUNCTION public.admin_assign_developer_channel(uuid,text) SECURITY INVOKER;
+CREATE POLICY developer_channel_image_upload ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id='product-images' AND (storage.foldername(name))[1]='developer-updates' AND public.can_manage_developer_channel(CASE WHEN (storage.foldername(name))[2] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN (storage.foldername(name))[2]::uuid ELSE NULL END));
+CREATE FUNCTION public.touch_developer_channel_manager() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN NEW.updated_at=now(); RETURN NEW; END; $$;
+CREATE TRIGGER touch_developer_channel_manager BEFORE UPDATE ON public.developer_channel_managers FOR EACH ROW EXECUTE FUNCTION public.touch_developer_channel_manager();
