@@ -9,7 +9,7 @@ import {
 import EstadoVazio from '@/components/EstadoVazio';
 import { Game, mapProdutoToGame } from '@/lib/gameData';
 import ErroCarregamento from '@/components/ErroCarregamento';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import DeveloperUpdates from '@/components/developer/DeveloperUpdates';
 import DeveloperGameCatalog from '@/components/developer/DeveloperGameCatalog';
 import { releaseYear } from '@/lib/developerCatalog';
@@ -195,9 +195,9 @@ export default function DeveloperProfile() {
       </div>
 
       <nav aria-label="Seções do desenvolvedor" className="flex flex-wrap gap-2 mt-6 border-b border-border pb-4">
-        <Button variant="ghost" size="sm" asChild><a href="#sobre">Sobre o estúdio</a></Button>
-        <Button variant="ghost" size="sm" asChild><a href="#jogos">Jogos ({games.length})</a></Button>
-        <Button variant="ghost" size="sm" asChild><a href="#publicacoes">Publicações oficiais</a></Button>
+        <a className={buttonVariants({ variant: 'ghost', size: 'sm' })} href="#sobre">Sobre o estúdio</a>
+        <a className={buttonVariants({ variant: 'ghost', size: 'sm' })} href="#jogos">Jogos ({games.length})</a>
+        <a className={buttonVariants({ variant: 'ghost', size: 'sm' })} href="#publicacoes">Publicações oficiais</a>
       </nav>
 
       <section id="sobre" className="scroll-mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
@@ -210,7 +210,7 @@ export default function DeveloperProfile() {
             <h3 className="text-sm font-semibold mb-2">Jogos de destaque</h3>
             <div className="flex flex-wrap gap-2">{developer.notable_games.map((title, index) => {
               const game = games.find(item => item.title.toLocaleLowerCase() === title.toLocaleLowerCase());
-              return game ? <Button key={index} variant="secondary" size="sm" asChild><Link to={`/jogo/${game.id}`}>{title}</Link></Button> : <span key={index} className="px-3 py-1.5 rounded-md bg-secondary text-xs break-words">{title}</span>;
+              return game ? <Link key={index} className={buttonVariants({ variant: 'secondary', size: 'sm' })} to={`/jogo/${game.id}`}>{title}</Link> : <span key={index} className="px-3 py-1.5 rounded-md bg-secondary text-xs break-words">{title}</span>;
             })}</div>
           </div>}
           {categories.length > 0 && <div><h3 className="text-sm font-semibold mb-2">Categorias no catálogo</h3><p className="text-sm text-muted-foreground">{categories.join(' · ')}</p></div>}
