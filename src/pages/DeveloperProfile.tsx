@@ -4,14 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   Loader2, ArrowLeft, Calendar, Globe, Building2, Gamepad2, MapPin, 
   Users, Twitter, Youtube, Instagram, Facebook, ExternalLink, 
-  TrendingUp, Star, Award, Clock, Filter, X, BookOpen
+  Star, BookOpen
 } from 'lucide-react';
 import EstadoVazio from '@/components/EstadoVazio';
-import GameCard from '@/components/GameCard';
 import { Game, mapProdutoToGame } from '@/lib/gameData';
 import ErroCarregamento from '@/components/ErroCarregamento';
 import { Button } from '@/components/ui/button';
 import DeveloperUpdates from '@/components/developer/DeveloperUpdates';
+import DeveloperGameCatalog from '@/components/developer/DeveloperGameCatalog';
+import { releaseYear } from '@/lib/developerCatalog';
 
 interface Developer {
   id: string;
@@ -38,8 +39,6 @@ export default function DeveloperProfile() {
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [platformFilter, setPlatformFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('recent');
 
   useEffect(() => {
     let cancelled = false;
@@ -83,30 +82,12 @@ export default function DeveloperProfile() {
     return () => { cancelled = true; };
   }, [id, retry]);
 
-  const getPlatforms = () => {
-    const platforms = new Set<string>();
-    games.forEach(g => {
-      if (g.platform) {
-        g.platform.forEach(p => platforms.add(p));
-      }
-    });
-    return ['all', ...Array.from(platforms).sort()];
-  };
-
-  const filteredGames = games
-    .filter(g => platformFilter === 'all' || (g.platform && g.platform.includes(platformFilter)))
-    .sort((a, b) => {
-      if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
-      if (sortBy === 'price') return a.price - b.price;
-      return new Date(b.releaseDate || 0).getTime() - new Date(a.releaseDate || 0).getTime();
-    });
-
-  const platforms = getPlatforms();
   const ratedGames = games.filter(game => game.rating > 0);
   const averageRating = ratedGames.length ? ratedGames.reduce((sum, game) => sum + game.rating, 0) / ratedGames.length : null;
-  const platformCounts = new Map<string, number>();
-  games.forEach(game => game.platform.forEach(platform => platformCounts.set(platform, (platformCounts.get(platform) ?? 0) + 1)));
-  const mostCommonPlatform = [...platformCounts].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const platforms = [...new Set(games.flatMap(game => game.platform))].sort();
+  const categories = [...new Set(games.map(game => game.category))].sort();
+  const years = games.map(releaseYear).filter(Boolean).sort();
+  const discountedGames = games.filter(game => game.originalPrice > game.price).length;
 
   if (loading) {
     return (
@@ -142,7 +123,7 @@ export default function DeveloperProfile() {
       </Link>
 
       {/* Banner */}
-      <div className="relative rounded-2xl overflow-hidden mb-6 h-48 md:h-64 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20">
+      <div className="relative rounded-lg overflow-hidden mb-6 h-48 md:h-64 bg-secondary">
         {developer.banner_url ? (
           <img src={developer.banner_url} alt={developer.name} className="w-full h-full object-cover" loading="lazy" />
         ) : (
@@ -155,15 +136,15 @@ export default function DeveloperProfile() {
 
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center gap-6 -mt-12 relative z-10">
-        <div className="w-24 h-24 rounded-2xl bg-card border-4 border-background overflow-hidden flex items-center justify-center shrink-0">
+        <div className="w-24 h-24 rounded-lg bg-card border-4 border-background overflow-hidden flex items-center justify-center shrink-0">
           {developer.logo_url ? (
-            <img src={developer.logo_url} alt={developer.name} className="w-full h-full object-cover" loading="lazy" />
+            <img src={developer.logo_url} alt={developer.name} className="w-full h-full object-contain" loading="lazy" />
           ) : (
             <Building2 className="h-10 w-10 text-muted-foreground" />
           )}
         </div>
-        <div className="flex-1">
-          <h1 className="text-3xl font-display font-bold">{developer.name}</h1>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-3xl font-display font-bold break-words">{developer.name}</h1>
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
             {developer.founded_year && (
               <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> Fundado em {developer.founded_year}</span>
@@ -189,137 +170,73 @@ export default function DeveloperProfile() {
         </div>
         <div className="flex flex-wrap gap-2">
           {socialLinks.twitter && (
-            <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
+            <a href={socialLinks.twitter} aria-label="X / Twitter" title="X / Twitter" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
               <Twitter className="h-4 w-4" />
             </a>
           )}
           {socialLinks.youtube && (
-            <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
+            <a href={socialLinks.youtube} aria-label="YouTube" title="YouTube" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
               <Youtube className="h-4 w-4" />
             </a>
           )}
           {socialLinks.instagram && (
-            <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
+            <a href={socialLinks.instagram} aria-label="Instagram" title="Instagram" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
               <Instagram className="h-4 w-4" />
             </a>
           )}
           {socialLinks.facebook && <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-lg bg-secondary"><Facebook className="h-4 w-4" /></a>}
           {socialLinks.discord && <a href={socialLinks.discord} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary text-sm">Discord</a>}
           {developer.wikipedia_url && (
-            <a href={developer.wikipedia_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
+            <a href={developer.wikipedia_url} aria-label="Wikipédia" title="Wikipédia" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
               <BookOpen className="h-4 w-4" />
             </a>
           )}
         </div>
       </div>
 
-      {/* Bio e Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <div className="md:col-span-2">
-          {developer.bio && (
-            <div className="bg-card border border-border rounded-xl p-4">
-              <p className="text-muted-foreground">{developer.bio}</p>
-            </div>
-          )}
-          {developer.description && (
-            <div className="bg-card border border-border rounded-xl p-4 mt-4">
-              <h3 className="text-sm font-semibold text-foreground mb-2">Sobre</h3>
-              <div className="text-muted-foreground whitespace-pre-wrap text-sm leading-relaxed">
-                {developer.description}
-              </div>
-            </div>
-          )}
-          {developer.notable_games && developer.notable_games.length > 0 && (
-            <div className="bg-card border border-border rounded-xl p-4 mt-4">
-              <h3 className="text-sm font-semibold text-foreground mb-2">Jogos de destaque</h3>
-              <div className="flex flex-wrap gap-2">
-                {developer.notable_games.map((game, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full bg-secondary text-xs text-foreground">
-                    {game}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <div>
-          <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Estatísticas</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-3 bg-secondary/40 rounded-lg">
-                <Gamepad2 className="h-5 w-5 text-primary mx-auto mb-1" />
-                <p className="text-xl font-bold">{games.length}</p>
-                <p className="text-[10px] text-muted-foreground">Jogos</p>
-              </div>
-              <div className="text-center p-3 bg-secondary/40 rounded-lg">
-                <Star className="h-5 w-5 text-warning mx-auto mb-1" />
-                <p className="text-xl font-bold">{averageRating?.toFixed(1) || '—'}</p>
-                <p className="text-[10px] text-muted-foreground">Média</p>
-              </div>
-              <div className="text-center p-3 bg-secondary/40 rounded-lg">
-                <Award className="h-5 w-5 text-price mx-auto mb-1" />
-                <p className="text-xl font-bold">{mostCommonPlatform || '—'}</p>
-                <p className="text-[10px] text-muted-foreground">Plataforma</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <nav aria-label="Seções do desenvolvedor" className="flex flex-wrap gap-2 mt-6 border-b border-border pb-4">
+        <Button variant="ghost" size="sm" asChild><a href="#sobre">Sobre o estúdio</a></Button>
+        <Button variant="ghost" size="sm" asChild><a href="#jogos">Jogos ({games.length})</a></Button>
+        <Button variant="ghost" size="sm" asChild><a href="#publicacoes">Publicações oficiais</a></Button>
+      </nav>
 
-      {/* Jogos */}
-      {games.length > 0 ? (
-        <div className="mt-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Gamepad2 className="h-5 w-5 text-primary" /> Jogos ({games.length})
-            </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              {platforms.length > 1 && (
-                <div className="flex items-center gap-1 bg-secondary/40 rounded-lg p-1">
-                  {platforms.map(p => (
-                    <Button
-                      key={p}
-                      variant={platformFilter === p ? 'default' : 'ghost'}
-                      size="sm"
-                      aria-pressed={platformFilter === p}
-                      onClick={() => setPlatformFilter(p)}
-                      className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${platformFilter === p ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                    >
-                      {p === 'all' ? 'Todos' : p}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1.5 bg-card border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
-              >
-                <option value="recent">Lançamento</option>
-                <option value="rating">Avaliação</option>
-                <option value="price">Preço</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filteredGames.map((game) => (
-              <GameCard key={game.id} game={game} />
-            ))}
-          </div>
-          {filteredGames.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">Nenhum jogo encontrado com estes filtros.</p>
-          )}
+      <section id="sobre" className="scroll-mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
+        <div className="md:col-span-2 min-w-0 space-y-5">
+          <h2 className="text-xl font-bold">Sobre {developer.name}</h2>
+          {developer.bio && <p className="text-foreground leading-relaxed whitespace-pre-wrap break-words">{developer.bio}</p>}
+          {developer.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed break-words">{developer.description}</p>}
+          {!developer.bio && !developer.description && <p className="text-sm text-muted-foreground">O estúdio ainda não adicionou uma descrição.</p>}
+          {developer.notable_games && developer.notable_games.length > 0 && <div>
+            <h3 className="text-sm font-semibold mb-2">Jogos de destaque</h3>
+            <div className="flex flex-wrap gap-2">{developer.notable_games.map((title, index) => {
+              const game = games.find(item => item.title.toLocaleLowerCase() === title.toLocaleLowerCase());
+              return game ? <Button key={index} variant="secondary" size="sm" asChild><Link to={`/jogo/${game.id}`}>{title}</Link></Button> : <span key={index} className="px-3 py-1.5 rounded-md bg-secondary text-xs break-words">{title}</span>;
+            })}</div>
+          </div>}
+          {categories.length > 0 && <div><h3 className="text-sm font-semibold mb-2">Categorias no catálogo</h3><p className="text-sm text-muted-foreground">{categories.join(' · ')}</p></div>}
         </div>
-      ) : (
-        <div className="mt-8">
-          <EstadoVazio
-            icone={Gamepad2}
-            titulo="Nenhum jogo cadastrado"
-            descricao="Este desenvolvedor ainda não tem jogos na plataforma."
-          />
-        </div>
-      )}
-      <DeveloperUpdates key={developer.id} developerId={developer.id} name={developer.name} logo={developer.logo_url} />
+        <aside className="border-t md:border-t-0 md:border-l border-border pt-5 md:pt-0 md:pl-6 min-w-0 space-y-5">
+          <div><h3 className="text-sm font-semibold mb-3">Informações do estúdio</h3><dl className="space-y-3 text-sm">
+            {developer.founded_year && <div><dt className="text-xs text-muted-foreground">Fundação</dt><dd>{developer.founded_year}</dd></div>}
+            {developer.country && <div><dt className="text-xs text-muted-foreground">País</dt><dd>{developer.country}</dd></div>}
+            {developer.headquarters && <div><dt className="text-xs text-muted-foreground">Sede</dt><dd className="break-words">{developer.headquarters}</dd></div>}
+            {developer.employees != null && <div><dt className="text-xs text-muted-foreground">Equipe do estúdio</dt><dd>{developer.employees.toLocaleString('pt-BR')} funcionários</dd></div>}
+            {developer.parent_company && <div><dt className="text-xs text-muted-foreground">Empresa controladora</dt><dd className="break-words">{developer.parent_company}</dd></div>}
+            {!developer.founded_year && !developer.country && !developer.headquarters && developer.employees == null && !developer.parent_company && <div><dd className="text-muted-foreground">Informações ainda não adicionadas.</dd></div>}
+          </dl></div>
+          <div className="border-t border-border pt-4"><h3 className="text-sm font-semibold mb-3">Catálogo na MIDIAS</h3>
+            <dl className="grid grid-cols-2 gap-4">
+              <div><dt className="text-xs text-muted-foreground">Jogos</dt><dd className="text-xl font-semibold">{games.length}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Avaliação média</dt><dd className="text-xl font-semibold flex items-center gap-1"><Star className="h-4 w-4 text-warning" />{averageRating?.toFixed(1) || '—'}</dd>{ratedGames.length > 0 && <p className="text-xs text-muted-foreground">{ratedGames.length} jogos avaliados</p>}</div>
+              <div><dt className="text-xs text-muted-foreground">Em oferta</dt><dd className="text-xl font-semibold">{discountedGames}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Lançamentos</dt><dd className="text-sm font-medium mt-1">{years.length ? years[0] === years[years.length - 1] ? years[0] : `${years[0]}–${years[years.length - 1]}` : '—'}</dd></div>
+            </dl>
+            {platforms.length > 0 && <div className="mt-4"><p className="text-xs text-muted-foreground mb-1">Plataformas</p><p className="text-sm break-words">{platforms.join(' · ')}</p></div>}
+          </div>
+        </aside>
+      </section>
+      <DeveloperGameCatalog key={developer.id} games={games} />
+      <div id="publicacoes" className="scroll-mt-24"><DeveloperUpdates key={developer.id} developerId={developer.id} name={developer.name} logo={developer.logo_url} /></div>
     </div>
   );
 }

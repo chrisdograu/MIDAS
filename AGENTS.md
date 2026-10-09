@@ -6,3 +6,5 @@
 - Public developer profiles resolve either a UUID or a slug and normalize product rows with `mapProdutoToGame`; this keeps existing links and game cards compatible.
 - Developer channel permissions are scoped in a separate assignment table and enforced by RLS; delegated managers never receive desktop administrator roles.
 - Official developer publications live in a separate web-only channel with paginated comments, independent of game forums.
+
+- Developer catalog filters operate on the publicly readable active games already loaded for that studio; filter and sort logic is isolated and tested without additional database queries.
