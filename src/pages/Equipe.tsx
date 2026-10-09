@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Github, Linkedin, Mail, Users, Loader2 } from 'lucide-react';
+import { ArrowLeft, Github, Linkedin, Mail, Users, Loader2, Twitter, Globe } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import EstadoVazio from '@/components/EstadoVazio';
 import ErroCarregamento from '@/components/ErroCarregamento';
 
-type SocialLinks = { github?: string; linkedin?: string; email?: string };
+type SocialLinks = { github?: string; linkedin?: string; email?: string; twitter?: string; website?: string };
 
 function safeLink(value?: string) {
   if (!value) return null;
@@ -23,7 +23,7 @@ export default function Equipe() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('team_members')
-        .select('id, name, role, photo_url, bio, social_links')
+        .select('id, name, role, photo_url, banner_url, bio, long_description, social_links')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
       if (error) throw error;
@@ -57,7 +57,9 @@ export default function Equipe() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {teamMembers.map((member) => {
             const links = (member.social_links ?? {}) as SocialLinks;
-            return <div key={member.id} className="bg-card border border-border rounded-2xl p-6 text-center hover:border-primary/40 transition-colors">
+            return <div key={member.id} className="bg-card border border-border rounded-lg overflow-hidden text-center hover:border-primary/40 transition-colors">
+            {member.banner_url && <img src={member.banner_url} alt={`Capa de ${member.name}`} className="w-full aspect-[3/1] object-cover" loading="lazy" />}
+            <div className="p-6">
             <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-3xl font-bold text-primary-foreground mb-4">
               {member.photo_url ? (
                 <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover rounded-full" loading="lazy" />
@@ -70,7 +72,10 @@ export default function Equipe() {
             {member.bio && (
               <p className="text-sm text-muted-foreground mt-2">{member.bio}</p>
             )}
-            <div className="flex items-center justify-center gap-3 mt-4">
+            {member.long_description && <details className="mt-4 text-left"><summary className="cursor-pointer text-sm font-medium text-primary">Sobre {member.name}</summary><p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap break-words">{member.long_description}</p></details>}
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+              {safeLink(links.twitter) && <a href={safeLink(links.twitter) ?? undefined} aria-label={`X de ${member.name}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary"><Twitter className="h-4 w-4" /></a>}
+              {safeLink(links.website) && <a href={safeLink(links.website) ?? undefined} aria-label={`Site de ${member.name}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary"><Globe className="h-4 w-4" /></a>}
               {safeLink(links.github) && (
                 <a href={safeLink(links.github) ?? undefined} aria-label={`GitHub de ${member.name}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
                   <Github className="h-4 w-4" />
@@ -86,6 +91,7 @@ export default function Equipe() {
                   <Mail className="h-4 w-4" />
                 </a>
               )}
+            </div>
             </div>
           </div>;
           })}

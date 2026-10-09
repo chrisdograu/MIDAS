@@ -18,6 +18,7 @@ import { adminLog, exportCsv } from '../lib/adminLog';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
 import { useDesktopAuth } from '@/hooks/useDesktopAuth';
+import ImageGalleryField from '../components/ImageGalleryField';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -440,20 +441,8 @@ export default function AdminTeamMembers() {
                 placeholder="Desenvolvedor Full Stack"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Foto (URL)</Label>
-              <Input
-                value={form.photo_url}
-                onChange={(e) => setForm({ ...form, photo_url: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Banner (URL)</Label>
-              <Input
-                value={form.banner_url}
-                onChange={(e) => setForm({ ...form, banner_url: e.target.value })}
-              />
-            </div>
+            <ImageGalleryField label="Foto da pessoa" value={form.photo_url ? [form.photo_url] : []} onChange={urls => setForm(f => ({ ...f, photo_url: urls[0] || '' }))} maxImages={1} folder="equipe/fotos" />
+            <ImageGalleryField label="Foto de capa" value={form.banner_url ? [form.banner_url] : []} onChange={urls => setForm(f => ({ ...f, banner_url: urls[0] || '' }))} maxImages={1} folder="equipe/capas" />
             <div className="space-y-2 flex items-center gap-2">
               <Switch
                 checked={form.is_active}

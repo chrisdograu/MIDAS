@@ -17,6 +17,8 @@ import { adminLog, exportCsv } from '../lib/adminLog';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
 import { useDesktopAuth } from '@/hooks/useDesktopAuth';
+import ImageGalleryField from '../components/ImageGalleryField';
+import DeveloperChannelAccess from '@/components/developer/DeveloperChannelAccess';
 
 interface Developer {
   id: string;
@@ -79,6 +81,8 @@ export default function AdminDevelopers() {
     twitter: '',
     youtube: '',
     instagram: '',
+    facebook: '',
+    discord: '',
     wikipedia_url: '',
   });
 
@@ -118,7 +122,7 @@ export default function AdminDevelopers() {
           counts.set(g.developer_id, (counts.get(g.developer_id) || 0) + 1);
           if (g.rating) {
             if (!ratings.has(g.developer_id)) ratings.set(g.developer_id, []);
-            ratings.get(g.developer_id)!.push(g.rating);
+            ratings.get(g.developer_id)?.push(g.rating);
           }
         });
         
@@ -171,6 +175,8 @@ export default function AdminDevelopers() {
       twitter: '',
       youtube: '',
       instagram: '',
+    facebook: '',
+    discord: '',
       wikipedia_url: '',
     });
     setEditing(null);
@@ -200,6 +206,8 @@ export default function AdminDevelopers() {
       twitter: dev.social_links?.twitter || '',
       youtube: dev.social_links?.youtube || '',
       instagram: dev.social_links?.instagram || '',
+      facebook: dev.social_links?.facebook || '',
+      discord: dev.social_links?.discord || '',
       wikipedia_url: dev.wikipedia_url || '',
     });
     setDialogOpen(true);
@@ -246,6 +254,8 @@ export default function AdminDevelopers() {
         twitter: form.twitter.trim() || null,
         youtube: form.youtube.trim() || null,
         instagram: form.instagram.trim() || null,
+        facebook: form.facebook.trim() || null,
+        discord: form.discord.trim() || null,
       },
       wikipedia_url: form.wikipedia_url.trim() || null,
     };
@@ -533,22 +543,8 @@ export default function AdminDevelopers() {
                 rows={4}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Logo URL</Label>
-              <Input
-                value={form.logo_url}
-                onChange={e => setForm({ ...form, logo_url: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Banner URL</Label>
-              <Input
-                value={form.banner_url}
-                onChange={e => setForm({ ...form, banner_url: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
+            <ImageGalleryField label="Logo do desenvolvedor" value={form.logo_url ? [form.logo_url] : []} onChange={urls => setForm(f => ({ ...f, logo_url: urls[0] || '' }))} maxImages={1} folder="desenvolvedores/logos" />
+            <ImageGalleryField label="Foto de capa" value={form.banner_url ? [form.banner_url] : []} onChange={urls => setForm(f => ({ ...f, banner_url: urls[0] || '' }))} maxImages={1} folder="desenvolvedores/capas" />
             <div className="space-y-2">
               <Label>Website</Label>
               <Input
@@ -628,13 +624,16 @@ export default function AdminDevelopers() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Wikipedia URL</Label>
+              <Label>Wikipédia (link)</Label>
               <Input
                 value={form.wikipedia_url}
                 onChange={e => setForm({ ...form, wikipedia_url: e.target.value })}
                 placeholder="https://en.wikipedia.org/wiki/..."
               />
             </div>
+            <div className="space-y-2"><Label>Facebook</Label><Input value={form.facebook} onChange={e => setForm({ ...form, facebook: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Discord</Label><Input value={form.discord} onChange={e => setForm({ ...form, discord: e.target.value })} /></div>
+            {editing && <DeveloperChannelAccess developerId={editing.id} />}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>

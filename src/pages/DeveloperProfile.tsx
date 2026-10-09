@@ -11,6 +11,7 @@ import GameCard from '@/components/GameCard';
 import { Game, mapProdutoToGame } from '@/lib/gameData';
 import ErroCarregamento from '@/components/ErroCarregamento';
 import { Button } from '@/components/ui/button';
+import DeveloperUpdates from '@/components/developer/DeveloperUpdates';
 
 interface Developer {
   id: string;
@@ -27,7 +28,7 @@ interface Developer {
   bio: string | null;
   description: string | null;
   notable_games: string[] | null;
-  social_links: { twitter?: string; youtube?: string; instagram?: string } | null;
+  social_links: { twitter?: string; youtube?: string; instagram?: string; facebook?: string; discord?: string } | null;
 }
 
 export default function DeveloperProfile() {
@@ -202,6 +203,8 @@ export default function DeveloperProfile() {
               <Instagram className="h-4 w-4" />
             </a>
           )}
+          {socialLinks.facebook && <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-lg bg-secondary"><Facebook className="h-4 w-4" /></a>}
+          {socialLinks.discord && <a href={socialLinks.discord} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary text-sm">Discord</a>}
           {developer.wikipedia_url && (
             <a href={developer.wikipedia_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors">
               <BookOpen className="h-4 w-4" />
@@ -316,6 +319,7 @@ export default function DeveloperProfile() {
           />
         </div>
       )}
+      <DeveloperUpdates key={developer.id} developerId={developer.id} name={developer.name} logo={developer.logo_url} />
     </div>
   );
 }
