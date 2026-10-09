@@ -1,7 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
-- [ ] Ampliar detalhes e filtros da página web do desenvolvedor e validar busca, filtros e limpeza.
+- [x] Ampliar detalhes e filtros da página web do desenvolvedor e validar busca, filtros e limpeza.
 
 - [x] Permitir envio de fotos e edição completa da equipe e desenvolvedores, exibindo os campos públicos.
 - [x] Criar publicações oficiais e comentários somente no perfil web dos desenvolvedores.

@@ -227,7 +227,7 @@ export default function DeveloperProfile() {
           <div className="border-t border-border pt-4"><h3 className="text-sm font-semibold mb-3">Catálogo na MIDIAS</h3>
             <dl className="grid grid-cols-2 gap-4">
               <div><dt className="text-xs text-muted-foreground">Jogos</dt><dd className="text-xl font-semibold">{games.length}</dd></div>
-              <div><dt className="text-xs text-muted-foreground">Avaliação média</dt><dd className="text-xl font-semibold flex items-center gap-1"><Star className="h-4 w-4 text-warning" />{averageRating?.toFixed(1) || '—'}</dd>{ratedGames.length > 0 && <p className="text-xs text-muted-foreground">{ratedGames.length} jogos avaliados</p>}</div>
+              <div><dt className="text-xs text-muted-foreground">Avaliação média</dt><dd className="text-xl font-semibold flex items-center gap-1"><Star className="h-4 w-4 text-warning" />{averageRating?.toFixed(1) || '—'}</dd>{ratedGames.length > 0 && <p className="text-xs text-muted-foreground">{ratedGames.length} {ratedGames.length === 1 ? 'jogo avaliado' : 'jogos avaliados'}</p>}</div>
               <div><dt className="text-xs text-muted-foreground">Em oferta</dt><dd className="text-xl font-semibold">{discountedGames}</dd></div>
               <div><dt className="text-xs text-muted-foreground">Lançamentos</dt><dd className="text-sm font-medium mt-1">{years.length ? years[0] === years[years.length - 1] ? years[0] : `${years[0]}–${years[years.length - 1]}` : '—'}</dd></div>
             </dl>
