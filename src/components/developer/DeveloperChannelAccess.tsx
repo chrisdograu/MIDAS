@@ -14,9 +14,12 @@ export default function DeveloperChannelAccess({ developerId }: { developerId: s
   const key = ['developer-channel-access', developerId];
   const { data = [], isError } = useQuery({ queryKey: key, queryFn: async () => {
     const { data, error } = await supabase.from('developer_channel_managers')
-      .select('user_id, profiles!developer_channel_managers_user_id_fkey(username, display_name)').eq('developer_id', developerId);
+      .select('user_id').eq('developer_id', developerId);
     if (error) throw error;
-    return data ?? [];
+    return Promise.all((data ?? []).map(async item => {
+      const { data: profiles } = await supabase.rpc('get_public_profile', { _uid: item.user_id });
+      return { ...item, profiles: profiles?.[0] };
+    }));
   }});
   const assign = async () => {
     setBusy(true);
