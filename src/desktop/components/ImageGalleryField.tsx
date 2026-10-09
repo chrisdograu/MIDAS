@@ -21,8 +21,8 @@ interface Props {
 }
 
 // GAP-D379: Tipos de arquivo permitidos
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function ImageGalleryField({ 
@@ -67,12 +67,12 @@ export default function ImageGalleryField({
           ctx.drawImage(img, 0, 0, width, height);
           canvas.toBlob((blob) => {
             if (!blob) { reject(new Error('Falha ao comprimir')); return; }
-            const compressedFile = new File([blob], file.name, {
-              type: file.type,
+            const compressedFile = new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.webp`, {
+              type: 'image/webp',
               lastModified: Date.now(),
             });
             resolve(compressedFile);
-          }, file.type, 0.8);
+          }, 'image/webp', 0.8);
         };
         img.onerror = () => reject(new Error('Falha ao carregar imagem'));
         img.src = e.target?.result as string;
@@ -90,7 +90,7 @@ export default function ImageGalleryField({
     // GAP-D379: Validação de tipo e tamanho
     const invalidFiles = files.filter(f => {
       const ext = '.' + f.name.split('.').pop()?.toLowerCase();
-      if (!ALLOWED_EXTENSIONS.includes(ext) && !ALLOWED_TYPES.includes(f.type)) {
+      if (!ALLOWED_EXTENSIONS.includes(ext) || !ALLOWED_TYPES.includes(f.type)) {
         return true;
       }
       return f.size > MAX_FILE_SIZE;
@@ -264,15 +264,18 @@ export default function ImageGalleryField({
                   principal
                 </span>
               )}
-              <button
+               <Button
                 type="button"
+                 variant="destructive"
+                 size="icon"
                 aria-label="Remover imagem"
+                 title="Remover imagem"
                 onClick={() => removeImage(src)}
-                className="absolute top-1 right-1 bg-destructive/90 hover:bg-destructive text-destructive-foreground p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                 className="absolute top-1 right-1 h-7 w-7 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-all"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-              </button>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all pointer-events-none" />
+               </Button>
+               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-all pointer-events-none" />
             </div>
           ))}
         </div>
