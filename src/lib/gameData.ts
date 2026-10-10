@@ -12,6 +12,7 @@ export interface Game {
   description: string;
   releaseDate: string;
   publisher: string;
+  developer?: { id: string; name: string; slug: string | null; logo_url: string | null } | null;
   tags: string[];
   stock: number;
   featured?: boolean;
@@ -35,6 +36,7 @@ export function mapProdutoToGame(row: {
   description: string | null;
   release_date: string | null;
   publisher: string | null;
+  developers?: { id: string; name: string; slug: string | null; logo_url: string | null } | null;
   tags: string[] | null;
   stock?: number;
   featured?: boolean | null;
@@ -52,6 +54,7 @@ export function mapProdutoToGame(row: {
     description: row.description || '',
     releaseDate: row.release_date || '',
     publisher: row.publisher || '',
+    developer: row.developers ?? null,
     tags: row.tags || [],
     stock: row.stock ?? 100,
     featured: !!row.featured,

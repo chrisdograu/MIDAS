@@ -303,6 +303,13 @@ export default function GameDetail() {
               <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded">{game.category}</span>
             </div>
             <h1 className="text-2xl font-bold text-foreground">{game.title}</h1>
+            {game.developer && (
+              <div className="flex items-center gap-2 mt-2 text-sm min-w-0">
+                {game.developer.logo_url && <img src={game.developer.logo_url} alt="" className="h-6 w-6 shrink-0 rounded object-contain" loading="lazy" />}
+                <span className="text-muted-foreground shrink-0">Desenvolvido por</span>
+                <Link to={`/desenvolvedor/${game.developer.slug || game.developer.id}`} className="text-primary hover:underline focus-ring rounded break-words min-w-0">{game.developer.name}</Link>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground mt-1">{game.publisher}</p>
           </div>
 
@@ -381,6 +388,12 @@ export default function GameDetail() {
         <div className="space-y-3">
           <h2 className="text-lg font-bold text-foreground">Detalhes</h2>
           <div className="bg-card border border-border rounded-xl p-4 space-y-3 text-sm">
+            {game.developer && (
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground shrink-0">Desenvolvedor</span>
+                <Link to={`/desenvolvedor/${game.developer.slug || game.developer.id}`} className="text-primary text-right break-words hover:underline focus-ring rounded min-w-0">{game.developer.name}</Link>
+              </div>
+            )}
             {game.publisher && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Publicadora</span>
