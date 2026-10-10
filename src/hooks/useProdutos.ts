@@ -18,18 +18,25 @@ export function useProdutos() {
   });
 }
 
+export async function fetchProduto(id: string): Promise<Game | null> {
+  const { data, error } = await supabase.from('produtos').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const game = mapProdutoToGame(data);
+  if (data.developer_id) {
+    const { data: developer } = await supabase.from('developers')
+      .select('id, name, slug, logo_url').eq('id', data.developer_id).maybeSingle();
+    game.developer = developer ?? null;
+  }
+  return game;
+}
+
 export function useProduto(id: string | undefined) {
   return useQuery({
     queryKey: ['produto', id],
     queryFn: async (): Promise<Game | null> => {
       if (!id) return null;
-      const { data, error } = await supabase
-        .from('produtos')
-        .select('*, developers(id, name, slug, logo_url)')
-        .eq('id', id)
-        .maybeSingle();
-      if (error) throw error;
-      return data ? mapProdutoToGame(data) : null;
+      return fetchProduto(id);
     },
     enabled: !!id,
   });

@@ -8,4 +8,4 @@
 - Official developer publications live in a separate web-only channel with paginated comments, independent of game forums.
 
 - Developer catalog filters operate on the publicly readable active games already loaded for that studio; filter and sort logic is isolated and tested without additional database queries.
-- Game information pages load the linked developer through the product foreign key and link to its slug or UUID; publisher names must never be used to infer a developer.
+- Game information pages and card prefetch share a product loader that resolves the studio by developer_id and links to its slug or UUID; publisher names must never be used to infer a developer.

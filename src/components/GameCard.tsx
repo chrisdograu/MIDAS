@@ -7,8 +7,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
-import { supabase } from "@/integrations/supabase/client";
-import { mapProdutoToGame } from "@/lib/gameData";
+import { fetchProduto } from "@/hooks/useProdutos";
 import { formatCurrency } from "@/lib/format";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -176,11 +175,7 @@ export default function GameCard({
     prefetchRoute("/jogo");
     qc.prefetchQuery({
       queryKey: ["produto", game.id],
-      queryFn: async () => {
-        const { data, error } = await supabase.from("produtos").select("*, developers(id, name, slug, logo_url)").eq("id", game.id).maybeSingle();
-        if (error) throw error;
-        return data ? mapProdutoToGame(data) : null;
-      },
+      queryFn: () => fetchProduto(game.id),
       staleTime: 60_000,
     });
   };
