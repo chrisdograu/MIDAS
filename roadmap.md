@@ -1,7 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
-- [ ] Conectar as informações dos jogos às páginas dos desenvolvedores e testar a navegação nos dois sentidos.
+- [x] Conectar as informações dos jogos às páginas dos desenvolvedores e testar a navegação nos dois sentidos.
 
 - [x] Ampliar detalhes e filtros da página web do desenvolvedor e validar busca, filtros e limpeza.
 
