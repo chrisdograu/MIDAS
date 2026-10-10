@@ -83,7 +83,7 @@ export function GlobalSearch() {
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar produtos, usuários, pedidos..."
+              placeholder="Buscar produtos, desenvolvedores, usuários, pedidos..."
               className="border-0 shadow-none focus-visible:ring-0 text-sm"
             />
             {loading ? (
@@ -125,7 +125,7 @@ export function GlobalSearch() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{result.title}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{result.type}</p>
+                      <p className="text-xs text-muted-foreground">{result.type === 'developer' ? 'Desenvolvedor' : result.type}</p>
                     </div>
                     <span className="text-xs text-muted-foreground">→</span>
                   </button>

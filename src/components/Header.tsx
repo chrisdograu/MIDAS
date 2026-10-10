@@ -16,6 +16,9 @@ import { formatDate } from '@/lib/format';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ListChecks } from 'lucide-react';
+import { Building2 } from 'lucide-react';
+import { useDeveloperSearch } from '@/hooks/useDeveloperSearch';
+import { developerSearchLink } from '@/lib/developerSearch';
 
 // GAP-HE04: Atalhos globais
 const SHORTCUTS = [
@@ -31,6 +34,7 @@ export default function Header() {
   const { user, profile, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const { data: developerResults = [] } = useDeveloperSearch(searchQuery, searchOpen);
   const [userResults, setUserResults] = useState<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null }[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -303,7 +307,7 @@ export default function Header() {
                   value={searchQuery}
                   onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true); }}
                   onFocus={() => setSearchOpen(true)}
-                  placeholder="Buscar em todo MIDIAS — jogos, @usuário, vendedores..."
+                   placeholder="Buscar jogos, desenvolvedores, @usuário..."
                   className="w-full pl-10 pr-12 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" 
                 />
                 {/* GAP-HE03: Botão de pesquisa por voz */}
@@ -321,6 +325,21 @@ export default function Header() {
                   <Mic className="h-4 w-4" />
                 </button>
                 
+                {searchOpen && !searchQuery.startsWith('@') && searchQuery.trim().length >= 2 && developerResults.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50 max-h-80 overflow-y-auto">
+                    <div className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border">Desenvolvedores</div>
+                    {developerResults.map(d => (
+                      <Link key={d.id} to={developerSearchLink(d)} onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                        className="flex items-center gap-3 px-3 py-2 hover:bg-secondary transition-colors">
+                        <div className="w-8 h-8 rounded bg-secondary overflow-hidden flex items-center justify-center shrink-0">
+                          {d.logo_url ? <img src={d.logo_url} alt="" className="w-full h-full object-cover" /> : <Building2 className="h-4 w-4 text-muted-foreground" />}
+                        </div>
+                        <span className="text-sm font-medium truncate">{d.name}</span>
+                      </Link>
+                    ))}
+                    <Link to={`/busca?q=${encodeURIComponent(searchQuery.trim())}`} onClick={() => setSearchOpen(false)} className="block px-3 py-2 text-xs text-primary border-t border-border">Ver todos os resultados</Link>
+                  </div>
+                )}
                 {searchOpen && searchQuery.startsWith('@') && userResults.length > 0 && (
                   <div className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50 max-h-80 overflow-y-auto">
                     <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border flex items-center gap-1">
@@ -426,7 +445,7 @@ export default function Header() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                      placeholder="Buscar jogos..."
+                      placeholder="Buscar jogos e desenvolvedores..."
                       className="w-full pl-10 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                 </form>

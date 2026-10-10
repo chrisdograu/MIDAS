@@ -20,6 +20,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
+import { useDeveloperSearch } from '@/hooks/useDeveloperSearch';
+import { developerSearchLink } from '@/lib/developerSearch';
 import {
   CommandDialog,
   CommandEmpty,
@@ -210,11 +212,13 @@ export default function DesktopLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [closedSections, setClosedSections] = useState<string[]>([]);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState('');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const toggleSection = (label: string) =>
     setClosedSections((prev) => (prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]));
   const { theme, toggleTheme } = useTheme();
   const { user, profile, position, isStaff, loading, signOut, canAccess } = useDesktopAuth();
+  const { data: developerResults = [], isFetching: searchingDevelopers, isError: developerSearchError } = useDeveloperSearch(commandQuery, commandOpen && position === 'admin');
   const pending = useDesktopPending(!!user && isStaff);
   useDesktopRealtimeAlerts(!!user && isStaff);
   const location = useLocation();
@@ -304,6 +308,7 @@ export default function DesktopLayout() {
   // GAP-D363: Comando de busca
   const handleCommandSelect = (url: string) => {
     setCommandOpen(false);
+    setCommandQuery('');
     navigate(url);
   };
 
@@ -340,16 +345,16 @@ export default function DesktopLayout() {
         {/* GAP-D363: Busca rápida */}
         {!collapsed && (
           <div className="px-3 py-2">
-            <button
+            <Button variant="outline"
               onClick={() => setCommandOpen(true)}
               className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/30 rounded-lg border border-border hover:bg-muted/50 transition-colors"
             >
               <Search className="h-3.5 w-3.5" />
-              <span className="flex-1 text-left">Buscar telas...</span>
+              <span className="flex-1 text-left">Buscar...</span>
               <kbd className="text-[10px] px-1.5 py-0.5 bg-muted rounded border border-border font-mono">
                 ⌘K
               </kbd>
-            </button>
+            </Button>
           </div>
         )}
 
@@ -507,10 +512,20 @@ export default function DesktopLayout() {
       </main>
 
       {/* GAP-D363: Command Dialog */}
-      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
-        <CommandInput placeholder="Buscar tela..." />
+      <CommandDialog open={commandOpen} onOpenChange={open => { setCommandOpen(open); if (!open) setCommandQuery(''); }}>
+        <CommandInput placeholder="Buscar telas e desenvolvedores..." value={commandQuery} onValueChange={setCommandQuery} />
         <CommandList>
-          <CommandEmpty>Nenhuma tela encontrada.</CommandEmpty>
+          <CommandEmpty>{searchingDevelopers ? 'Buscando desenvolvedores...' : developerSearchError ? 'Não foi possível buscar desenvolvedores.' : 'Nenhum resultado encontrado.'}</CommandEmpty>
+          {position === 'admin' && commandQuery.trim().length >= 2 && developerResults.length > 0 && (
+            <CommandGroup heading="Desenvolvedores">
+              {developerResults.map(d => (
+                <CommandItem key={d.id} value={`desenvolvedor ${d.name}`} onSelect={() => handleCommandSelect(developerSearchLink(d, true))}>
+                  {d.logo_url ? <img src={d.logo_url} alt="" className="w-6 h-6 rounded object-cover mr-2" /> : <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />}
+                  <span>{d.name}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
           {filteredSections.map((section) => (
             <CommandGroup key={section.label} heading={section.label}>
               {section.items.map((item) => (

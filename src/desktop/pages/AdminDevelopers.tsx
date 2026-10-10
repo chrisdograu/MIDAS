@@ -19,6 +19,8 @@ import { formatDateTime } from '@/lib/format';
 import { useDesktopAuth } from '@/hooks/useDesktopAuth';
 import ImageGalleryField from '../components/ImageGalleryField';
 import DeveloperChannelAccess from '@/components/developer/DeveloperChannelAccess';
+import { useSearchParams } from 'react-router-dom';
+import { escapeIlikeTerm } from '@/lib/escapeIlike';
 
 interface Developer {
   id: string;
@@ -53,9 +55,11 @@ const ITEMS_PER_PAGE = 20;
 
 export default function AdminDevelopers() {
   const { position } = useDesktopAuth();
+  const [searchParams] = useSearchParams();
   const [developers, setDevelopers] = useState<Developer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+  useEffect(() => { setSearch(searchParams.get('q') || ''); }, [searchParams]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -99,7 +103,7 @@ export default function AdminDevelopers() {
         .order('name');
       
       if (search) {
-        query = query.ilike('name', `%${search}%`);
+        query = query.ilike('name', `%${escapeIlikeTerm(search)}%`);
       }
       
       const { data, error, count } = await query.range(from, from + ITEMS_PER_PAGE - 1);
