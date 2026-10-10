@@ -8,8 +8,10 @@ import { Search, Loader2, Gamepad2, User, Store, MessageSquare, Star, ShoppingBa
 import EstadoVazio from '@/components/EstadoVazio';
 import { FilterChip, FilterChipGroup } from '@/components/FilterChip';
 import { formatCurrency } from '@/lib/format';
+import { Building2 } from 'lucide-react';
+import { searchDevelopers, developerSearchLink } from '@/lib/developerSearch';
 
-type Category = 'all' | 'games' | 'users' | 'sellers' | 'reviews' | 'forum' | 'marketplace';
+type Category = 'all' | 'games' | 'developers' | 'users' | 'sellers' | 'reviews' | 'forum' | 'marketplace';
 type Platform = 'web' | 'mobile' | 'both';
 type Sort = 'relevance' | 'az';
 type PlatFilter = 'all' | 'web' | 'mobile';
@@ -32,6 +34,7 @@ interface Result {
 const TABS: { k: Category; label: string; icon: any }[] = [
   { k: 'all', label: 'Tudo', icon: Search },
   { k: 'games', label: 'Jogos', icon: Gamepad2 },
+  { k: 'developers', label: 'Desenvolvedores', icon: Building2 },
   { k: 'users', label: 'Usuários', icon: User },
   { k: 'sellers', label: 'Vendedores', icon: Store },
   { k: 'reviews', label: 'Reviews', icon: Star },
@@ -211,18 +214,23 @@ export default function BuscaGlobal() {
       const like = `%${term}%`;
       const dateLimit = getDateFilter(dateFilter);
       
-      const [games, profiles, sellers, reviews, posts, ads] = await Promise.all([
+      const [games, profiles, sellers, reviews, posts, ads, developers] = await Promise.all([
         supabase.from('produtos').select('id,title,image_url,category,release_date,rating').eq('is_active', true).ilike('title', like).limit(LIMIT),
         supabase.from('profiles').select('id,display_name,username,avatar_url,created_at').or(`display_name.ilike.${like},username.ilike.${like}`).not('is_paused', 'is', true).limit(LIMIT),
         supabase.from('seller_profiles').select('user_id,handle,display_name,avatar_url').or(`handle.ilike.${like},display_name.ilike.${like}`).limit(LIMIT),
         supabase.from('avaliacoes').select('id,product_id,rating,comment,user_id,created_at').not('comment', 'is', null).ilike('comment', like).limit(LIMIT),
         supabase.from('forum_posts').select('id,title,content,product_id,created_at').or(`title.ilike.${like},content.ilike.${like}`).limit(LIMIT),
         supabase.from('anuncios').select('id,title,description,price,created_at').eq('status', 'active').or(`title.ilike.${like},description.ilike.${like}`).limit(LIMIT),
+        searchDevelopers(term, 0, LIMIT).catch(() => []),
       ]);
 
       if (cancel) return;
 
       const list: Result[] = [];
+      developers.forEach(d => list.push({
+        id: d.id, title: d.name, subtitle: 'Desenvolvedor', image: d.logo_url,
+        category: 'developers', platform: 'web', webUrl: developerSearchLink(d),
+      }));
       
       // GAP-140: Filtrar por data
       const filterByDate = (createdAt: string | null): boolean => {
@@ -293,7 +301,7 @@ export default function BuscaGlobal() {
       });
       
       setResults(list);
-      setHasMore(list.length >= LIMIT);
+      setHasMore([games.data, profiles.data, sellers.data, reviews.data, posts.data, ads.data, developers].some(rows => (rows?.length || 0) >= LIMIT));
       setLoading(false);
     })();
     return () => { cancel = true; };
@@ -316,12 +324,13 @@ export default function BuscaGlobal() {
     const like = `%${term}%`;
     const dateLimit = getDateFilter(dateFilter);
     
-    const [games, profiles, reviews, posts, ads] = await Promise.all([
+    const [games, profiles, reviews, posts, ads, developers] = await Promise.all([
       supabase.from('produtos').select('id,title,image_url,category,release_date,rating').eq('is_active', true).ilike('title', like).range(newOffset, newOffset + LIMIT - 1),
       supabase.from('profiles').select('id,display_name,username,avatar_url,created_at').or(`display_name.ilike.${like},username.ilike.${like}`).not('is_paused', 'is', true).range(newOffset, newOffset + LIMIT - 1),
       supabase.from('avaliacoes').select('id,product_id,rating,comment,user_id,created_at').not('comment', 'is', null).ilike('comment', like).range(newOffset, newOffset + LIMIT - 1),
       supabase.from('forum_posts').select('id,title,content,product_id,created_at').or(`title.ilike.${like},content.ilike.${like}`).range(newOffset, newOffset + LIMIT - 1),
       supabase.from('anuncios').select('id,title,description,price,created_at').eq('status', 'active').or(`title.ilike.${like},description.ilike.${like}`).range(newOffset, newOffset + LIMIT - 1),
+      searchDevelopers(term, newOffset, LIMIT).catch(() => []),
     ]);
 
     const filterByDate = (createdAt: string | null): boolean => {
@@ -330,6 +339,10 @@ export default function BuscaGlobal() {
     };
 
     const newResults: Result[] = [];
+    developers.forEach(d => newResults.push({
+      id: d.id, title: d.name, subtitle: 'Desenvolvedor', image: d.logo_url,
+      category: 'developers', platform: 'web', webUrl: developerSearchLink(d),
+    }));
     
     (games.data || []).forEach(g => {
       if (!filterByDate(g.release_date)) return;
@@ -385,8 +398,8 @@ export default function BuscaGlobal() {
     });
 
     setResults(prev => [...prev, ...newResults]);
-    setOffset(newOffset + LIMIT);
-    setHasMore(newResults.length >= LIMIT);
+    setOffset(newOffset);
+    setHasMore([games.data, profiles.data, reviews.data, posts.data, ads.data, developers].some(rows => (rows?.length || 0) >= LIMIT));
     setLoadingMore(false);
   };
 
@@ -423,7 +436,7 @@ export default function BuscaGlobal() {
   }, [results, tab, platFilter, genre, minRating, priceRange, sort]);
 
   const counts = useMemo(() => {
-    const c: Record<Category, number> = { all: results.length, games: 0, users: 0, sellers: 0, reviews: 0, forum: 0, marketplace: 0 };
+    const c: Record<Category, number> = { all: results.length, games: 0, developers: 0, users: 0, sellers: 0, reviews: 0, forum: 0, marketplace: 0 };
     results.forEach(r => { c[r.category]++; });
     return c;
   }, [results]);
@@ -499,7 +512,7 @@ export default function BuscaGlobal() {
           onChange={e => setQ(e.target.value)}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          placeholder="Buscar em todo MIDIAS — jogos, usuários, vendedores, reviews, fórum, marketplace..."
+          placeholder="Buscar jogos, desenvolvedores, usuários, vendedores..."
           className="w-full pl-12 pr-28 py-3 bg-card border border-border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDebounce } from '@/hooks/useDebounce';
+import { searchDevelopers, developerSearchLink } from '@/lib/developerSearch';
 
 interface SearchResult {
   id: string;
@@ -32,7 +33,7 @@ export function useGlobalSearch(query: string) {
         supabase.from('produtos').select('id, title, image_url').ilike('title', term).limit(5),
         supabase.from('profiles').select('id, display_name, avatar_url').ilike('display_name', term).limit(5),
         supabase.from('pedidos').select('id').ilike('id', `%${searchTerm}%`).limit(5),
-        supabase.from('developers').select('id, name, logo_url').ilike('name', term).limit(5),
+        searchDevelopers(searchTerm, 0, 5),
         supabase.from('publishers').select('id, name, logo_url').ilike('name', term).limit(5),
       ]);
 
@@ -67,13 +68,13 @@ export function useGlobalSearch(query: string) {
         });
       });
 
-      (developers.data || []).forEach((d: any) => {
+      developers.forEach(d => {
         resultsList.push({
           id: d.id,
           title: d.name,
           type: 'developer',
-          link: `/desktop/desenvolvedores`,
-          image: d.logo_url,
+          link: developerSearchLink(d, true),
+          image: d.logo_url || undefined,
         });
       });
 
