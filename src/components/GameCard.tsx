@@ -177,7 +177,8 @@ export default function GameCard({
     qc.prefetchQuery({
       queryKey: ["produto", game.id],
       queryFn: async () => {
-        const { data } = await supabase.from("produtos").select("*").eq("id", game.id).maybeSingle();
+        const { data, error } = await supabase.from("produtos").select("*, developers(id, name, slug, logo_url)").eq("id", game.id).maybeSingle();
+        if (error) throw error;
         return data ? mapProdutoToGame(data) : null;
       },
       staleTime: 60_000,
