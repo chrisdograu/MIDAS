@@ -1,7 +1,8 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
-- [ ] Incluir desenvolvedores nas buscas web e desktop e validar os destinos dos resultados.
+- [x] Incluir desenvolvedores nas buscas web e desktop, testar os destinos e validar a busca web no navegador.
+- [ ] Validar busca no desktop com administrador conectado — Supabase externo sem sessão de teste disponível.
 
 - [x] Conectar as informações dos jogos às páginas dos desenvolvedores e testar a navegação nos dois sentidos.
 
