@@ -25,7 +25,7 @@ export function useProduto(id: string | undefined) {
       if (!id) return null;
       const { data, error } = await supabase
         .from('produtos')
-        .select('*')
+        .select('*, developers(id, name, slug, logo_url)')
         .eq('id', id)
         .maybeSingle();
       if (error) throw error;
