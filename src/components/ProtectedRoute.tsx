@@ -48,9 +48,13 @@ export default function ProtectedRoute({
     }
 
     const checkBanAndRole = async () => {
+      setRoleCheckLoading(true);
+      setIsBanned(false);
+      setBannedUntil(null);
+      setUserRole('user');
       const { data: profile } = await supabase
         .from('profiles')
-        .select('banned_until, role')
+        .select('banned_until')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -59,15 +63,16 @@ export default function ProtectedRoute({
           setIsBanned(true);
           setBannedUntil(profile.banned_until);
         }
-        if (profile.role) {
-          setUserRole(profile.role as Role);
-        }
+      }
+      if (requiredRole) {
+        const { data: roles } = await supabase.from('user_roles').select('role, position').eq('user_id', user.id);
+        if (roles?.some(r => r.role === requiredRole || (requiredRole === 'moderator' && r.position === 'moderador'))) setUserRole(requiredRole);
       }
       setRoleCheckLoading(false);
     };
 
     checkBanAndRole();
-  }, [user]);
+  }, [user, requiredRole]);
 
   if (loading || roleCheckLoading) {
     return (
@@ -87,7 +92,7 @@ export default function ProtectedRoute({
         </div>
         <h2 className="text-xl font-bold text-foreground">Conta Suspensa</h2>
         <p className="text-sm text-muted-foreground mt-2 max-w-md">
-          Sua conta está suspensa até {formatDate(bannedUntil!)}.
+          Sua conta está suspensa até {bannedUntil ? formatDate(bannedUntil) : 'nova avaliação'}.
           Durante este período, você não pode acessar esta área.
         </p>
         <button

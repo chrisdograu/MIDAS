@@ -294,8 +294,12 @@ export default function NotificationBell() {
     }
 
     const filteredRows = rows.filter(item => {
-      if (!preferences.types[item.type as keyof typeof preferences.types]) return false;
-      return true;
+      const category: keyof typeof preferences.types = item.type === 'nova_mensagem' ? 'messages'
+        : ['proposta_aceita', 'proposta_recusada', 'certificado_aprovado', 'certificado_recusado', 'certificado_revogado'].includes(item.type) ? 'marketplace'
+        : item.type === 'lembrete_torneio' ? 'tournaments'
+        : ['comentario_review', 'novo_seguidor'].includes(item.type) ? 'social'
+        : item.type in preferences.types ? item.type as keyof typeof preferences.types : 'system';
+      return preferences.types[category] !== false;
     });
 
     setItems(filteredRows.map((item) => ({

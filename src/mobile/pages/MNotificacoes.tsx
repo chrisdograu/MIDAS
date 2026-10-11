@@ -7,6 +7,8 @@ import { formatDateTime, timeAgo } from '@/lib/format';
 import { toast } from 'sonner';
 import EstadoVazio from '@/components/EstadoVazio';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import ErroCarregamento from '@/components/ErroCarregamento';
 
 interface Notification {
   id: string;
@@ -48,10 +50,12 @@ export default function MNotificacoes() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [markingAll, setMarkingAll] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const load = async () => {
     if (!user) { setLoading(false); return; }
     setLoading(true);
+    setLoadError(false);
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -60,7 +64,7 @@ export default function MNotificacoes() {
       .limit(100);
     if (error) {
       console.error('Erro ao carregar notificações:', error);
-      setNotifications([]);
+      setLoadError(true);
     } else {
       setNotifications(data || []);
     }
@@ -69,20 +73,17 @@ export default function MNotificacoes() {
 
   useEffect(() => {
     load();
-    if (user) {
-      supabase
-        .from('notifications')
-        .update({ is_read: true, read_at: new Date().toISOString() })
-        .eq('user_id', user.id)
-        .eq('is_read', false)
-        .then(() => {});
-    }
+    if (!user) return;
+    const channel = supabase.channel(`mobile-notifications-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   const markAllAsRead = async () => {
     if (!user) return;
     setMarkingAll(true);
-    const { error } = await supabase.rpc('mark_all_notifications_read', { user_uuid: user.id });
+    const { error } = await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false);
     setMarkingAll(false);
     if (error) {
       toast.error('Erro ao marcar como lidas');
@@ -92,7 +93,13 @@ export default function MNotificacoes() {
     toast.success('Todas as notificações marcadas como lidas');
   };
 
-  const handleClick = (notif: Notification) => {
+  const handleClick = async (notif: Notification) => {
+    if (!user) return;
+    if (!notif.is_read) {
+      const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', notif.id).eq('user_id', user.id);
+      if (error) toast.error('Não foi possível marcar a notificação como lida');
+      else setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
+    }
     if (notif.link) {
       navigate(notif.link);
     }
@@ -135,22 +142,23 @@ export default function MNotificacoes() {
         </Link>
         <div className="flex items-center gap-2">
           {hasUnread && (
-            <button
+            <Button
               onClick={markAllAsRead}
               disabled={markingAll}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
             >
               {markingAll ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCheck className="h-3.5 w-3.5" />}
               Marcar lidas
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="outline" size="icon" aria-label="Atualizar notificações" title="Atualizar notificações"
             onClick={load}
             disabled={loading}
             className="p-2 rounded-lg bg-card border border-border hover:border-primary/40 transition-colors"
           >
             <RefreshCw className={"h-4 w-4 " + (loading ? 'animate-spin' : '')} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -166,7 +174,7 @@ export default function MNotificacoes() {
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-      ) : notifications.length === 0 ? (
+      ) : loadError ? <ErroCarregamento onRetry={load} /> : notifications.length === 0 ? (
         <EstadoVazio
           icone={Bell}
           titulo="Nenhuma notificação ainda"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, ShoppingBag, Settings, LogOut, Send, Flag, ShieldOff, ArrowLeft, UserPlus, UserCheck, Users, Lock, Star, Newspaper, BookMarked, Palette, Edit2, Save, X } from 'lucide-react';
 import EstadoVazio from '@/components/EstadoVazio';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,7 @@ export default function MProfile() {
   const { userId } = useParams();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const targetId = userId || user?.id;
   const isOwn = !userId || userId === user?.id;
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -54,6 +55,17 @@ export default function MProfile() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportText, setReportText] = useState('');
   const [customizeOpen, setCustomizeOpen] = useState(false);
+  useEffect(() => {
+    if (isOwn && searchParams.get('tab') === 'customizacao') setCustomizeOpen(true);
+  }, [isOwn, searchParams]);
+  const handleCustomizeOpen = (open: boolean) => {
+    setCustomizeOpen(open);
+    if (!open && searchParams.get('tab') === 'customizacao') {
+      const next = new URLSearchParams(searchParams);
+      next.delete('tab');
+      setSearchParams(next, { replace: true });
+    }
+  };
   const [followersOpen, setFollowersOpen] = useState<'followers' | 'following' | null>(null);
   const [followList, setFollowList] = useState<{ id: string; display_name: string | null; avatar_url: string | null }[]>([]);
   
@@ -307,7 +319,7 @@ export default function MProfile() {
         </div>
       )}
 
-      <Sheet open={customizeOpen} onOpenChange={setCustomizeOpen}>
+      <Sheet open={customizeOpen} onOpenChange={handleCustomizeOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
           <SheetHeader><SheetTitle className="flex items-center gap-2"><Palette className="h-4 w-4 text-primary" /> Customização</SheetTitle></SheetHeader>
           <div className="mt-4"><CustomizacaoTab /></div>

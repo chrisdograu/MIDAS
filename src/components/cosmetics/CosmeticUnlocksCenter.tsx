@@ -3,10 +3,11 @@
 // Emite toast com link "Ver" quando um novo cosmético é desbloqueado em realtime.
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Gift, Sparkles, Filter, X } from 'lucide-react';
+import { Gift, Sparkles, Loader2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import ErroCarregamento from '@/components/ErroCarregamento';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { CosmeticPreview } from './CosmeticPreview';
@@ -23,7 +24,7 @@ interface Props {
 }
 
 // GAP-M039: Filtros de tipo
-const KIND_FILTERS: (RewardKind | 'all')[] = ['all', 'avatar_frame', 'profile_banner', 'profile_accent', 'sticker', 'character_icon'];
+const KIND_FILTERS: (RewardKind | 'all')[] = ['all', 'avatar_frame', 'profile_banner', 'profile_accent', 'game_card_skin', 'game_page_theme', 'sticker', 'character_icon'];
 
 export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant = 'compact' }: Props) {
   const { user } = useAuth();
@@ -33,22 +34,27 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
   const [newCount, setNewCount] = useState(0);
   const [kindFilter, setKindFilter] = useState<RewardKind | 'all'>('all');
   const seenKey = user ? `cosmetic-unlocks-seen:${user.id}` : '';
-  const [pendingToasts, setPendingToasts] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const reload = async () => {
-    if (!user) return;
-    const { data } = await supabase
+    if (!user) { setRows([]); setNewCount(0); setLoading(false); return; }
+    setLoading(true);
+    setLoadError(false);
+    const { data, error } = await supabase
       .from('user_game_rewards' as any)
       .select('unlocked_at, reward:game_rewards(*, produtos(title))')
       .eq('user_id', user.id)
       .order('unlocked_at', { ascending: false })
       .limit(30);
-    const list: UnlockRow[] = (data || []).map((r: any) => ({
+    if (error) { setLoadError(true); setLoading(false); return; }
+    const list: UnlockRow[] = (data || []).filter((r: any) => r.reward?.id).map((r: any) => ({
       unlocked_at: r.unlocked_at,
       reward: r.reward as GameReward,
       product_title: r.reward?.produtos?.title ?? null,
     }));
     setRows(list);
+    setLoading(false);
     const lastSeen = (typeof localStorage !== 'undefined' && seenKey) ? localStorage.getItem(seenKey) : null;
     const nu = lastSeen ? list.filter(l => l.unlocked_at > lastSeen).length : list.length;
     setNewCount(nu);
@@ -124,8 +130,9 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
 
   return (
     <>
-      <button
-        onClick={() => { setOpen(true); markSeen(); }}
+      <Button
+        variant="ghost"
+        onClick={() => { setOpen(true); markSeen(); void reload(); }}
         className={`relative inline-flex items-center gap-1.5 ${variant === 'full' ? 'px-3 py-2 rounded-lg bg-card border border-border text-xs font-semibold hover:border-primary' : 'p-2 rounded-full hover:bg-card/60'}`}
         aria-label="Central de cosméticos desbloqueados"
         title="Desbloqueios de cosméticos"
@@ -137,7 +144,7 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
             {newCount > 9 ? '9+' : newCount}
           </span>
         )}
-      </button>
+      </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
@@ -150,8 +157,8 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
 
           <Link
             to={customizationHref}
-            onClick={() => setOpen(false)}
-            className="mt-3 mb-4 block py-2.5 rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-center text-sm"
+            onClick={() => { setOpen(false); navigate(customizationHref); }}
+            className={buttonVariants({ className: 'mt-3 mb-4 flex w-full text-sm' })}
           >
             🎨 Ir para customização
           </Link>
@@ -159,7 +166,8 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
           {/* GAP-M039: Filtro de tipo */}
           <div className="flex flex-wrap gap-1 mb-4">
             {KIND_FILTERS.map(f => (
-              <button
+              <Button
+                variant={kindFilter === f ? 'default' : 'outline'} size="sm"
                 key={f}
                 onClick={() => setKindFilter(f)}
                 className={cn(
@@ -170,11 +178,12 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
                 )}
               >
                 {f === 'all' ? 'Todos' : KIND_LABEL[f]}
-              </button>
+              </Button>
             ))}
           </div>
 
-          {filteredRows.length === 0 ? (
+          {loading ? <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" aria-label="Carregando cosméticos" /></div>
+          : loadError ? <ErroCarregamento onRetry={reload} /> : filteredRows.length === 0 ? (
             <div className="text-center text-sm text-muted-foreground py-10">
               Ainda nenhum cosmético desbloqueado.
             </div>
