@@ -8,6 +8,7 @@ import { timeAgo } from '@/mobile/lib/time';
 import { MobileBadge } from '@/mobile/lib/badge';
 import { toast } from 'sonner';
 import { dbWrite } from '@/lib/dbWrite';
+import MChatFilters from '@/mobile/components/MChatFilters';
 
 interface Conv {
   id: string; participant_1: string; participant_2: string; anuncio_id: string | null;
@@ -266,76 +267,19 @@ export default function MChat() {
   const hasUnread = conversas.some(c => c.unread > 0);
 
   return (
-    <div className="h-full overflow-hidden px-4 py-5 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-xl font-bold gradient-text">Chat</h1>
-        <div className="flex items-center gap-2">
-          {/* GAP-1010: Marcar todas como lidas */}
-          {hasUnread && (
-            <button
-              onClick={markAllAsRead}
-              disabled={markingAll}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
-            >
-              {markingAll ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCheck className="h-3.5 w-3.5" />}
-              Marcar lidas
-            </button>
-          )}
-          <Link to="/m/grupos" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border text-xs font-semibold hover:border-primary/40">
-            <UsersRound className="h-3.5 w-3.5 text-primary" /> Grupos
-          </Link>
-        </div>
-      </div>
-
-      {/* GAP-1009: Indicador de "digitando..." */}
+    <div className="h-full overflow-hidden px-4 py-4 flex flex-col gap-2">
+      <MChatFilters
+        tab={tab} onTabChange={setTab} filter={filter} onFilterChange={setFilter}
+        unread={{ amigos: friendsUnread, vendedores: vendorUnread, torneios: tournamentUnread }}
+        hasUnread={hasUnread} markingAll={markingAll} onMarkAllRead={markAllAsRead}
+        selectMode={selectMode} selectedCount={selectedIds.size}
+        onToggleSelect={() => {
+          setSelectMode(!selectMode);
+          if (selectMode) setSelectedIds(new Set());
+        }}
+        onArchiveSelected={archiveSelected}
+      />
       <TypingIndicator users={typingUsers} />
-
-      <div className="flex gap-1 p-1 bg-card border border-border rounded-xl">
-        <button onClick={() => setTab('amigos')} className={`flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1 ${tab === 'amigos' ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md' : 'text-muted-foreground'}`}>
-          <Users className="h-3.5 w-3.5" /> Amigos
-          {friendsUnread > 0 && <span className="ml-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">{friendsUnread}</span>}
-        </button>
-        <button onClick={() => setTab('vendedores')} className={`flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1 ${tab === 'vendedores' ? 'bg-gradient-to-r from-warning to-warning text-on-media shadow-md' : 'text-muted-foreground'}`}>
-          <Store className="h-3.5 w-3.5" /> Vendedores
-          {vendorUnread > 0 && <span className="ml-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">{vendorUnread}</span>}
-        </button>
-        <button onClick={() => setTab('torneios')} className={`flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1 ${tab === 'torneios' ? 'bg-gradient-to-r from-destructive to-accent text-primary-foreground shadow-md' : 'text-muted-foreground'}`}>
-          <Trophy className="h-3.5 w-3.5" /> Torneios
-          {tournamentUnread > 0 && <span className="ml-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">{tournamentUnread}</span>}
-        </button>
-      </div>
-
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-thin">
-        {([
-          { id: 'all', label: 'Todos', Icon: Inbox },
-          { id: 'favorites', label: 'Favoritos', Icon: Star },
-          { id: 'unread', label: 'Não lidos', Icon: MessagesSquare },
-          { id: 'archived', label: 'Arquivados', Icon: Archive },
-        ] as { id: Filter; label: string; Icon: any }[]).map(f => (
-          <button key={f.id} onClick={() => setFilter(f.id)}
-            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap flex items-center gap-1 ${filter === f.id ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground'}`}>
-            <f.Icon className="h-3 w-3" /> {f.label}
-          </button>
-        ))}
-        {/* GAP-1012: Modo de seleção múltipla */}
-        <button
-          onClick={() => {
-            setSelectMode(!selectMode);
-            if (selectMode) setSelectedIds(new Set());
-          }}
-          className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${selectMode ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground'}`}
-        >
-          {selectMode ? '✕ Cancelar' : '☑ Selecionar'}
-        </button>
-        {selectMode && selectedIds.size > 0 && (
-          <button
-            onClick={archiveSelected}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap bg-warning text-warning-foreground"
-          >
-            Arquivar ({selectedIds.size})
-          </button>
-        )}
-      </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -412,7 +356,7 @@ export default function MChat() {
                       </div>
                       <div className="space-y-1.5">
                         {visible.map(c => (
-                          <Link key={c.id} to={`/m/chat/${c.id}`} className={`relative flex items-start gap-3 p-3 glass rounded-xl border-l-2 ${c.favorited ? 'border-primary' : 'border-destructive/60'} hover:border-primary transition-all overflow-hidden ${selectMode ? 'cursor-pointer' : ''}`} onClick={() => selectMode ? toggleSelect(c.id) : null}>
+                          <Link key={c.id} to={`/m/chat/${c.id}`} className={`relative flex items-start gap-3 p-3 glass rounded-xl border-l-2 ${c.favorited ? 'border-primary' : 'border-destructive/60'} hover:border-primary transition-all overflow-hidden ${selectMode ? 'cursor-pointer' : ''}`} onClick={e => { if (selectMode) { e.preventDefault(); toggleSelect(c.id); } }}>
                             {selectMode && (
                               <input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => {}} className="mt-1 h-4 w-4 accent-primary" />
                             )}
@@ -447,7 +391,7 @@ export default function MChat() {
           ) : (
             <div className="space-y-1.5">
               {filtered.map(c => (
-                <Link key={c.id} to={`/m/chat/${c.id}`} className={`relative flex items-start gap-3 p-3 glass rounded-xl hover:border-primary/40 transition-colors overflow-hidden ${c.favorited ? 'border-l-2 border-primary' : ''} ${selectMode ? 'cursor-pointer' : ''}`} onClick={() => selectMode ? toggleSelect(c.id) : null}>
+                <Link key={c.id} to={`/m/chat/${c.id}`} className={`relative flex items-start gap-3 p-3 glass rounded-xl hover:border-primary/40 transition-colors overflow-hidden ${c.favorited ? 'border-l-2 border-primary' : ''} ${selectMode ? 'cursor-pointer' : ''}`} onClick={e => { if (selectMode) { e.preventDefault(); toggleSelect(c.id); } }}>
                   {selectMode && (
                     <input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => {}} className="mt-1 h-4 w-4 accent-primary" />
                   )}
