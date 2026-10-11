@@ -15,6 +15,14 @@ function setup(overrides = {}) {
 }
 
 describe('Controles do chat móvel', () => {
+  it('mantém as cores de cada categoria e destaca a aba selecionada na mesma cor', () => {
+    setup({ tab: 'vendedores', unread: { amigos: 3, vendedores: 2, torneios: 1 } });
+    expect(screen.getByRole('tab', { name: /Amigos/ })).toHaveClass('text-primary');
+    const sellers = screen.getByRole('tab', { name: /Vendedores/ });
+    expect(sellers).toHaveClass('text-seller', 'border-seller', 'bg-seller/5');
+    expect(sellers.querySelector('span:last-child')).toHaveClass('bg-seller', 'text-seller-foreground');
+    expect(screen.getByRole('tab', { name: /Torneios/ })).toHaveClass('text-gold');
+  });
   it('preserva as três abas e deixa filtros recolhidos inicialmente', () => {
     setup();
     expect(screen.getAllByRole('tab')).toHaveLength(3);
