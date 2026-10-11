@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import MNotificacoes from '@/mobile/pages/MNotificacoes';
 import { CosmeticUnlocksCenter } from '@/components/cosmetics/CosmeticUnlocksCenter';
 
-const mocks = vi.hoisted(() => ({ update: vi.fn(), fail: false }));
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'user-1' } }) }));
+const mocks = vi.hoisted(() => ({ update: vi.fn(), fail: false, user: { id: 'user-1' } }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: mocks.user }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
   from: (table: string) => {
     const result = () => ({ error: mocks.fail ? { message: 'offline' } : null, data: table === 'notifications' ? [{ id: 'n1', type: 'novo_seguidor', title: 'Novo seguidor', body: null, link: null, is_read: false, created_at: new Date().toISOString() }] : [{ unlocked_at: new Date().toISOString(), reward: null }, { unlocked_at: new Date().toISOString(), reward: { id: 'r1', kind: 'game_card_skin', name: 'Visual de Colecionador', rarity: 'common', payload: {}, asset_url: null } }] });
