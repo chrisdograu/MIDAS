@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Notification controls update only the existing `is_read` field; notification preferences map database event types to UI categories, and mobile customization links open the profile sheet via the URL query so deep links work.
+
 - Mobile chat controls live in a presentation-only toolbar; collapsing filters and grouping actions must preserve conversation filtering, tabs, and data access behavior.
 
 - Developer search shares a named-record loader and destination mapper across web and desktop; public results link to profiles, and admin results filter the existing management screen without widening permissions.

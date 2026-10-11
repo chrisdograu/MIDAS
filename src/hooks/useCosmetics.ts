@@ -44,10 +44,10 @@ export function useMyCosmeticInventory() {
     setLoading(true);
     const { data } = await supabase
       .from('user_game_rewards' as any)
-      .select('unlocked_at, reward:game_rewards(*, produtos!inner(title))')
+      .select('unlocked_at, reward:game_rewards(*, produtos(title))')
       .eq('user_id', user.id)
       .order('unlocked_at', { ascending: false });
-    const list = (data || []).map((r: any) => ({
+    const list = (data || []).filter((r: any) => r.reward?.id).map((r: any) => ({
       reward: r.reward as GameReward,
       product_title: r.reward?.produtos?.title ?? null,
       unlocked_at: r.unlocked_at,
