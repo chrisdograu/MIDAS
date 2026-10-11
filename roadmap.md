@@ -1,7 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
-- [ ] Corrigir bloqueio de toques causado pelo painel do sino móvel e testar abertura da página e dos cosméticos no navegador.
+- [x] Corrigir bloqueio de toques causado pelo painel do sino móvel; abertura, filtros dos cosméticos, fechar e voltar às notificações testados por toque com dados isolados no navegador.
 
 - [x] Corrigir notificações móveis, abertura da customização e carregamento da central de cosméticos; oito testes dos controles passaram.
 - [ ] Validar notificações e cosméticos com sessão real — Supabase externo sem sessão de teste disponível.
