@@ -16,6 +16,7 @@ interface Notification {
   title: string;
   body: string | null;
   link: string | null;
+  cta_url?: string | null;
   is_read: boolean;
   created_at: string;
   reference_type: string | null;
@@ -100,8 +101,14 @@ export default function MNotificacoes() {
       if (error) toast.error('Não foi possível marcar a notificação como lida');
       else setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
     }
-    if (notif.link) {
-      navigate(notif.link);
+    const destination = notif.cta_url || notif.link;
+    if (destination) {
+      const mobilePath = destination === '/perfil' ? '/m/perfil'
+        : destination.startsWith('/perfil/') ? destination.replace('/perfil/', '/m/perfil/')
+        : destination === '/forum' ? '/m/forum'
+        : destination === '/torneios' ? '/torneios'
+        : destination;
+      navigate(mobilePath);
     }
   };
 
@@ -135,7 +142,7 @@ export default function MNotificacoes() {
   }, {});
 
   return (
-    <div className="px-4 py-5 space-y-4 pb-24">
+    <div className="w-full min-w-0 px-4 py-5 space-y-4 pb-8">
       <div className="flex items-center justify-between">
         <Link to="/m" className="inline-flex items-center gap-1 text-sm text-muted-foreground">
           <ArrowLeft className="h-4 w-4" /> Voltar
@@ -162,7 +169,7 @@ export default function MNotificacoes() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Bell className="h-5 w-5 text-primary" />
         <h1 className="text-xl font-bold">Notificações</h1>
         {unreadCount > 0 && (
@@ -191,20 +198,18 @@ export default function MNotificacoes() {
                   const colorClass = TYPE_COLORS[n.type] || 'text-muted-foreground bg-muted/20';
                   
                   return (
-                    <motion.div
+                    <Button
+                      variant="ghost"
                       key={n.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(index * 0.03, 0.3) }}
                       onClick={() => handleClick(n)}
-                      className={"flex items-start gap-3 p-3 rounded-xl transition-colors cursor-pointer " + (n.is_read ? 'bg-card border border-border' : 'bg-primary/5 border border-primary/20')}
+                      className={"flex h-auto w-full min-w-0 items-start justify-start gap-3 whitespace-normal p-3 rounded-lg text-left transition-colors " + (n.is_read ? 'bg-card border border-border' : 'bg-primary/5 border border-primary/20')}
                     >
                       <div className={"w-10 h-10 rounded-full " + colorClass + " flex items-center justify-center shrink-0"}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground">{n.title}</p>
-                        {n.body && <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>}
+                        <p className="break-words text-sm font-semibold text-foreground [overflow-wrap:anywhere]">{n.title}</p>
+                        {n.body && <p className="break-words text-xs text-muted-foreground mt-0.5 [overflow-wrap:anywhere]">{n.body}</p>}
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-[10px] text-muted-foreground">{timeAgo(n.created_at)}</span>
                           {!n.is_read && (
@@ -212,7 +217,7 @@ export default function MNotificacoes() {
                           )}
                         </div>
                       </div>
-                    </motion.div>
+                    </Button>
                   );
                 })}
               </div>

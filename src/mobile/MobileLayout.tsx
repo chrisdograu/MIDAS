@@ -5,12 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import NotificationBell from '@/components/NotificationBell';
 import { CosmeticUnlocksCenter } from '@/components/cosmetics/CosmeticUnlocksCenter';
 import { usePrefetchRoute } from '@/hooks/usePrefetchRoute';
 import { toast } from 'sonner';
 
-const ROUTES_WITH_BELL = new Set(['/m', '/m/']);
 
 const tabs = [
   { to: '/m', icon: Home, label: 'Início', end: true },
@@ -157,11 +155,9 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
             MIDIAS
           </NavLink>
           <div className="flex items-center gap-2">
-            {ROUTES_WITH_BELL.has(location.pathname) ? (
-              <NotificationBell />
-            ) : (
+            {(
               // GAP-M001: Indicador de notificações não lidas em outras telas
-              <NavLink to="/m/notificacoes" className="relative p-1.5 rounded-lg hover:bg-muted/50 transition-colors">
+              <NavLink to="/m/notificacoes" aria-label="Notificações" title="Notificações" className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg hover:bg-muted/50 transition-colors">
                 {totalUnread > 0 ? (
                   <BellDot className="h-5 w-5 text-primary" />
                 ) : (

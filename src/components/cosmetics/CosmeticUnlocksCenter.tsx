@@ -147,8 +147,8 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader>
+        <SheetContent side="right" className="w-full max-w-full sm:max-w-md h-[100dvh] overflow-y-auto overflow-x-hidden overscroll-contain">
+          <SheetHeader className="pr-8">
             <SheetTitle className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" /> Desbloqueios recentes
             </SheetTitle>
@@ -157,7 +157,7 @@ export function CosmeticUnlocksCenter({ customizationHref = '/perfil', variant =
 
           <Link
             to={customizationHref}
-            onClick={() => { setOpen(false); navigate(customizationHref); }}
+            onClick={() => { setOpen(false); }}
             className={buttonVariants({ className: 'mt-3 mb-4 flex w-full text-sm' })}
           >
             🎨 Ir para customização
