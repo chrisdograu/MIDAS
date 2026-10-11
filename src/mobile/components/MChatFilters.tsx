@@ -14,9 +14,9 @@ const filters = [
   { id: 'archived', label: 'Arquivados', icon: Archive },
 ] as const;
 const tabs = [
-  { id: 'amigos', label: 'Amigos', icon: Users },
-  { id: 'vendedores', label: 'Vendedores', icon: Store },
-  { id: 'torneios', label: 'Torneios', icon: Trophy },
+  { id: 'amigos', label: 'Amigos', icon: Users, color: 'text-primary hover:text-primary', active: 'border-primary bg-primary/5 hover:bg-primary/10', badge: 'bg-primary text-primary-foreground' },
+  { id: 'vendedores', label: 'Vendedores', icon: Store, color: 'text-seller hover:text-seller', active: 'border-seller bg-seller/5 hover:bg-seller/10', badge: 'bg-seller text-seller-foreground' },
+  { id: 'torneios', label: 'Torneios', icon: Trophy, color: 'text-gold hover:text-gold', active: 'border-gold bg-gold/5 hover:bg-gold/10', badge: 'bg-gold text-background' },
 ] as const;
 
 interface Props {
@@ -59,9 +59,9 @@ export default function MChatFilters(props: Props) {
       <div className="grid grid-cols-3 border-b border-border" role="tablist" aria-label="Tipo de conversa">
         {tabs.map(t => (
           <Button key={t.id} variant="ghost" role="tab" aria-selected={props.tab === t.id} onClick={() => props.onTabChange(t.id)}
-            className={cn('h-11 min-w-0 gap-1 rounded-none border-b-2 border-transparent px-1 text-xs text-muted-foreground', props.tab === t.id && 'border-primary text-primary bg-primary/5')}>
+            className={cn('h-11 min-w-0 gap-1 rounded-none border-b-2 border-transparent px-1 text-xs', t.color, props.tab === t.id && t.active)}>
             <t.icon className="h-3.5 w-3.5" /><span>{t.label}</span>
-            {props.unread[t.id] > 0 && <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-primary px-1 text-[9px] text-primary-foreground">{props.unread[t.id] > 99 ? '99+' : props.unread[t.id]}</span>}
+            {props.unread[t.id] > 0 && <span className={cn('flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[9px]', t.badge)}>{props.unread[t.id] > 99 ? '99+' : props.unread[t.id]}</span>}
           </Button>
         ))}
       </div>
