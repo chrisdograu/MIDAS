@@ -1,7 +1,8 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
-- [ ] Corrigir notificações móveis, abertura da customização e carregamento da central de cosméticos; testar controles.
+- [x] Corrigir notificações móveis, abertura da customização e carregamento da central de cosméticos; oito testes dos controles passaram.
+- [ ] Validar notificações e cosméticos com sessão real — Supabase externo sem sessão de teste disponível.
 
 - [x] Organizar visualmente os filtros de /m/chat, preservando opções e seções; quatro testes dos controles passaram.
 - [ ] Validar a tela de chat completa com login — Supabase externo sem sessão de teste disponível.
