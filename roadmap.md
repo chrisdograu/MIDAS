@@ -1,6 +1,8 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
 
+- [ ] Organizar visualmente os filtros de /m/chat, preservando opções e seções, e testar os controles.
+
 - [x] Incluir desenvolvedores nas buscas web e desktop, testar os destinos e validar a busca web no navegador.
 - [ ] Validar busca no desktop com administrador conectado — Supabase externo sem sessão de teste disponível.
 

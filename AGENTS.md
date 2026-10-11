@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Mobile chat controls live in a presentation-only toolbar; collapsing filters and grouping actions must preserve conversation filtering, tabs, and data access behavior.
+
 - Developer search shares a named-record loader and destination mapper across web and desktop; public results link to profiles, and admin results filter the existing management screen without widening permissions.
 
 - Checkout applies and records coupons atomically inside `create_order_secure`; the client must never redeem a coupon separately.
