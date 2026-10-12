@@ -2,6 +2,7 @@
 
 - Notification controls update only the existing `is_read` field; notification preferences map database event types to UI categories, and mobile customization links open the profile sheet via the URL query so deep links work.
 - The mobile header notification bell navigates to the mobile notification page rather than mounting the web dropdown; this prevents the dropdown backdrop from trapping header touches and constrains the content to the mobile page.
+- Successful profile cosmetic writes notify mounted loadout readers through a user-scoped browser event; this refreshes previews without requiring database realtime publication settings.
 
 - Mobile chat controls live in a presentation-only toolbar; collapsing filters and grouping actions must preserve conversation filtering, tabs, and data access behavior.
 

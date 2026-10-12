@@ -38,15 +38,18 @@ export function useMyCosmeticInventory() {
   const { user } = useAuth();
   const [rows, setRows] = useState<InventoryRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const reload = useCallback(async () => {
     if (!user) { setRows([]); setLoading(false); return; }
     setLoading(true);
-    const { data } = await supabase
+    setLoadError(false);
+    const { data, error } = await supabase
       .from('user_game_rewards' as any)
       .select('unlocked_at, reward:game_rewards(*, produtos(title))')
       .eq('user_id', user.id)
       .order('unlocked_at', { ascending: false });
+    if (error) { setLoadError(true); setLoading(false); return; }
     const list = (data || []).filter((r: any) => r.reward?.id).map((r: any) => ({
       reward: r.reward as GameReward,
       product_title: r.reward?.produtos?.title ?? null,
@@ -57,7 +60,7 @@ export function useMyCosmeticInventory() {
   }, [user?.id]);
 
   useEffect(() => { reload(); }, [reload]);
-  return { rows, loading, reload };
+  return { rows, loading, reload, loadError };
 }
 
 // --- Global profile loadout (any user) ---
@@ -77,17 +80,26 @@ export function useUserLoadout(userId: string | null | undefined) {
   }, [userId]);
 
   useEffect(() => { reload(); }, [reload]);
+  useEffect(() => {
+    if (!userId) return;
+    const onChanged = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === userId) void reload();
+    };
+    window.addEventListener('cosmetic-loadout-changed', onChanged);
+    return () => window.removeEventListener('cosmetic-loadout-changed', onChanged);
+  }, [userId, reload]);
   return { rows, loading, reload };
 }
 
 export async function equipGlobalSlot(userId: string, slot: string, rewardId: string | null) {
-  if (rewardId === null) {
-    return supabase.from('user_cosmetic_loadout' as any).delete().eq('user_id', userId).eq('slot', slot);
-  }
-  return supabase.from('user_cosmetic_loadout' as any).upsert(
+  const result = rewardId === null
+    ? await supabase.from('user_cosmetic_loadout' as any).delete().eq('user_id', userId).eq('slot', slot)
+    : await supabase.from('user_cosmetic_loadout' as any).upsert(
     { user_id: userId, slot, reward_id: rewardId, updated_at: new Date().toISOString() },
     { onConflict: 'user_id,slot' }
   );
+  if (!result.error) window.dispatchEvent(new CustomEvent('cosmetic-loadout-changed', { detail: userId }));
+  return result;
 }
 
 // --- Per game page loadout ---

@@ -216,7 +216,7 @@ export default function MProfile() {
 
       {isOwn && (
         <div className="flex justify-end">
-          <CosmeticUnlocksCenter customizationHref="#" />
+          <CosmeticUnlocksCenter customizationHref="/m/perfil?tab=customizacao" />
         </div>
       )}
 
@@ -320,8 +320,8 @@ export default function MProfile() {
       )}
 
       <Sheet open={customizeOpen} onOpenChange={handleCustomizeOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader><SheetTitle className="flex items-center gap-2"><Palette className="h-4 w-4 text-primary" /> Customização</SheetTitle></SheetHeader>
+        <SheetContent side="right" className="w-full max-w-full sm:max-w-md h-[100dvh] overflow-y-auto overflow-x-hidden overscroll-contain">
+          <SheetHeader className="pr-8"><SheetTitle className="flex items-center gap-2"><Palette className="h-4 w-4 text-primary" /> Customização</SheetTitle></SheetHeader>
           <div className="mt-4"><CustomizacaoTab /></div>
         </SheetContent>
       </Sheet>

@@ -1,5 +1,6 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
+- [x] Corrigir controles de gravação e atualização visual da customização do perfil; seis testes passaram e os toques responderam com dados isolados.
 
 - [x] Corrigir bloqueio de toques causado pelo painel do sino móvel; abertura, filtros dos cosméticos, fechar e voltar às notificações testados por toque com dados isolados no navegador.
 
