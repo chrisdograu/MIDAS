@@ -23,12 +23,9 @@ export function CosmeticPreview({
   const emoji = reward.payload?.emoji || KIND_EMOJI[reward.kind];
   const rarityRing = RARITY_COLOR[reward.rarity].split(' ')[0];
   const [hasError, setHasError] = useState(false);
-
-  // GAP-M038: Fallback para asset quebrado
-  if (hasError || (!reward.asset_url && reward.kind === 'avatar_frame')) {
-    // Tentar recarregar após erro
-    setTimeout(() => setHasError(false), 5000);
-  }
+  // GAP-M038: imagem quebrada cai no placeholder visual abaixo.
+  // Overlays decorativos são sempre pointer-events-none e presos ao preview
+  // (relative + overflow-hidden), para nunca cobrirem a tela e bloquearem toques.
 
   // GAP-M037: Animação de brilho
   const shimmerClass = animated ? 'animate-pulse' : '';
