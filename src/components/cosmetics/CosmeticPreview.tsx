@@ -49,7 +49,7 @@ export function CosmeticPreview({
         />
         {/* GAP-M037: Overlay de brilho */}
         {animated && (
-          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary/5 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-transparent via-primary/5 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
         )}
       </div>
     );
@@ -66,12 +66,12 @@ export function CosmeticPreview({
         )}
         style={{ width: size * 2, height: size, background: `linear-gradient(135deg, ${color}, ${color}40)` }}
       >
-        <div className="absolute inset-0 opacity-50 mix-blend-overlay"
+        <div className="pointer-events-none absolute inset-0 opacity-50 mix-blend-overlay"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,.4), transparent 40%)' }} />
-        <span className="absolute bottom-1 right-2 text-lg">{emoji}</span>
+        <span className="pointer-events-none absolute bottom-1 right-2 text-lg">{emoji}</span>
         {/* GAP-M037: Brilho animado */}
         {animated && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
         )}
       </div>
     );
@@ -80,13 +80,13 @@ export function CosmeticPreview({
   if (reward.kind === 'profile_accent') {
     return (
       <div className={cn(
-        `rounded-full border-2 ${rarityRing} flex items-center justify-center`,
+        `relative overflow-hidden rounded-full border-2 ${rarityRing} flex items-center justify-center`,
         shimmerClass,
         className
       )} style={{ width: size, height: size, background: color }}>
         <span className="text-2xl">{emoji}</span>
         {animated && (
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
         )}
       </div>
     );
@@ -96,7 +96,7 @@ export function CosmeticPreview({
   return (
     <div
       className={cn(
-        `rounded-xl border-2 ${rarityRing} flex items-center justify-center bg-card relative`,
+        `rounded-xl border-2 ${rarityRing} flex items-center justify-center bg-card relative overflow-hidden`,
         shimmerClass,
         className
       )}
@@ -104,7 +104,7 @@ export function CosmeticPreview({
     >
       <span className="text-3xl">{emoji}</span>
       {animated && (
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+        <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
       )}
     </div>
   );
