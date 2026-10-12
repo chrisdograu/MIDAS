@@ -21,18 +21,10 @@ const PRESETS = ['#14B8A6', '#A855F7', '#EF4444', '#F97316', '#EAB308', '#22C55E
 
 // GAP-CT10: Cores complementares sugeridas
 const getComplementaryColors = (hex: string): string[] => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2 / 255;
-  const h = 0;
-  // Simplificado: retorna variações da mesma cor
-  return [
-    `hsl(${h}, ${60 + Math.random() * 20}%, ${Math.min(90, 30 + l * 50)}%)`,
-    `hsl(${h + 30}, ${50 + Math.random() * 30}%, ${Math.min(85, 25 + l * 50)}%)`,
-  ];
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return [];
+  const channels = [1, 3, 5].map(start => parseInt(hex.slice(start, start + 2), 16));
+  const encode = (values: number[]) => `#${values.map(v => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
+  return [encode(channels.map(v => 255 - v)), encode(channels.map(v => v + (255 - v) * 0.25))];
 };
 
 interface BadgeRow { badge_id: string; name?: string | null; icon?: string | null }

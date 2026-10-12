@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import ErroCarregamento from '@/components/ErroCarregamento';
 
 const SLOT_FOR_KIND: Partial<Record<RewardKind, string>> = {
   avatar_frame: 'avatar_frame',
@@ -24,7 +26,7 @@ const RARITY_FILTERS = ['all', 'common', 'uncommon', 'rare', 'epic', 'legendary'
 
 export function CosmeticInventoryGrid() {
   const { user } = useAuth();
-  const { rows, loading, reload } = useMyCosmeticInventory();
+  const { rows, loading, reload, loadError } = useMyCosmeticInventory();
   const { rows: loadout, reload: reloadLoadout } = useUserLoadout(user?.id);
   
   // GAP-M033: Busca
@@ -36,6 +38,7 @@ export function CosmeticInventoryGrid() {
   const [kindFilter, setKindFilter] = useState<RewardKind | 'all'>('all');
   // GAP-M036: Preview
   const [previewItem, setPreviewItem] = useState<any | null>(null);
+  const [equipping, setEquipping] = useState(false);
 
   // GAP-M033 + GAP-M034 + GAP-M035: Filtros e ordenação
   const filteredAndSorted = useMemo(() => {
@@ -90,18 +93,27 @@ export function CosmeticInventoryGrid() {
   const equippedId = (slot: string) => loadout.find(l => l.slot === slot)?.reward_id;
 
   const handleEquip = async (rewardId: string, kind: RewardKind) => {
-    if (!user) return;
+    if (!user || equipping) return;
+    if (kind === 'game_card_skin' || kind === 'game_page_theme') {
+      toast.info('Este cosmético é aplicado na personalização da página de um jogo da sua biblioteca.');
+      return;
+    }
     const slot = SLOT_FOR_KIND[kind];
+    setEquipping(true);
+    let result;
     if (!slot) {
       const stickerSlots = ['sticker_1', 'sticker_2', 'sticker_3'];
-      const free = stickerSlots.find(s => !loadout.find(l => l.slot === s)) || 'sticker_1';
-      await equipGlobalSlot(user.id, free, rewardId);
+      const existing = loadout.find(l => l.reward_id === rewardId);
+      const free = existing?.slot || stickerSlots.find(s => !loadout.find(l => l.slot === s)?.reward_id) || 'sticker_1';
+      result = await equipGlobalSlot(user.id, free, existing ? null : rewardId);
     } else {
       const current = equippedId(slot);
-      await equipGlobalSlot(user.id, slot, current === rewardId ? null : rewardId);
+      result = await equipGlobalSlot(user.id, slot, current === rewardId ? null : rewardId);
     }
-    reloadLoadout();
-    toast.success('Loadout atualizado');
+    setEquipping(false);
+    if (result.error) { toast.error('Não foi possível aplicar o cosmético. Tente novamente.'); return; }
+    await reloadLoadout();
+    toast.success('Cosmético atualizado');
   };
 
   // GAP-M036: Abrir preview
@@ -110,6 +122,7 @@ export function CosmeticInventoryGrid() {
   };
 
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
+  if (loadError) return <ErroCarregamento onRetry={reload} />;
 
   if (rows.length === 0) {
     return (
@@ -165,7 +178,7 @@ export function CosmeticInventoryGrid() {
       </div>
 
       {/* Filtros de tipo */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
+      <div className="flex flex-wrap gap-1.5 pb-1">
         {filters.map(f => (
           <button key={f} onClick={() => setKindFilter(f)}
             className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border transition ${
@@ -211,9 +224,11 @@ export function CosmeticInventoryGrid() {
                     {reward.rarity}
                   </Badge>
                   
-                  <button
+                  <Button
                     onClick={() => handleEquip(reward.id, reward.kind)}
-                    className={`w-full mt-1 py-0.5 rounded text-[9px] font-semibold transition ${
+                    disabled={equipping}
+                    variant="secondary"
+                    className={`w-full min-h-11 h-auto mt-1 px-1 rounded text-[11px] font-semibold transition ${
                       isEquipped 
                         ? 'bg-primary/20 text-primary' 
                         : 'bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary'
@@ -224,9 +239,9 @@ export function CosmeticInventoryGrid() {
                         <CheckCircle2 className="h-3 w-3" /> Equipado
                       </span>
                     ) : (
-                      'Equipar'
+                      reward.kind === 'game_card_skin' || reward.kind === 'game_page_theme' ? 'Usar no jogo' : 'Equipar'
                     )}
-                  </button>
+                  </Button>
                 </div>
               );
             })}
