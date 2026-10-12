@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner';
 import { stripImageExif } from '@/lib/stripImageExif';
 import { CosmeticInventoryGrid } from '@/components/cosmetics/CosmeticInventoryGrid';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -74,12 +75,12 @@ export default function CustomizacaoTab() {
 
   // GAP-CT04: Sensors para drag-and-drop
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
     (async () => {
       const [{ data: p }, { data: ub }, { data: ut }] = await Promise.all([
         supabase.from('profiles').select('theme_color, profile_cover_url, trophy_showcase, backlog_note').eq('id', user.id).maybeSingle(),
@@ -154,7 +155,7 @@ export default function CustomizacaoTab() {
   // GAP-CT04: Reordenar vitrine
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    if (active.id !== over.id) {
+    if (over && active.id !== over.id) {
       const oldIndex = showcase.indexOf(active.id);
       const newIndex = showcase.indexOf(over.id);
       setShowcase(arrayMove(showcase, oldIndex, newIndex));
@@ -173,22 +174,21 @@ export default function CustomizacaoTab() {
   const save = async () => {
     if (!user) return;
     
-    // GAP-CT07: Dialog de confirmação
-    const confirmSave = await new Promise<boolean>((resolve) => {
-      // Usar confirm nativo por simplicidade
-      resolve(window.confirm('Salvar personalização? Suas alterações serão aplicadas ao perfil público.'));
-    });
-    if (!confirmSave) return;
+    if (saving) return;
+    if (!/^#[0-9a-fA-F]{6}$/.test(color)) {
+      toast.error('Escolha uma cor válida no formato #RRGGBB.');
+      return;
+    }
     
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({
+    const { data, error } = await supabase.from('profiles').update({
       theme_color: color,
       profile_cover_url: coverUrl,
       trophy_showcase: showcase,
       backlog_note: backlogNote.trim() ? backlogNote.trim().slice(0, 280) : null,
-    } as any).eq('id', user.id);
+    } as any).eq('id', user.id).select('id').maybeSingle();
     setSaving(false);
-    if (error) { toast.error('Erro ao salvar'); return; }
+    if (error || !data) { toast.error('Não foi possível salvar a personalização. Tente novamente.'); return; }
     toast.success('Personalização salva ✨');
   };
 
@@ -211,7 +211,7 @@ export default function CustomizacaoTab() {
   const showcaseItems = [...showcase];
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {/* GAP-CT06: Preview em tempo real */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">🎨 Personalização</h2>
@@ -320,7 +320,7 @@ export default function CustomizacaoTab() {
         </div>
         <div className="flex items-center gap-2">
           <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-12 h-10 rounded cursor-pointer bg-transparent border border-border" />
-          <input type="text" value={color} onChange={e => setColor(e.target.value)} className="flex-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm font-mono" />
+          <input type="text" aria-label="Código da cor de destaque" value={color} onChange={e => setColor(e.target.value)} className="min-w-0 flex-1 px-3 py-2 bg-secondary border border-border rounded-lg text-sm font-mono" />
         </div>
         
         {/* GAP-CT10: Cores complementares sugeridas */}
@@ -452,11 +452,11 @@ export default function CustomizacaoTab() {
       </section>
 
       {/* GAP-CT07: Botão Salvar com confirmação */}
-      <button onClick={save} disabled={saving}
-        className="w-full py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold rounded-lg flex items-center justify-center gap-2 disabled:opacity-50">
+      <Button onClick={save} disabled={saving || uploading}
+        className="w-full min-h-11 gap-2">
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
         Salvar personalização
-      </button>
+      </Button>
 
       {/* Inventário de cosméticos */}
       <section className="pt-4 border-t border-border">
