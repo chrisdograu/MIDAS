@@ -12,6 +12,7 @@
 - Checkout applies and records coupons atomically inside `create_order_secure`; the client must never redeem a coupon separately.
 - Customer-facing code must not update order status directly; order state changes belong to trusted database functions or staff workflows.
 - Public team and developer pages read the same Supabase records managed by admin-only desktop screens, so edits appear publicly without hardcoded duplicate content.
+- Desktop developer CRUD uses table writes protected by existing administrator RLS, not absent admin RPCs; updates and deletes verify returned rows before reporting success.
 - Public developer profiles resolve either a UUID or a slug and normalize product rows with `mapProdutoToGame`; this keeps existing links and game cards compatible.
 - Developer channel permissions are scoped in a separate assignment table and enforced by RLS; delegated managers never receive desktop administrator roles.
 - Official developer publications live in a separate web-only channel with paginated comments, independent of game forums.
