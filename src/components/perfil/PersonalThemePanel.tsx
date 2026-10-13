@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Palette, Loader2, RotateCcw, Eye, Share2, Check, History } from 'lucide-react';
 import { toast } from 'sonner';
-import { applyPersonalTheme, contrastRatio, hexToHsl, type PersonalTheme } from '@/lib/personalTheme';
+import { applyPersonalTheme, complementaryThemeColors, contrastRatio, hexToHsl, type PersonalTheme } from '@/lib/personalTheme';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import ErroCarregamento from '@/components/ErroCarregamento';
 
 const PRESETS: { label: string; accent: string; bg?: string; text?: string }[] = [
   { label: 'Padrão MIDIAS', accent: '#14B8A6' },
@@ -20,18 +21,7 @@ const PRESETS: { label: string; accent: string; bg?: string; text?: string }[] =
   { label: 'Laranja sunset', accent: '#F97316' },
 ];
 
-// GAP-PT02: Cores complementares
-const getComplementaryPalette = (hex: string): { accent: string; bg: string; text: string }[] => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const hsl = hexToHsl(hex);
-  return [
-    { accent: hex, bg: `${hex}22`, text: hex },
-    { accent: `hsl(${Math.round((r+g+b)/3 * 0.3)}, 70%, 50%)`, bg: `${hex}44`, text: '#FFFFFF' },
-    { accent: `hsl(${Math.round((r+g+b)/3 * 0.6)}, 80%, 40%)`, bg: `${hex}66`, text: '#FFFFFF' },
-  ];
-};
+const getComplementaryPalette = (hex: string) => complementaryThemeColors(hex).map(accent => ({ accent, text: contrastRatio(accent, '#0B0F14') >= contrastRatio(accent, '#FFFFFF') ? '#0B0F14' : '#FFFFFF' }));
 
 // GAP-PT03: Histórico de temas
 const THEME_HISTORY_KEY = 'midias-theme-history';
@@ -41,43 +31,51 @@ export default function PersonalThemePanel() {
   const [theme, setTheme] = useState<PersonalTheme>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   // GAP-PT01: Preview
   const [previewMode, setPreviewMode] = useState(false);
   // GAP-PT03: Histórico
   const [themeHistory, setThemeHistory] = useState<string[]>(() => {
     try {
-      return JSON.parse(localStorage.getItem(THEME_HISTORY_KEY) || '[]');
+      const stored = JSON.parse(localStorage.getItem(THEME_HISTORY_KEY) || '[]');
+      return Array.isArray(stored) ? stored.filter((value): value is string => typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)) : [];
     } catch { return []; }
   });
   // GAP-PT04: Compartilhamento
   const [shareCopied, setShareCopied] = useState(false);
 
-  useEffect(() => {
+  const load = async () => {
     if (!user) { setLoading(false); return; }
-    (async () => {
-      const { data } = await supabase.from('profiles').select('personal_theme').eq('id', user.id).maybeSingle();
-      const t = ((data as any)?.personal_theme || {}) as PersonalTheme;
+    setLoading(true);
+    setLoadError(false);
+      const { data, error } = await supabase.from('profiles').select('personal_theme').eq('id', user.id).maybeSingle();
+      if (error || !data) { setLoadError(true); setLoading(false); return; }
+      const stored = (data as any)?.personal_theme;
+      const t: PersonalTheme = typeof stored?.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(stored.accent) ? { accent: stored.accent } : {};
       setTheme(t);
       applyPersonalTheme(t);
       setLoading(false);
-    })();
-  }, [user?.id]);
+  };
+  useEffect(() => { void load(); }, [user?.id]);
 
   const save = async (next: PersonalTheme) => {
-    if (!user) return;
+    if (!user || saving || loading || loadError) return;
+    if (next.accent && !/^#[0-9a-fA-F]{6}$/.test(next.accent)) {
+      toast.error('Escolha uma cor válida');
+      return;
+    }
+    setSaving(true);
+    const { data, error } = await supabase.from('profiles').update({ personal_theme: next } as any).eq('id', user.id).select('id').maybeSingle();
+    setSaving(false);
+    if (error || !data) { toast.error('Não foi possível salvar o tema'); return; }
     setTheme(next);
     applyPersonalTheme(next);
-    // GAP-PT03: Salvar no histórico
     if (next.accent) {
       const history = [next.accent, ...themeHistory.filter(h => h !== next.accent)].slice(0, 5);
       setThemeHistory(history);
-      localStorage.setItem(THEME_HISTORY_KEY, JSON.stringify(history));
+      try { localStorage.setItem(THEME_HISTORY_KEY, JSON.stringify(history)); } catch { /* Optional history. */ }
     }
-    setSaving(true);
-    const { error } = await supabase.from('profiles').update({ personal_theme: next } as any).eq('id', user.id);
-    setSaving(false);
-    if (error) toast.error('Não foi possível salvar o tema');
-    else toast.success('Ambiente atualizado');
+    toast.success('Ambiente atualizado');
   };
 
   // GAP-PT04: Compartilhar tema
@@ -95,6 +93,7 @@ export default function PersonalThemePanel() {
   };
 
   if (!user) return null;
+  if (loadError) return <ErroCarregamento onRetry={() => void load()} />;
 
   const accent = theme.accent || '#14B8A6';
   const onDark = contrastRatio(accent, '#0B0F14');
@@ -113,17 +112,18 @@ export default function PersonalThemePanel() {
         <div className="flex items-center gap-1">
           {/* GAP-PT04: Compartilhar */}
           {theme.accent && (
-            <Button variant="ghost" size="sm" onClick={shareTheme} className="h-7 px-2 text-xs">
+            <Button variant="ghost" size="sm" onClick={shareTheme} aria-label="Compartilhar tema" title="Compartilhar tema" className="h-7 px-2 text-xs">
               {shareCopied ? <Check className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
             </Button>
           )}
           {/* GAP-PT01: Preview */}
-          <button
+          <Button variant="ghost"
+            aria-label="Prévia do tema" title="Prévia do tema"
             onClick={() => setPreviewMode(!previewMode)}
             className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition"
           >
             <Eye className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
       </div>
       <p className="text-[11px] text-muted-foreground mb-3">
@@ -150,7 +150,8 @@ export default function PersonalThemePanel() {
 
       <div className="flex flex-wrap gap-2">
         {PRESETS.map(p => (
-          <button
+          <Button variant="ghost"
+            disabled={saving || loading}
             key={p.accent}
             type="button"
             onClick={() => save({ ...theme, accent: p.accent })}
@@ -160,7 +161,7 @@ export default function PersonalThemePanel() {
           >
             <span className="h-3 w-3 rounded-full" style={{ background: p.accent }} aria-hidden />
             {p.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -170,19 +171,20 @@ export default function PersonalThemePanel() {
           <input
             type="color"
             value={accent}
-            onChange={e => setTheme(t => ({ ...t, accent: e.target.value }))}
-            onBlur={e => save({ ...theme, accent: e.target.value })}
+            onChange={e => void save({ ...theme, accent: e.target.value })}
+            disabled={saving || loading}
             className="h-7 w-10 rounded border border-border bg-transparent"
             aria-label="Cor de destaque personalizada"
           />
         </label>
-        <button
+        <Button variant="ghost"
           type="button"
+          disabled={saving || loading}
           onClick={() => save({})}
           className="ml-auto text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1"
         >
           <RotateCcw className="h-3 w-3" /> Voltar ao padrão
-        </button>
+        </Button>
       </div>
 
       {/* GAP-PT03: Histórico de temas */}
@@ -193,10 +195,12 @@ export default function PersonalThemePanel() {
           </p>
           <div className="flex gap-1.5">
             {themeHistory.map(h => (
-              <button
+              <Button variant="ghost"
+                disabled={saving || loading}
                 key={h}
                 onClick={() => save({ ...theme, accent: h })}
-                className="w-6 h-6 rounded-full border border-border transition hover:scale-110"
+                aria-label={`Usar cor ${h}`}
+                className="p-0 w-6 h-6 rounded-full border border-border transition hover:scale-110"
                 style={{ background: h }}
                 title={h}
               />
@@ -210,14 +214,16 @@ export default function PersonalThemePanel() {
         <p className="text-[10px] text-muted-foreground mb-1.5">Paleta complementar</p>
         <div className="flex gap-2">
           {palette.slice(0, 3).map((c, i) => (
-            <button
+            <Button variant="ghost"
+              disabled={saving || loading}
               key={i}
               onClick={() => save({ ...theme, accent: c.accent })}
-              className="w-8 h-8 rounded-full border border-border transition hover:scale-110 flex items-center justify-center text-[8px]"
+              aria-label={`Usar cor ${c.accent}`}
+              className="p-0 w-8 h-8 rounded-full border border-border transition hover:scale-110 flex items-center justify-center text-[8px]"
               style={{ background: c.accent, color: c.text }}
             >
               {i === 0 ? '✦' : ''}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

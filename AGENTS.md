@@ -2,7 +2,8 @@
 
 - Notification controls update only the existing `is_read` field; notification preferences map database event types to UI categories, and mobile customization links open the profile sheet via the URL query so deep links work.
 - The mobile header notification bell navigates to the mobile notification page rather than mounting the web dropdown; this prevents the dropdown backdrop from trapping header touches and constrains the content to the mobile page.
-- Successful profile cosmetic writes notify mounted loadout readers through a user-scoped browser event; this refreshes previews without requiring database realtime publication settings.
+- Successful profile and game cosmetic writes notify mounted loadout readers through user-scoped browser events (also product-scoped for games); this refreshes previews without requiring database realtime publication settings.
+- Cosmetic overlays render the persisted equipped loadout, not fictional saved-theme navigation; visibility preferences must reset when the owner or game changes.
 
 - Mobile chat controls live in a presentation-only toolbar; collapsing filters and grouping actions must preserve conversation filtering, tabs, and data access behavior.
 
@@ -11,6 +12,7 @@
 - Checkout applies and records coupons atomically inside `create_order_secure`; the client must never redeem a coupon separately.
 - Customer-facing code must not update order status directly; order state changes belong to trusted database functions or staff workflows.
 - Public team and developer pages read the same Supabase records managed by admin-only desktop screens, so edits appear publicly without hardcoded duplicate content.
+- Desktop developer CRUD uses table writes protected by existing administrator RLS, not absent admin RPCs; updates and deletes verify returned rows before reporting success.
 - Public developer profiles resolve either a UUID or a slug and normalize product rows with `mapProdutoToGame`; this keeps existing links and game cards compatible.
 - Developer channel permissions are scoped in a separate assignment table and enforced by RLS; delegated managers never receive desktop administrator roles.
 - Official developer publications live in a separate web-only channel with paginated comments, independent of game forums.

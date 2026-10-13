@@ -22,7 +22,7 @@ const SLOT_FOR_KIND: Partial<Record<RewardKind, string>> = {
   profile_accent: 'profile_accent',
 };
 
-const RARITY_FILTERS = ['all', 'common', 'uncommon', 'rare', 'epic', 'legendary'] as const;
+const RARITY_FILTERS = ['all', 'common', 'rare', 'epic', 'legendary', 'mythic'] as const;
 
 export function CosmeticInventoryGrid() {
   const { user } = useAuth();
@@ -34,7 +34,7 @@ export function CosmeticInventoryGrid() {
   // GAP-M034: Ordenação
   const [sortBy, setSortBy] = useState<'rarity' | 'name' | 'recent'>('recent');
   // GAP-M035: Filtro por raridade
-  const [rarityFilter, setRarityFilter] = useState<'all' | 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'>('all');
+  const [rarityFilter, setRarityFilter] = useState<'all' | 'common' | 'rare' | 'epic' | 'legendary' | 'mythic'>('all');
   const [kindFilter, setKindFilter] = useState<RewardKind | 'all'>('all');
   // GAP-M036: Preview
   const [previewItem, setPreviewItem] = useState<any | null>(null);
