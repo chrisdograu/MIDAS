@@ -106,32 +106,45 @@ export async function equipGlobalSlot(userId: string, slot: string, rewardId: st
 export function useGamePageLoadout(userId: string | null | undefined, productId: string | null | undefined) {
   const [rows, setRows] = useState<LoadoutRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const reload = useCallback(async () => {
     if (!userId || !productId) { setRows([]); setLoading(false); return; }
     setLoading(true);
-    const { data } = await supabase
+    setLoadError(false);
+    const { data, error } = await supabase
       .from('user_game_page_loadout' as any)
       .select('slot, reward_id, reward:game_rewards(*)')
       .eq('user_id', userId)
       .eq('product_id', productId);
+    if (error) { setLoadError(true); setLoading(false); return; }
     setRows((data as any) || []);
     setLoading(false);
   }, [userId, productId]);
 
   useEffect(() => { reload(); }, [reload]);
-  return { rows, loading, reload };
+  useEffect(() => {
+    if (!userId || !productId) return;
+    const onChanged = (event: Event) => {
+      const detail = (event as CustomEvent<{ userId: string; productId: string }>).detail;
+      if (detail?.userId === userId && detail.productId === productId) void reload();
+    };
+    window.addEventListener('game-cosmetic-loadout-changed', onChanged);
+    return () => window.removeEventListener('game-cosmetic-loadout-changed', onChanged);
+  }, [userId, productId, reload]);
+  return { rows, loading, reload, loadError };
 }
 
 export async function equipGamePageSlot(userId: string, productId: string, slot: string, rewardId: string | null) {
-  if (rewardId === null) {
-    return supabase.from('user_game_page_loadout' as any).delete()
-      .eq('user_id', userId).eq('product_id', productId).eq('slot', slot);
-  }
-  return supabase.from('user_game_page_loadout' as any).upsert(
+  const result = rewardId === null
+    ? await supabase.from('user_game_page_loadout' as any).delete()
+      .eq('user_id', userId).eq('product_id', productId).eq('slot', slot)
+    : await supabase.from('user_game_page_loadout' as any).upsert(
     { user_id: userId, product_id: productId, slot, reward_id: rewardId, updated_at: new Date().toISOString() },
     { onConflict: 'user_id,product_id,slot' }
   );
+  if (!result.error) window.dispatchEvent(new CustomEvent('game-cosmetic-loadout-changed', { detail: { userId, productId } }));
+  return result;
 }
 
 // --- Game rewards catalog (admin / preview) ---

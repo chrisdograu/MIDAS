@@ -1,5 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
+- [ ] Corrigir restauração e gravação das cores, atualização dos cosméticos por jogo e controles incompletos dos overlays; testar regressões.
+- [ ] Revisar edição e envio de fotos nas novas páginas desktop; validação com conta real bloqueada por Supabase externo sem sessão disponível.
 - [x] Corrigir controles de gravação e atualização visual da customização do perfil; seis testes passaram e os toques responderam com dados isolados.
 
 - [x] Corrigir bloqueio de toques causado pelo painel do sino móvel; abertura, filtros dos cosméticos, fechar e voltar às notificações testados por toque com dados isolados no navegador.

@@ -6,6 +6,13 @@ export type PersonalTheme = { accent?: string };
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
+export function complementaryThemeColors(hex: string): string[] {
+  if (!HEX.test(hex)) return [];
+  const rgb = hexToRgb(hex);
+  const encode = (values: number[]) => `#${values.map(v => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
+  return [hex, encode(rgb.map(v => 255 - v)), encode(rgb.map(v => v + (255 - v) * 0.25))];
+}
+
 export function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '');
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
@@ -54,6 +61,7 @@ export function applyPersonalTheme(theme: PersonalTheme | null | undefined) {
   if (!accent || !HEX.test(accent)) {
     root.style.removeProperty('--primary');
     root.style.removeProperty('--ring');
+    root.style.removeProperty('--primary-foreground');
     return;
   }
   const hsl = hexToHsl(accent);
