@@ -18,6 +18,8 @@ import { X, Sparkles, Loader2, CheckCircle2, RotateCcw, Eye } from 'lucide-react
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import ErroCarregamento from '@/components/ErroCarregamento';
 
 const PAGE_SLOTS: { slot: string; label: string; kinds: RewardKind[]; icon: string }[] = [
   { slot: 'banner', label: 'Banner da página', kinds: ['profile_banner', 'game_page_theme'], icon: '🖼️' },
@@ -45,8 +47,8 @@ export function GamePageCustomizer({
   onOpenChange,
 }: { productId: string; open: boolean; onOpenChange: (b: boolean) => void }) {
   const { user } = useAuth();
-  const { rows: inventory, loading: inventoryLoading } = useMyCosmeticInventory();
-  const { rows: loadout, reload, loading: loadoutLoading } = useGamePageLoadout(user?.id, productId);
+  const { rows: inventory, loading: inventoryLoading, loadError: inventoryError, reload: reloadInventory } = useMyCosmeticInventory();
+  const { rows: loadout, reload, loading: loadoutLoading, loadError: loadoutError } = useGamePageLoadout(user?.id, productId);
   
   // GAP-C003: Persistência do slot ativo
   const [activeSlot, setActiveSlot] = useState<string>('banner');
@@ -67,7 +69,7 @@ export function GamePageCustomizer({
         {
           event: '*',
           schema: 'public',
-          table: 'game_page_loadout',
+          table: 'user_game_page_loadout',
           filter: `product_id=eq.${productId}`,
         },
         () => {
@@ -84,7 +86,7 @@ export function GamePageCustomizer({
     if (realtimeVersion > 0) reload();
   }, [realtimeVersion]);
 
-  const slotMeta = useMemo(() => PAGE_SLOTS.find(s => s.slot === activeSlot)!, [activeSlot]);
+  const slotMeta = useMemo(() => PAGE_SLOTS.find(s => s.slot === activeSlot) || PAGE_SLOTS[0], [activeSlot]);
 
   // GAP-C005: Ordenação por raridade e recência
   const eligible = useMemo(() => {
@@ -115,7 +117,7 @@ export function GamePageCustomizer({
     const next = rewardId === cur ? null : rewardId;
 
     // GAP-C007: Salvar no histórico antes de alterar
-    setHistory(prev => [...prev, { slot: activeSlot, previousId: cur, newId: next }]);
+    setHistory(prev => [...prev, { slot: activeSlot, previousId: cur ?? null, newId: next }]);
 
     setEquipping(activeSlot);
     const { error } = await equipGamePageSlot(user.id, productId, activeSlot, next);
@@ -133,10 +135,8 @@ export function GamePageCustomizer({
 
   // GAP-C007: Desfazer última alteração
   const undoLast = useCallback(async () => {
-    if (history.length === 0 || !user) return;
+    if (history.length === 0 || !user || equipping) return;
     const last = history[history.length - 1];
-    setHistory(prev => prev.slice(0, -1));
-
     setEquipping(last.slot);
     const { error } = await equipGamePageSlot(user.id, productId, last.slot, last.previousId);
     setEquipping(null);
@@ -145,10 +145,11 @@ export function GamePageCustomizer({
       toast.error('Erro ao desfazer');
       return;
     }
+    setHistory(prev => prev.slice(0, -1));
     reload();
     setActiveSlot(last.slot);
     toast.info('↩️ Alteração desfeita');
-  }, [history, user, productId, reload]);
+  }, [history, user, productId, reload, equipping]);
 
   const occupiedCount = getOccupiedCount(loadout);
 
@@ -164,8 +165,8 @@ export function GamePageCustomizer({
       }
       onOpenChange(val);
     }}>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-        <SheetHeader>
+      <SheetContent side="right" className="w-full max-w-full sm:max-w-md h-[100dvh] overflow-y-auto overflow-x-hidden overscroll-contain">
+        <SheetHeader className="pr-8">
           <SheetTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             Personalizar esta página
@@ -191,7 +192,7 @@ export function GamePageCustomizer({
 
         {/* GAP-C007: Botão Undo */}
         <div className="flex items-center justify-between mb-3">
-          <button
+          <Button variant="ghost"
             onClick={undoLast}
             disabled={history.length === 0 || !!equipping}
             className={cn(
@@ -203,7 +204,7 @@ export function GamePageCustomizer({
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Desfazer ({history.length})
-          </button>
+          </Button>
           <span className="text-[10px] text-muted-foreground">
             {equipping && <Loader2 className="h-3 w-3 animate-spin inline" />}
           </span>
@@ -214,7 +215,7 @@ export function GamePageCustomizer({
           {PAGE_SLOTS.map(s => {
             const isEq = !!equippedId(s.slot);
             return (
-              <button
+              <Button variant="ghost"
                 key={s.slot}
                 onClick={() => setActiveSlot(s.slot)}
                 className={cn(
@@ -227,7 +228,7 @@ export function GamePageCustomizer({
                 <span>{s.icon}</span>
                 {s.label}
                 {isEq && <CheckCircle2 className="h-3 w-3 ml-0.5" />}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -246,7 +247,7 @@ export function GamePageCustomizer({
           </div>
         )}
 
-        {eligible.length === 0 ? (
+        {isLoading && !equipping ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> : inventoryError || loadoutError ? <ErroCarregamento onRetry={() => { void reload(); void reloadInventory(); }} /> : eligible.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
             Você ainda não tem cosméticos compatíveis com este slot.
           </div>
@@ -258,18 +259,18 @@ export function GamePageCustomizer({
               const rarityClass = RARITY_COLOR[reward.rarity]?.split(' ')[1] || '';
 
               return (
-                <button
+                <Button variant="ghost"
                   key={reward.id}
                   onClick={() => equip(reward.id)}
                   disabled={isLoading}
                   className={cn(
-                    "p-2 rounded-xl border bg-card flex flex-col items-center gap-1 transition hover:border-primary/60 relative",
+                    "h-auto min-w-0 whitespace-normal p-2 rounded-lg border bg-card flex flex-col items-center gap-1 transition hover:border-primary/60 relative",
                     isEq ? "ring-2 ring-primary" : "border-border",
                     equippedElsewhere && !isEq && "opacity-60"
                   )}
                 >
                   <CosmeticPreview reward={reward} size={64} />
-                  <p className={cn("text-[11px] font-semibold line-clamp-1", rarityClass)}>
+                  <p className={cn("max-w-full text-[11px] font-semibold line-clamp-1", rarityClass)}>
                     {reward.name}
                   </p>
                   <p className="text-[9px] text-muted-foreground line-clamp-1">de {product_title}</p>
@@ -295,26 +296,26 @@ export function GamePageCustomizer({
                       <Loader2 className="h-5 w-5 animate-spin text-primary" />
                     </div>
                   )}
-                </button>
+                </Button>
               );
             })}
           </div>
         )}
 
         {equippedId(activeSlot) && (
-          <button
+          <Button variant="ghost"
             onClick={() => equip(null)}
             disabled={isLoading}
             className="mt-3 w-full py-2 rounded-lg border border-destructive/50 text-destructive text-xs font-semibold flex items-center justify-center gap-1 hover:bg-destructive/10 transition"
           >
             <X className="h-3 w-3" /> Remover deste slot
-          </button>
+          </Button>
         )}
 
         {/* GAP-C008: Indicador de sincronização */}
         {realtimeVersion > 0 && (
           <div className="mt-2 text-[9px] text-muted-foreground flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            <div className="w-1.5 h-1.5 rounded-full bg-success" />
             Sincronizado em tempo real
           </div>
         )}

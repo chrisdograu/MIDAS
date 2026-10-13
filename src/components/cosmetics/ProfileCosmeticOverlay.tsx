@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useUserLoadout } from '@/hooks/useCosmetics';
 import { Sparkles, EyeOff, User, Loader2, Sliders, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 
 // GAP-PCO01: Validações
@@ -85,13 +86,16 @@ export function ProfileCosmeticOverlay({
     } catch { return 60; }
   });
 
-  // GAP-PCO06: Múltiplos loadouts salvos
-  const [savedLoadouts, setSavedLoadouts] = useState<Record<string, any>>({});
-  const [currentLoadoutIndex, setCurrentLoadoutIndex] = useState(0);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(getVisibilityKey(ownerId));
+      setVisible(!forceDefault && (saved === null || saved === 'true'));
+    } catch { setVisible(!forceDefault); }
+  }, [ownerId, forceDefault]);
 
   const banner = rows.find(r => r.slot === 'profile_banner')?.reward;
   const accent = rows.find(r => r.slot === 'profile_accent')?.reward;
-  const stickers = rows.filter(r => r.slot.startsWith('sticker_')).map(r => r.reward).filter(Boolean);
+  const stickers = rows.flatMap(r => r.slot.startsWith('sticker_') && r.reward ? [r.reward] : []);
 
   // GAP-PCO03: Fallback para cor inválida
   const accentColor = useMemo(() => {
@@ -112,7 +116,7 @@ export function ProfileCosmeticOverlay({
     setTimeout(() => {
       setVisible(v => {
         const next = !v;
-        localStorage.setItem(getVisibilityKey(ownerId), String(next));
+        try { localStorage.setItem(getVisibilityKey(ownerId), String(next)); } catch { /* Preference storage may be unavailable. */ }
         return next;
       });
       setFadeState('in');
@@ -123,7 +127,7 @@ export function ProfileCosmeticOverlay({
   const handleIntensityChange = useCallback((value: number[]) => {
     const newValue = value[0];
     setIntensity(newValue);
-    localStorage.setItem(getIntensityKey(ownerId), String(newValue));
+    try { localStorage.setItem(getIntensityKey(ownerId), String(newValue)); } catch { /* Preference storage may be unavailable. */ }
   }, [ownerId]);
 
   // GAP-PCO07: Loading state
@@ -153,6 +157,7 @@ export function ProfileCosmeticOverlay({
         <div className="fixed left-4 bottom-28 sm:bottom-16 z-40 flex items-center gap-2 bg-card/80 backdrop-blur border border-border rounded-full px-3 py-1.5 shadow-lg">
           <Sliders className="h-3.5 w-3.5 text-muted-foreground" />
           <Slider
+            aria-label="Intensidade da customização"
             value={[intensity]}
             onValueChange={handleIntensityChange}
             min={10}
@@ -165,11 +170,11 @@ export function ProfileCosmeticOverlay({
       )}
 
       {/* Botão toggle — com GAP-PCO04: animação */}
-      {hasCosmetics && !hideToggle && (
-        <button
+      {hasCosmetics && !hideToggle && !forceDefault && (
+        <Button variant="ghost"
           onClick={toggleVisibility}
           className={cn(
-            "fixed left-3 bottom-20 sm:bottom-4 z-50 px-3 py-2 rounded-full",
+            "fixed left-3 bottom-20 sm:bottom-4 z-40 px-3 py-2 rounded-full",
             "bg-card/95 backdrop-blur border border-border shadow-lg",
             "text-xs font-semibold flex items-center gap-1.5 hover:border-primary transition-all duration-200"
           )}
@@ -186,7 +191,7 @@ export function ProfileCosmeticOverlay({
               Customização
             </>
           )}
-        </button>
+        </Button>
       )}
 
       {/* GAP-PCO04: Fade transition nos elementos visuais */}
@@ -217,13 +222,13 @@ export function ProfileCosmeticOverlay({
           <div className="fixed right-3 top-24 z-30 space-y-2 pointer-events-none">
             {stickers.slice(0, 3).map((s, i) => (
               <div
-                key={s!.id}
+                key={s.id}
                 className="w-12 h-12 rounded-xl bg-card/80 backdrop-blur border border-border flex items-center justify-center text-2xl shadow"
                 style={{ transform: `rotate(${(i - 1) * 6}deg)` }}
               >
-                {s!.asset_url ? (
+                {s.asset_url ? (
                   <img
-                    src={s!.asset_url}
+                    src={s.asset_url}
                     alt=""
                     className="w-full h-full object-cover rounded-xl"
                     loading="lazy"
@@ -233,14 +238,14 @@ export function ProfileCosmeticOverlay({
                       const parent = (e.target as HTMLImageElement).parentElement;
                       if (parent) {
                         const fallback = document.createElement('span');
-                        fallback.textContent = s!.payload?.emoji || '✨';
+                        fallback.textContent = s.payload?.emoji || '✨';
                         fallback.className = 'text-2xl';
                         parent.appendChild(fallback);
                       }
                     }}
                   />
                 ) : (
-                  s!.payload?.emoji || '✨'
+                  s.payload?.emoji || '✨'
                 )}
               </div>
             ))}
