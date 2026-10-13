@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GamePageCosmeticOverlay } from '@/components/cosmetics/GamePageCosmeticOverlay';
 import { ProfileCosmeticOverlay } from '@/components/cosmetics/ProfileCosmeticOverlay';
 
+vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
+
 vi.mock('@/hooks/useCosmetics', () => ({
   useUserLoadout: () => ({ loading: false, rows: [{ slot: 'profile_accent', reward: { payload: { color: '#3B82F6' } } }] }),
   useGamePageLoadout: () => ({ loading: false, rows: [{ slot: 'theme', reward: { payload: { color: '#3B82F6' } } }] }),
