@@ -82,7 +82,8 @@ export function ProfileCosmeticOverlay({
     if (typeof window === 'undefined') return 60;
     try {
       const saved = localStorage.getItem(getIntensityKey(ownerId));
-      return saved !== null ? parseInt(saved, 10) : 60;
+      const value = saved === null ? 60 : Number(saved);
+      return Number.isFinite(value) ? Math.min(90, Math.max(10, value)) : 60;
     } catch { return 60; }
   });
 
@@ -90,6 +91,9 @@ export function ProfileCosmeticOverlay({
     try {
       const saved = localStorage.getItem(getVisibilityKey(ownerId));
       setVisible(!forceDefault && (saved === null || saved === 'true'));
+      const storedIntensity = localStorage.getItem(getIntensityKey(ownerId));
+      const value = storedIntensity === null ? 60 : Number(storedIntensity);
+      setIntensity(Number.isFinite(value) ? Math.min(90, Math.max(10, value)) : 60);
     } catch { setVisible(!forceDefault); }
   }, [ownerId, forceDefault]);
 

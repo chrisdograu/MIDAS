@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { applyPersonalTheme, complementaryThemeColors, contrastRatio, hexToHsl, type PersonalTheme } from '@/lib/personalTheme';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import ErroCarregamento from '@/components/ErroCarregamento';
 
 const PRESETS: { label: string; accent: string; bg?: string; text?: string }[] = [
   { label: 'Padrão MIDIAS', accent: '#14B8A6' },
@@ -30,6 +31,7 @@ export default function PersonalThemePanel() {
   const [theme, setTheme] = useState<PersonalTheme>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   // GAP-PT01: Preview
   const [previewMode, setPreviewMode] = useState(false);
   // GAP-PT03: Histórico
@@ -42,19 +44,22 @@ export default function PersonalThemePanel() {
   // GAP-PT04: Compartilhamento
   const [shareCopied, setShareCopied] = useState(false);
 
-  useEffect(() => {
+  const load = async () => {
     if (!user) { setLoading(false); return; }
-    (async () => {
-      const { data } = await supabase.from('profiles').select('personal_theme').eq('id', user.id).maybeSingle();
-      const t = ((data as any)?.personal_theme || {}) as PersonalTheme;
+    setLoading(true);
+    setLoadError(false);
+      const { data, error } = await supabase.from('profiles').select('personal_theme').eq('id', user.id).maybeSingle();
+      if (error || !data) { setLoadError(true); setLoading(false); return; }
+      const stored = (data as any)?.personal_theme;
+      const t: PersonalTheme = typeof stored?.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(stored.accent) ? { accent: stored.accent } : {};
       setTheme(t);
       applyPersonalTheme(t);
       setLoading(false);
-    })();
-  }, [user?.id]);
+  };
+  useEffect(() => { void load(); }, [user?.id]);
 
   const save = async (next: PersonalTheme) => {
-    if (!user || saving || loading) return;
+    if (!user || saving || loading || loadError) return;
     if (next.accent && !/^#[0-9a-fA-F]{6}$/.test(next.accent)) {
       toast.error('Escolha uma cor válida');
       return;
@@ -88,6 +93,7 @@ export default function PersonalThemePanel() {
   };
 
   if (!user) return null;
+  if (loadError) return <ErroCarregamento onRetry={() => void load()} />;
 
   const accent = theme.accent || '#14B8A6';
   const onDark = contrastRatio(accent, '#0B0F14');
@@ -106,12 +112,13 @@ export default function PersonalThemePanel() {
         <div className="flex items-center gap-1">
           {/* GAP-PT04: Compartilhar */}
           {theme.accent && (
-            <Button variant="ghost" size="sm" onClick={shareTheme} className="h-7 px-2 text-xs">
+            <Button variant="ghost" size="sm" onClick={shareTheme} aria-label="Compartilhar tema" title="Compartilhar tema" className="h-7 px-2 text-xs">
               {shareCopied ? <Check className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
             </Button>
           )}
           {/* GAP-PT01: Preview */}
           <Button variant="ghost"
+            aria-label="Prévia do tema" title="Prévia do tema"
             onClick={() => setPreviewMode(!previewMode)}
             className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition"
           >
