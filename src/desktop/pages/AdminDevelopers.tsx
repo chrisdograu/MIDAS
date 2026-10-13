@@ -475,6 +475,7 @@ export default function AdminDevelopers() {
             <div className="space-y-2">
               <Label>Nome *</Label>
               <Input
+                aria-label="Nome do desenvolvedor"
                 value={form.name}
                 onChange={e => {
                   setForm({ ...form, name: e.target.value });
@@ -487,6 +488,7 @@ export default function AdminDevelopers() {
             <div className="space-y-2">
               <Label>Slug</Label>
               <Input
+                aria-label="Endereço do desenvolvedor"
                 value={form.slug}
                 onChange={e => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
                 placeholder="gerado-automaticamente"
