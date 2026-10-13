@@ -264,31 +264,12 @@ export default function AdminDevelopers() {
       wikipedia_url: form.wikipedia_url.trim() || null,
     };
     
-    const { data: { user } } = await supabase.auth.getUser();
-    
     try {
       if (editing) {
-        const { error } = await supabase.rpc('admin_update_developer', {
-          _id: editing.id,
-          _name: payload.name,
-          _slug: payload.slug,
-          _description: payload.description,
-          _bio: payload.bio,
-          _website: payload.website,
-          _founded_year: payload.founded_year,
-          _country: payload.country,
-          _headquarters: payload.headquarters,
-          _employees: payload.employees,
-          _parent_company: payload.parent_company,
-          _logo_url: payload.logo_url,
-          _banner_url: payload.banner_url,
-          _notable_games: payload.notable_games,
-          _social_links: payload.social_links,
-          _wikipedia_url: payload.wikipedia_url,
-        });
-        
+        const { data, error } = await supabase.from('developers').update(payload).eq('id', editing.id).select('id').maybeSingle();
         if (error) throw error;
-        
+        if (!data) throw new Error('Não foi possível atualizar o desenvolvedor. Verifique seu acesso.');
+
         await adminLog({
           action: 'update_developer',
           entity: 'developers',
@@ -299,30 +280,13 @@ export default function AdminDevelopers() {
         
         toast.success('Desenvolvedor atualizado!');
       } else {
-        const { data: result, error } = await supabase.rpc('admin_create_developer', {
-          _name: payload.name,
-          _slug: payload.slug,
-          _description: payload.description,
-          _bio: payload.bio,
-          _website: payload.website,
-          _founded_year: payload.founded_year,
-          _country: payload.country,
-          _headquarters: payload.headquarters,
-          _employees: payload.employees,
-          _parent_company: payload.parent_company,
-          _logo_url: payload.logo_url,
-          _banner_url: payload.banner_url,
-          _notable_games: payload.notable_games,
-          _social_links: payload.social_links,
-          _wikipedia_url: payload.wikipedia_url,
-        });
-        
+        const { data: result, error } = await supabase.from('developers').insert(payload).select('id').single();
         if (error) throw error;
-        
+
         await adminLog({
           action: 'create_developer',
           entity: 'developers',
-          entity_id: result,
+          entity_id: result.id,
           reason: `Desenvolvedor "${payload.name}" criado`,
           payload: { name: payload.name, slug: payload.slug },
         });
@@ -345,12 +309,10 @@ export default function AdminDevelopers() {
     
     setSaving(true);
     try {
-      const { error } = await supabase.rpc('admin_delete_developer', {
-        _id: deleteTarget.id,
-      });
-      
+      const { data, error } = await supabase.from('developers').delete().eq('id', deleteTarget.id).select('id').maybeSingle();
       if (error) throw error;
-      
+      if (!data) throw new Error('Não foi possível excluir o desenvolvedor. Verifique seu acesso.');
+
       await adminLog({
         action: 'delete_developer',
         entity: 'developers',

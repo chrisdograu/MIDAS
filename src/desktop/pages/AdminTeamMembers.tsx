@@ -134,6 +134,7 @@ export default function AdminTeamMembers() {
     }
 
     const slug = form.slug.trim() || generateSlug(form.name);
+    if (!slug) { toast.error('Informe um endereço válido para o membro'); return; }
     setSaving(true);
 
     const payload = {
@@ -156,12 +157,13 @@ export default function AdminTeamMembers() {
 
     try {
       if (editing) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('team_members')
           .update(payload)
-          .eq('id', editing.id);
+          .eq('id', editing.id).select('id').maybeSingle();
 
         if (error) throw error;
+        if (!data) throw new Error('Não foi possível atualizar o membro. Verifique seu acesso.');
 
         await adminLog({
           action: 'update_team_member',
