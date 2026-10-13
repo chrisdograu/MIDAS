@@ -24,7 +24,7 @@ async function fill() {
   render(<MemoryRouter><AdminDevelopers /></MemoryRouter>);
   fireEvent.click(await screen.findByRole('button', { name: 'Novo Desenvolvedor' }));
   fireEvent.change(screen.getByLabelText('Nome do desenvolvedor'), { target: { value: 'Estúdio teste' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Criar', exact: true }));
+  fireEvent.click(screen.getByRole('button', { name: /^Criar$/ }));
 }
 describe('Cadastro de desenvolvedores', () => {
   it('salva na tabela protegida sem depender de funções inexistentes', async () => {
@@ -35,7 +35,7 @@ describe('Cadastro de desenvolvedores', () => {
   it('mantém o formulário aberto e não confirma sucesso após falha', async () => {
     mock.fail = true;
     await fill();
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Criar', exact: true })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: /^Criar$/ })).toBeEnabled());
     expect(mock.success).not.toHaveBeenCalled();
     expect(screen.getByLabelText('Nome do desenvolvedor')).toHaveValue('Estúdio teste');
   });
