@@ -542,7 +542,7 @@ export default function ForumAdmin() {
                 bannedWords.map(word => (
                   <Badge key={word} variant="destructive" className="gap-1">
                     {word}
-                    <X className="h-3 w-3 cursor-pointer hover:text-white" onClick={() => removeBannedWord(word)} />
+                    <X className="h-3 w-3 cursor-pointer hover:text-on-media" onClick={() => removeBannedWord(word)} />
                   </Badge>
                 ))
               )}

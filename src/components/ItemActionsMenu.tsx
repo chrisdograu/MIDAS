@@ -49,7 +49,7 @@ function DefaultConfirmDialog({
   if (!open) return null;
   
   return (
-    <div className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[200] bg-overlay/50 flex items-center justify-center p-4">
       <div className="bg-card rounded-xl p-6 max-w-sm w-full border border-border shadow-xl">
         <h4 className="text-lg font-semibold text-foreground">{title}</h4>
         <p className="text-sm text-muted-foreground mt-2">{message}</p>

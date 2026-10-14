@@ -190,8 +190,8 @@ export default function FriendIdentityPanel({ userId }: Props) {
                 className="block bg-card border border-border rounded-lg overflow-hidden group hover:border-primary/40 transition">
                 <div className="aspect-video bg-muted relative">
                   {c.thumbnail_url && <img src={c.thumbnail_url} className="w-full h-full object-cover" alt="" loading="lazy" />}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <Gamepad2 className="h-6 w-6 text-white" />
+                  <div className="absolute inset-0 bg-overlay/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <Gamepad2 className="h-6 w-6 text-on-media" />
                   </div>
                 </div>
                 {c.title && <p className="text-[10px] text-foreground p-2 line-clamp-1">{c.title}</p>}

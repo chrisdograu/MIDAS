@@ -30,7 +30,7 @@ function QuickViewModal({ game, onClose }: QuickViewModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-overlay/70 flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-card rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
@@ -39,10 +39,10 @@ function QuickViewModal({ game, onClose }: QuickViewModalProps) {
           <img src={game.image} alt={game.title} className="w-full h-full object-cover rounded-t-xl" />
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+            className="absolute top-3 right-3 p-2 bg-overlay/50 rounded-full hover:bg-overlay/70 transition-colors"
           >
             <span className="sr-only">Fechar</span>
-            <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-5 w-5 text-on-media" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -252,7 +252,7 @@ export default function GameCard({
                     "absolute top-2 right-2 p-2 bg-card/80 backdrop-blur-sm rounded-lg z-10 transition-all",
                     isHovered || isWishlisted ? "opacity-100" : "opacity-0",
                     "hover:scale-110",
-                    isWishlisted ? "text-red-500" : "text-muted-foreground hover:text-red-500",
+                    isWishlisted ? "text-destructive" : "text-muted-foreground hover:text-destructive",
                   )}
                   aria-label={isWishlisted ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                 >

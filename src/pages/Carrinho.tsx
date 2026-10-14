@@ -261,7 +261,7 @@ export default function Carrinho() {
                       <p className="text-xs text-muted-foreground">{item.game.platform.join(', ')}</p>
                       {/* GAP-116: Badge digital/físico */}
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                        isDigital ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-500'
+                        isDigital ? 'bg-primary/10 text-primary' : 'bg-warning/10 text-warning'
                       }`}>
                         {isDigital ? '💻 Digital' : '📦 Físico'}
                       </span>

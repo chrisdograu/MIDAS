@@ -75,27 +75,27 @@ function ScreenshotLightbox({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center select-none"
+      className="fixed inset-0 z-50 bg-overlay/95 flex items-center justify-center select-none"
       onClick={onClose}
       onWheel={handleWheel}
     >
       <button 
         onClick={onClose} 
-        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10"
+        className="absolute top-4 right-4 p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10"
       >
         <X className="h-5 w-5" />
       </button>
       
-      <div className="absolute top-4 left-4 text-white/60 text-sm z-10">
+      <div className="absolute top-4 left-4 text-on-media/60 text-sm z-10">
         {index + 1} / {images.length}
         {author && <span className="ml-2">· {author}</span>}
-        {createdAt && <span className="ml-2 text-white/40">{formatRelativeTime(createdAt)}</span>}
+        {createdAt && <span className="ml-2 text-on-media/40">{formatRelativeTime(createdAt)}</span>}
       </div>
 
       {index > 0 && (
         <button 
           onClick={(e) => { e.stopPropagation(); onPrev(); }} 
-          className="absolute left-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10"
+          className="absolute left-4 p-3 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
@@ -103,7 +103,7 @@ function ScreenshotLightbox({
       {index < images.length - 1 && (
         <button 
           onClick={(e) => { e.stopPropagation(); onNext(); }} 
-          className="absolute right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10"
+          className="absolute right-4 p-3 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10"
         >
           <ChevronRight className="h-6 w-6" />
         </button>
@@ -112,7 +112,7 @@ function ScreenshotLightbox({
       <div className="max-w-[92vw] max-h-[92vh] flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
         {loading && (
           <div className="flex items-center justify-center w-32 h-32">
-            <Loader2 className="h-8 w-8 text-white/40 animate-spin" />
+            <Loader2 className="h-8 w-8 text-on-media/40 animate-spin" />
           </div>
         )}
         
@@ -130,7 +130,7 @@ function ScreenshotLightbox({
         />
         
         {caption && (
-          <div className="text-center text-sm text-white/80 bg-black/50 backdrop-blur px-4 py-2 rounded-lg max-w-lg">
+          <div className="text-center text-sm text-on-media/80 bg-overlay/50 backdrop-blur px-4 py-2 rounded-lg max-w-lg">
             {caption}
           </div>
         )}
@@ -384,7 +384,7 @@ export function ScreenshotsPanel({ productId }: { productId: string }) {
                       />
                       {i === 3 && s.images.length > 4 && (
                         <div 
-                          className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-bold text-sm cursor-pointer"
+                          className="absolute inset-0 flex items-center justify-center bg-overlay/50 text-on-media font-bold text-sm cursor-pointer"
                           onClick={() => openLightbox(s, 0)}
                         >
                           +{s.images.length - 3}
@@ -395,7 +395,7 @@ export function ScreenshotsPanel({ productId }: { productId: string }) {
                   {/* GAP-SP01: Botão expandir */}
                   <button 
                     onClick={() => openLightbox(s, 0)}
-                    className="absolute bottom-2 right-2 p-1.5 rounded bg-black/50 text-white/70 hover:text-white transition opacity-0 group-hover:opacity-100"
+                    className="absolute bottom-2 right-2 p-1.5 rounded bg-overlay/50 text-on-media/70 hover:text-on-media transition opacity-0 group-hover:opacity-100"
                   >
                     <Maximize2 className="h-3.5 w-3.5" />
                   </button>

@@ -421,7 +421,7 @@ export default function Biblioteca() {
                       )}
                       {/* GAP-129, GAP-402: Badge de jogo emprestado */}
                       {isLoaned && (
-                        <span className="absolute top-1.5 left-1.5 text-[10px] font-bold bg-amber-500/90 text-white px-1.5 py-0.5 rounded-full shadow-lg">
+                        <span className="absolute top-1.5 left-1.5 text-[10px] font-bold bg-warning/90 text-on-media px-1.5 py-0.5 rounded-full shadow-lg">
                           📤 Emprestado
                         </span>
                       )}

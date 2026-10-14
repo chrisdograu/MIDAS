@@ -172,7 +172,7 @@ export function GifPicker({ onSelect, onClose }: { onSelect: (url: string) => vo
   const displayItems = category === 'favorites' ? favorites : items;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/70 flex items-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] bg-overlay/70 flex items-end" onClick={onClose}>
       <div className="w-full bg-card rounded-t-2xl p-3 max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex items-center gap-2 mb-2">
           <div className="relative flex-1">
@@ -284,9 +284,9 @@ export function GifPicker({ onSelect, onClose }: { onSelect: (url: string) => vo
                           e.stopPropagation();
                           toggleFavorite(g);
                         }}
-                        className="absolute top-1 right-1 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                        className="absolute top-1 right-1 p-1 bg-overlay/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-overlay/70"
                       >
-                        <Star className={cn("h-3.5 w-3.5", isFavorite ? "fill-yellow-400 text-yellow-400" : "text-white")} />
+                        <Star className={cn("h-3.5 w-3.5", isFavorite ? "fill-gold text-gold" : "text-on-media")} />
                       </button>
                     </button>
                   );

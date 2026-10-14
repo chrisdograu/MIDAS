@@ -140,8 +140,8 @@ export default function CustomCoverEditor({ productId, productTitle, defaultImag
                 loading="lazy"
               />
               {current && (
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="text-white text-xs font-medium px-3 py-1 bg-black/50 rounded-lg">Capa custom</span>
+                <div className="absolute inset-0 bg-overlay/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="text-on-media text-xs font-medium px-3 py-1 bg-overlay/50 rounded-lg">Capa custom</span>
                 </div>
               )}
             </div>

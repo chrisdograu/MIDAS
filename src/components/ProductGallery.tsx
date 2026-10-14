@@ -133,7 +133,7 @@ export default function ProductGallery({
         {enableZoom && images.length > 0 && (
           <button
             onClick={(e) => { e.stopPropagation(); openLightbox(); }}
-            className="absolute bottom-3 right-3 p-2 bg-black/50 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute bottom-3 right-3 p-2 bg-overlay/50 rounded-lg text-on-media opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
@@ -143,7 +143,7 @@ export default function ProductGallery({
         {images.length > 1 && autoplay > 0 && (
           <button
             onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
-            className="absolute bottom-3 left-3 p-2 bg-black/50 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute bottom-3 left-3 p-2 bg-overlay/50 rounded-lg text-on-media opacity-0 group-hover:opacity-100 transition-opacity"
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
@@ -154,13 +154,13 @@ export default function ProductGallery({
           <>
             <button
               onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-overlay/50 rounded-full text-on-media opacity-0 group-hover:opacity-100 transition-opacity hover:bg-overlay/70"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); goToNext(); }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-overlay/50 rounded-full text-on-media opacity-0 group-hover:opacity-100 transition-opacity hover:bg-overlay/70"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -176,7 +176,7 @@ export default function ProductGallery({
                 onClick={(e) => { e.stopPropagation(); setActive(i); }}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
-                  i === active ? "w-6 bg-white" : "w-3 bg-white/50"
+                  i === active ? "w-6 bg-on-media" : "w-3 bg-on-media/50"
                 )}
               />
             ))}
@@ -210,12 +210,12 @@ export default function ProductGallery({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] bg-overlay/95 flex items-center justify-center p-4"
             onClick={closeLightbox}
           >
             <button
               onClick={closeLightbox}
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition-colors"
             >
               <X className="h-6 w-6" />
             </button>
@@ -231,13 +231,13 @@ export default function ProductGallery({
                 <>
                   <button
                     onClick={goToPrevious}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition-colors"
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </button>
                   <button
                     onClick={goToNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition-colors"
                   >
                     <ChevronRight className="h-6 w-6" />
                   </button>
@@ -248,7 +248,7 @@ export default function ProductGallery({
                         onClick={() => setActive(i)}
                         className={cn(
                           "h-2 rounded-full transition-all",
-                          i === active ? "w-8 bg-white" : "w-2 bg-white/50"
+                          i === active ? "w-8 bg-on-media" : "w-2 bg-on-media/50"
                         )}
                       />
                     ))}

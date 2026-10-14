@@ -108,9 +108,9 @@ function ReportHistory({ targetId, targetType }: { targetId: string; targetType:
   if (loading || history.length === 0) return null;
 
   const statusColors: Record<string, string> = {
-    pendente: 'bg-yellow-500/20 text-yellow-600',
-    resolvida: 'bg-green-500/20 text-green-600',
-    recusada: 'bg-red-500/20 text-red-600',
+    pendente: 'bg-warning/20 text-warning',
+    resolvida: 'bg-success/20 text-success',
+    recusada: 'bg-destructive/20 text-destructive',
   };
 
   return (

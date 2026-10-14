@@ -143,7 +143,7 @@ function PreferencesModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] bg-overlay/50 flex items-center justify-center p-4">
       <div className="bg-card rounded-xl p-6 max-w-sm w-full border border-border shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-semibold">Preferências de Notificações</h4>
@@ -167,7 +167,7 @@ function PreferencesModal({
               )}
             >
               <div className={cn(
-                "w-4 h-4 rounded-full bg-white transition-transform",
+                "w-4 h-4 rounded-full bg-on-media transition-transform",
                 localPrefs.sound ? "translate-x-5" : "translate-x-0.5"
               )} />
             </button>
@@ -184,7 +184,7 @@ function PreferencesModal({
               )}
             >
               <div className={cn(
-                "w-4 h-4 rounded-full bg-white transition-transform",
+                "w-4 h-4 rounded-full bg-on-media transition-transform",
                 localPrefs.grouped ? "translate-x-5" : "translate-x-0.5"
               )} />
             </button>
@@ -207,7 +207,7 @@ function PreferencesModal({
                 )}
               >
                 <div className={cn(
-                  "w-4 h-4 rounded-full bg-white transition-transform",
+                  "w-4 h-4 rounded-full bg-on-media transition-transform",
                   value ? "translate-x-5" : "translate-x-0.5"
                 )} />
               </button>

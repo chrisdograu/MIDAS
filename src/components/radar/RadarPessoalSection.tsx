@@ -97,7 +97,7 @@ export default function RadarPessoalSection({ limit = 6 }: { limit?: number }) {
                   ? <img src={item.image_url} alt={item.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   : <div className="w-full h-full flex items-center justify-center"><Gamepad2 className="h-8 w-8 text-muted-foreground/40" /></div>}
                 {/* GAP-RP01: Badge da fonte */}
-                <div className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5">
+                <div className="absolute top-1 right-1 bg-overlay/60 rounded-full p-0.5">
                   <SourceIcon className="h-3 w-3 text-primary" />
                 </div>
               </div>

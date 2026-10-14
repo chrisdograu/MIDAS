@@ -37,12 +37,12 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-overlay/95 flex items-center justify-center"
       onClick={onClose}
     >
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white/70 hover:text-white p-2 z-10"
+        className="absolute top-4 right-4 text-on-media/70 hover:text-on-media p-2 z-10"
       >
         <X className="h-8 w-8" />
       </button>
@@ -51,17 +51,17 @@ function ImageLightbox({ images, initialIndex, onClose }: { images: string[]; in
         <>
           <button
             onClick={(e) => { e.stopPropagation(); setCurrentIndex((currentIndex - 1 + images.length) % images.length); }}
-            className="absolute left-4 text-white/70 hover:text-white p-2 z-10"
+            className="absolute left-4 text-on-media/70 hover:text-on-media p-2 z-10"
           >
             <ChevronLeft className="h-8 w-8" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); setCurrentIndex((currentIndex + 1) % images.length); }}
-            className="absolute right-4 text-white/70 hover:text-white p-2 z-10"
+            className="absolute right-4 text-on-media/70 hover:text-on-media p-2 z-10"
           >
             <ChevronRight className="h-8 w-8" />
           </button>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-sm">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-on-media/50 text-sm">
             {currentIndex + 1} / {images.length}
           </div>
         </>
@@ -280,7 +280,7 @@ export default function MMarketplaceItem() {
             />
             <button
               onClick={() => openLightbox(photoIdx)}
-              className="absolute bottom-3 right-3 p-1.5 rounded-full bg-black/50 text-white/70 hover:text-white"
+              className="absolute bottom-3 right-3 p-1.5 rounded-full bg-overlay/50 text-on-media/70 hover:text-on-media"
             >
               <Expand className="h-4 w-4" />
             </button>

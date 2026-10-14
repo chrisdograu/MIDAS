@@ -198,7 +198,7 @@ export default function EmAlta() {
                 </p>
                 {/* GAP-142: Badge de posição */}
                 <span className="absolute top-2 left-2 text-[10px] font-bold bg-background/80 backdrop-blur text-foreground px-2 py-0.5 rounded-full border border-border flex items-center gap-1">
-                  <Trophy className={`h-3 w-3 ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-400' : index === 2 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                  <Trophy className={`h-3 w-3 ${index === 0 ? 'text-gold' : index === 1 ? 'text-muted-foreground' : index === 2 ? 'text-warning' : 'text-muted-foreground'}`} />
                   #{index + 1}
                 </span>
                 {/* GAP-143, GAP-470: Badge de plataforma */}

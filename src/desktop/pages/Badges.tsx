@@ -16,12 +16,12 @@ import { Search } from 'lucide-react';
 
 // GAP-D28: Categorias com cores
 const CATEGORIES = [
-  { value: 'store', label: '🛒 Loja & Compras', color: 'text-blue-400' },
-  { value: 'community', label: '💬 Comunidade', color: 'text-green-400' },
-  { value: 'level', label: '📈 Nível & XP', color: 'text-purple-400' },
-  { value: 'tournament', label: '🏆 Torneios', color: 'text-yellow-400' },
-  { value: 'special', label: '⭐ Especiais', color: 'text-red-400' },
-  { value: 'custom', label: '🎨 Personalizados', color: 'text-pink-400' },
+  { value: 'store', label: '🛒 Loja & Compras', color: 'text-info' },
+  { value: 'community', label: '💬 Comunidade', color: 'text-success' },
+  { value: 'level', label: '📈 Nível & XP', color: 'text-highlight' },
+  { value: 'tournament', label: '🏆 Torneios', color: 'text-gold' },
+  { value: 'special', label: '⭐ Especiais', color: 'text-destructive' },
+  { value: 'custom', label: '🎨 Personalizados', color: 'text-playful' },
 ];
 
 // GAP-D30: Regras de desbloqueio
