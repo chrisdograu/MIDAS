@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, Trash2, Loader2, Link2, ImagePlus, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { removeStoredImages } from '@/lib/storageCleanup';
 
 interface Props {
   label?: string;
@@ -38,6 +39,7 @@ export default function ImageGalleryField({
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLInputElement>(null);
+  const sessionUploads = useRef(new Set<string>());
 
   // GAP-D380: Compressão básica via canvas
   const compressImage = useCallback((file: File, maxWidth = 1200, maxHeight = 1200): Promise<File> => {
@@ -131,6 +133,7 @@ export default function ImageGalleryField({
           .getPublicUrl(path);
         
         added.push(publicUrl);
+        sessionUploads.current.add(publicUrl);
       } catch (err) {
         toast.error(`Erro ao processar ${file.name}`);
       }
@@ -170,6 +173,12 @@ export default function ImageGalleryField({
 
   const removeImage = (src: string) => {
     onChange(value.filter(v => v !== src));
+    // Arquivo enviado agora e ainda não salvo: apaga na hora para não ocupar espaço.
+    // Imagens já salvas são apagadas pela tela somente depois de salvar com sucesso.
+    if (sessionUploads.current.has(src)) {
+      sessionUploads.current.delete(src);
+      void removeStoredImages([src]);
+    }
   };
 
   const isImageLoading = (src: string) => {
