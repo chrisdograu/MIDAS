@@ -61,6 +61,10 @@
     --seller: 28 92% 55%;
     --seller-foreground: 220 20% 7%;
     --overlay: 220 25% 4%;
+    --on-media: 0 0% 100%;
+    --info: 208 80% 58%;
+    --highlight: 270 65% 62%;
+    --playful: 330 80% 64%;
 
 
     /* Neon intensity tokens (Phase 7) — dark mode pode brilhar forte */
@@ -138,6 +142,10 @@
     --seller: 24 88% 38%;
     --seller-foreground: 0 0% 100%;
     --overlay: 222 47% 14%;
+    --on-media: 0 0% 100%;
+    --info: 208 80% 38%;
+    --highlight: 262 78% 46%;
+    --playful: 330 70% 42%;
 
     /* Neon mais discreto no claro — evita "queimar" os olhos */
     --neon-glow-strength: 0.2;

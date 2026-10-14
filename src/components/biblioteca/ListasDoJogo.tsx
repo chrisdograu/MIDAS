@@ -26,14 +26,14 @@ const COLORS = [
 ];
 
 const COLOR_CLASSES: Record<string, string> = {
-  blue: "bg-blue-500/20 text-blue-500 border-blue-500/30",
-  green: "bg-green-500/20 text-green-500 border-green-500/30",
-  purple: "bg-purple-500/20 text-purple-500 border-purple-500/30",
-  red: "bg-red-500/20 text-red-500 border-red-500/30",
-  yellow: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
-  pink: "bg-pink-500/20 text-pink-500 border-pink-500/30",
-  orange: "bg-orange-500/20 text-orange-500 border-orange-500/30",
-  gray: "bg-gray-500/20 text-gray-500 border-gray-500/30",
+  blue: "bg-info/20 text-info border-info/30",
+  green: "bg-success/20 text-success border-success/30",
+  purple: "bg-highlight/20 text-highlight border-highlight/30",
+  red: "bg-destructive/20 text-destructive border-destructive/30",
+  yellow: "bg-warning/20 text-warning border-warning/30",
+  pink: "bg-playful/20 text-playful border-playful/30",
+  orange: "bg-seller/20 text-seller border-seller/30",
+  gray: "bg-muted-foreground/20 text-muted-foreground border-muted-foreground/30",
 };
 
 interface Lista { 

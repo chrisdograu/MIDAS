@@ -161,7 +161,7 @@ export function GamePagePreviewSimulator({ productId, rewards }: Props) {
         {showComparison && (
           <div className="absolute inset-0 opacity-30 pointer-events-none">
             {/* Versão original (sem cosméticos) — cinza */}
-            <div className="w-full h-full bg-gradient-to-b from-gray-800/50 to-transparent" />
+            <div className="w-full h-full bg-gradient-to-b from-muted/50 to-transparent" />
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-xs text-muted-foreground bg-card/80 px-3 py-1 rounded-full">
                 Versão original

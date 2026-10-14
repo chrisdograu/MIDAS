@@ -270,7 +270,7 @@ export default function GameDetail() {
 
             {/* GAP-021, GAP-111: Trailer/Video */}
             {game.trailer_url && (
-              <div className="mt-4 rounded-xl overflow-hidden aspect-video bg-black">
+              <div className="mt-4 rounded-xl overflow-hidden aspect-video bg-overlay">
                 <iframe
                   src={game.trailer_url}
                   title={`Trailer de ${game.title}`}

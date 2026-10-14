@@ -79,7 +79,7 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
       default: 'bg-muted text-muted-foreground',
       primary: 'bg-primary text-primary-foreground',
       destructive: 'bg-destructive text-destructive-foreground',
-      success: 'bg-green-500 text-white',
+      success: 'bg-success text-on-media',
     };
 
     const renderContent = (isActive: boolean, isPending: boolean) => {

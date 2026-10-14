@@ -212,8 +212,8 @@ export function CosmeticInventoryGrid() {
                     className="relative group"
                   >
                     <CosmeticPreview reward={reward} size={56} />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                      <Eye className="h-4 w-4 text-white" />
+                    <div className="absolute inset-0 bg-overlay/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                      <Eye className="h-4 w-4 text-on-media" />
                     </div>
                   </button>
                   <p className={`text-[10px] font-semibold line-clamp-1 ${rarityClass}`}>{reward.name}</p>

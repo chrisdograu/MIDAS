@@ -240,11 +240,11 @@ export default function CustomizacaoTab() {
           
           {/* GAP-CT03: Barra de progresso do upload */}
           {uploading && (
-            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
-              <div className="w-48 h-2 bg-white/20 rounded-full overflow-hidden">
+            <div className="absolute inset-0 bg-overlay/50 flex flex-col items-center justify-center">
+              <div className="w-48 h-2 bg-on-media/20 rounded-full overflow-hidden">
                 <div className="h-full bg-primary transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
               </div>
-              <p className="text-white text-xs mt-2">{uploadProgress}%</p>
+              <p className="text-on-media text-xs mt-2">{uploadProgress}%</p>
             </div>
           )}
           
@@ -285,12 +285,12 @@ export default function CustomizacaoTab() {
               {savedBanners.map((url, i) => (
                 <div key={i} className="relative group aspect-video rounded-lg overflow-hidden border border-border">
                   <img src={url} alt="" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+                  <div className="absolute inset-0 bg-overlay/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                     <button onClick={() => setCoverUrl(url)} className="p-1 bg-primary rounded">
-                      <Check className="h-3 w-3 text-white" />
+                      <Check className="h-3 w-3 text-on-media" />
                     </button>
                     <button onClick={() => removeBanner(url)} className="p-1 bg-destructive rounded">
-                      <Trash2 className="h-3 w-3 text-white" />
+                      <Trash2 className="h-3 w-3 text-on-media" />
                     </button>
                   </div>
                 </div>

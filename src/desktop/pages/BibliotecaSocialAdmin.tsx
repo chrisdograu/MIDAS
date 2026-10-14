@@ -363,11 +363,11 @@ export default function BibliotecaSocialAdmin() {
                   {target.avatar_url ? <img src={target.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" /> : target.display_name?.[0] || '?'}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">{target.display_name}</h2>
-                  <p className="text-sm text-white/70">@{target.username}</p>
+                  <h2 className="text-xl font-bold text-on-media">{target.display_name}</h2>
+                  <p className="text-sm text-on-media/70">@{target.username}</p>
                 </div>
                 {target.is_private && (
-                  <Badge className="ml-2 bg-warning/80 text-black">
+                  <Badge className="ml-2 bg-warning/80 text-overlay">
                     <EyeOff className="h-3 w-3 mr-1" /> Privado
                   </Badge>
                 )}

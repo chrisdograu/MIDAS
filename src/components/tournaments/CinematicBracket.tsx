@@ -22,8 +22,8 @@ interface Props {
 
 // GAP-CB02: Badges por rodada
 const ROUND_BADGES: Record<number, { label: string; icon: any; color: string }> = {
-  1: { label: 'Quartas', icon: Shield, color: 'text-blue-400 border-blue-400/30 bg-blue-400/10' },
-  2: { label: 'Semifinal', icon: Star, color: 'text-purple-400 border-purple-400/30 bg-purple-400/10' },
+  1: { label: 'Quartas', icon: Shield, color: 'text-info border-info/30 bg-info/10' },
+  2: { label: 'Semifinal', icon: Star, color: 'text-highlight border-highlight/30 bg-highlight/10' },
   3: { label: 'Final', icon: Trophy, color: 'text-warning border-warning/30 bg-warning/10' },
   4: { label: 'Grande Final', icon: Crown, color: 'text-destructive border-destructive/30 bg-destructive/10' },
 };

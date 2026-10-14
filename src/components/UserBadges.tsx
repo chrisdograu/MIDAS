@@ -21,32 +21,32 @@ interface BadgeRow {
 // GAP-UB03: Configurações por raridade
 const rarityConfigs: Record<string, { color: string; bg: string; label: string; icon: typeof Trophy }> = {
   common: { 
-    color: 'text-gray-400', 
-    bg: 'bg-gray-400/10', 
+    color: 'text-muted-foreground', 
+    bg: 'bg-muted-foreground/10', 
     label: 'Comum',
     icon: Star,
   },
   uncommon: { 
-    color: 'text-green-400', 
-    bg: 'bg-green-400/10', 
+    color: 'text-success', 
+    bg: 'bg-success/10', 
     label: 'Incomum',
     icon: Star,
   },
   rare: { 
-    color: 'text-blue-400', 
-    bg: 'bg-blue-400/10', 
+    color: 'text-info', 
+    bg: 'bg-info/10', 
     label: 'Raro',
     icon: Diamond,
   },
   epic: { 
-    color: 'text-purple-400', 
-    bg: 'bg-purple-400/10', 
+    color: 'text-highlight', 
+    bg: 'bg-highlight/10', 
     label: 'Épico',
     icon: Shield,
   },
   legendary: { 
-    color: 'text-yellow-400', 
-    bg: 'bg-yellow-400/10', 
+    color: 'text-gold', 
+    bg: 'bg-gold/10', 
     label: 'Lendário',
     icon: Trophy,
   },

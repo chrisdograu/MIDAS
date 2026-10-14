@@ -150,7 +150,7 @@ export default function AvaliacoesUsuario() {
           { label: 'Total de Avaliações', value: reviews.length, color: 'text-primary' },
           { label: 'Média Geral', value: avgRating, color: 'text-warning' },
           { label: 'Negativas (≤2)', value: reviews.filter(a => a.rating <= 2).length, color: 'text-destructive' },
-          { label: 'Denunciadas', value: reviews.filter(a => a.is_denunciada).length, color: 'text-orange-400' },
+          { label: 'Denunciadas', value: reviews.filter(a => a.is_denunciada).length, color: 'text-seller' },
         ].map(s => (
           <Card key={s.label} className="border-border/50">
             <CardContent className="py-4 px-4"><p className={`text-2xl font-bold ${s.color}`}>{s.value}</p><p className="text-xs text-muted-foreground">{s.label}</p></CardContent>

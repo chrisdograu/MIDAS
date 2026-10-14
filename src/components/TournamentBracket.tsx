@@ -121,8 +121,8 @@ export default function TournamentBracket({
   const getMatchAnimation = (match: Match) => {
     if (match.winner && isUserWinner(match)) {
       return {
-        className: 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/20',
-        icon: <Crown className="h-3 w-3 text-yellow-400" />,
+        className: 'ring-2 ring-gold shadow-lg shadow-gold/20',
+        icon: <Crown className="h-3 w-3 text-gold" />,
         label: 'Vitória!',
       };
     }
@@ -184,7 +184,7 @@ export default function TournamentBracket({
                               m.winner === m.player_a && "text-success"
                             )}>
                               {a?.display_name || '—'}
-                              {m.winner === m.player_a && <Trophy className="h-3 w-3 inline ml-1 text-yellow-400" />}
+                              {m.winner === m.player_a && <Trophy className="h-3 w-3 inline ml-1 text-gold" />}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {m.score_a ?? '-'}
@@ -196,7 +196,7 @@ export default function TournamentBracket({
                               m.winner === m.player_b && "text-success"
                             )}>
                               {b?.display_name || '—'}
-                              {m.winner === m.player_b && <Trophy className="h-3 w-3 inline ml-1 text-yellow-400" />}
+                              {m.winner === m.player_b && <Trophy className="h-3 w-3 inline ml-1 text-gold" />}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {m.score_b ?? '-'}
@@ -250,7 +250,7 @@ export default function TournamentBracket({
                 isWinner ? 'bg-primary/15 border-l-2 border-primary' : 'bg-secondary/30'
               )}>
                 <span className="text-sm truncate flex items-center gap-1.5">
-                  {isWinner && <Crown className="h-3 w-3 text-yellow-400" />}
+                  {isWinner && <Crown className="h-3 w-3 text-gold" />}
                   {p?.display_name || '—'}
                 </span>
                 <span className="text-xs font-mono text-muted-foreground">

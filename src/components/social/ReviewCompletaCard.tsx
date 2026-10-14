@@ -376,22 +376,22 @@ export default function ReviewCompletaCard({ review }: { review: ReviewCompletaD
 
       {/* Lightbox */}
       {isLightboxOpen && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center" onClick={closeLightbox}>
-          <button onClick={closeLightbox} className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10">
+        <div className="fixed inset-0 z-50 bg-overlay/95 flex items-center justify-center" onClick={closeLightbox}>
+          <button onClick={closeLightbox} className="absolute top-4 right-4 p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10">
             <Image className="h-5 w-5" />
           </button>
           {images.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="absolute left-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10">
+              <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="absolute left-4 p-3 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10">
                 <ChevronLeft className="h-6 w-6" />
               </button>
-              <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="absolute right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10">
+              <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="absolute right-4 p-3 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10">
                 <ChevronRight className="h-6 w-6" />
               </button>
             </>
           )}
           <img src={images[currentImageIndex]} alt="" className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain" onClick={(e) => e.stopPropagation()} />
-          <span className="absolute bottom-4 text-white/60 text-sm">{currentImageIndex + 1} / {images.length}</span>
+          <span className="absolute bottom-4 text-on-media/60 text-sm">{currentImageIndex + 1} / {images.length}</span>
         </div>
       )}
 

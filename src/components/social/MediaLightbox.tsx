@@ -131,7 +131,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center select-none"
+        className="fixed inset-0 z-50 bg-overlay/95 flex items-center justify-center select-none"
         onClick={onClose}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -142,11 +142,11 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+              className="p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition"
             >
               <X className="h-5 w-5" />
             </button>
-            <span className="text-sm text-white/70">
+            <span className="text-sm text-on-media/70">
               {idx + 1} / {items.length}
             </span>
           </div>
@@ -154,7 +154,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
             {/* GAP-ML04: Compartilhar */}
             <button
               onClick={handleShare}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+              className="p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition"
               title="Compartilhar"
             >
               <Share2 className="h-4 w-4" />
@@ -162,7 +162,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
             {/* GAP-ML01: Download */}
             <button
               onClick={handleDownload}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+              className="p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition"
               title="Baixar"
             >
               <Download className="h-4 w-4" />
@@ -170,7 +170,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
             {/* GAP-ML05: Zoom toggle */}
             <button
               onClick={() => { setIsZoomed(!isZoomed); setZoom(isZoomed ? 1 : 2); }}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+              className="p-2 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition"
               title={isZoomed ? 'Reduzir' : 'Ampliar'}
             >
               {isZoomed ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -180,7 +180,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
 
         {/* GAP-ML02: Barra de progresso */}
         {loading && (
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 w-64 h-1 bg-white/20 rounded-full overflow-hidden">
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 w-64 h-1 bg-on-media/20 rounded-full overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-200"
               style={{ width: `${progress}%` }}
@@ -192,7 +192,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
         {idx > 0 && (
           <button
             onClick={(e) => { e.stopPropagation(); setIdx(idx - 1); }}
-            className="absolute left-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10"
+            className="absolute left-4 p-3 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
@@ -200,7 +200,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
         {idx < items.length - 1 && (
           <button
             onClick={(e) => { e.stopPropagation(); setIdx(idx + 1); }}
-            className="absolute right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition z-10"
+            className="absolute right-4 p-3 rounded-full bg-on-media/10 hover:bg-on-media/20 text-on-media transition z-10"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
@@ -216,7 +216,7 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
         >
           {loading && (
             <div className="flex items-center justify-center w-32 h-32">
-              <Loader2 className="h-8 w-8 text-white/40 animate-spin" />
+              <Loader2 className="h-8 w-8 text-on-media/40 animate-spin" />
             </div>
           )}
 
@@ -248,9 +248,9 @@ export default function MediaLightbox({ items, startIndex, onClose, onShare }: P
 
           {/* Legendas */}
           {(current.author || current.caption) && (
-            <div className="text-center text-sm text-white/90 bg-black/50 backdrop-blur px-4 py-2 rounded-lg">
+            <div className="text-center text-sm text-on-media/90 bg-overlay/50 backdrop-blur px-4 py-2 rounded-lg">
               {current.author && <span className="font-semibold">{current.author}</span>}
-              {current.caption && <span className="text-white/70"> · {current.caption}</span>}
+              {current.caption && <span className="text-on-media/70"> · {current.caption}</span>}
             </div>
           )}
         </motion.div>

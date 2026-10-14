@@ -35,11 +35,11 @@ const COLORS: Record<string, string> = {
   underdog: 'from-success/20 to-success/10 border-success/30 text-success',
   streak: 'from-warning/20 to-warning/10 border-warning/30 text-warning',
   record: 'from-warning/20 to-warning/10 border-warning/30 text-warning',
-  upset: 'from-purple-500/20 to-purple-500/10 border-purple-500/30 text-purple-500',
-  comeback: 'from-orange-500/20 to-orange-500/10 border-orange-500/30 text-orange-500',
-  domination: 'from-blue-500/20 to-blue-500/10 border-blue-500/30 text-blue-500',
-  teamwork: 'from-green-500/20 to-green-500/10 border-green-500/30 text-green-500',
-  legendary: 'from-yellow-500/20 to-yellow-500/10 border-yellow-500/30 text-yellow-500',
+  upset: 'from-highlight/20 to-highlight/10 border-highlight/30 text-highlight',
+  comeback: 'from-seller/20 to-seller/10 border-seller/30 text-seller',
+  domination: 'from-info/20 to-info/10 border-info/30 text-info',
+  teamwork: 'from-success/20 to-success/10 border-success/30 text-success',
+  legendary: 'from-warning/20 to-warning/10 border-warning/30 text-warning',
 };
 
 // GAP-ST02: Verificar se é recente (últimas 24h)

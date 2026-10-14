@@ -27,8 +27,8 @@ const TYPE_STYLE: Record<string, { icon: any; color: string; bg: string }> = {
   game: { icon: Gamepad2, color: 'text-primary', bg: 'bg-primary/10' },
   review: { icon: Star, color: 'text-warning', bg: 'bg-warning/10' },
   review_completa: { icon: Star, color: 'text-accent', bg: 'bg-accent/10' },
-  opinion: { icon: MessageSquare, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-  screenshot: { icon: Camera, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+  opinion: { icon: MessageSquare, color: 'text-info', bg: 'bg-info/10' },
+  screenshot: { icon: Camera, color: 'text-highlight', bg: 'bg-highlight/10' },
 };
 
 // GAP-HS01: Estado vazio

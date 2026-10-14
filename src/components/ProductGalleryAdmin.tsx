@@ -166,9 +166,9 @@ export default function ProductGalleryAdmin({ productId }: { productId: string }
                         {/* Grip handle */}
                         <div
                           {...provided.dragHandleProps}
-                          className="absolute top-1 left-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition cursor-grab active:cursor-grabbing"
+                          className="absolute top-1 left-1 p-1 bg-overlay/50 rounded opacity-0 group-hover:opacity-100 transition cursor-grab active:cursor-grabbing"
                         >
-                          <GripVertical className="h-3 w-3 text-white" />
+                          <GripVertical className="h-3 w-3 text-on-media" />
                         </div>
                         
                         <button
@@ -179,7 +179,7 @@ export default function ProductGalleryAdmin({ productId }: { productId: string }
                           <Trash2 className="h-3 w-3" />
                         </button>
                         
-                        <div className="absolute bottom-1 right-1 text-[10px] text-white/60 bg-black/30 px-1.5 rounded">
+                        <div className="absolute bottom-1 right-1 text-[10px] text-on-media/60 bg-overlay/30 px-1.5 rounded">
                           #{index + 1}
                         </div>
                       </div>

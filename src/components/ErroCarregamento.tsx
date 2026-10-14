@@ -14,8 +14,8 @@ const severityIcons: Record<Severity, LucideIcon> = {
 
 // GAP-EC01: Cores por severidade
 const severityColors: Record<Severity, { bg: string; icon: string; border: string }> = {
-  info: { bg: 'bg-blue-500/10', icon: 'text-blue-500', border: 'border-blue-500/20' },
-  warning: { bg: 'bg-yellow-500/10', icon: 'text-yellow-500', border: 'border-yellow-500/20' },
+  info: { bg: 'bg-info/10', icon: 'text-info', border: 'border-info/20' },
+  warning: { bg: 'bg-warning/10', icon: 'text-warning', border: 'border-warning/20' },
   error: { bg: 'bg-destructive/10', icon: 'text-destructive', border: 'border-destructive/20' },
 };
 

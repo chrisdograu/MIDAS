@@ -41,7 +41,7 @@ function StarFilter({ value, onChange }: { value: number; onChange: (v: number) 
         <button
           key={star}
           onClick={() => onChange(star === value ? 0 : star)}
-          className={`text-lg transition-colors ${star <= value ? 'text-yellow-400' : 'text-muted-foreground/30'}`}
+          className={`text-lg transition-colors ${star <= value ? 'text-gold' : 'text-muted-foreground/30'}`}
         >
           ★
         </button>
@@ -366,7 +366,7 @@ export default function Catalogo() {
         {/* GAP-105, GAP-436: Filtro por avaliação mínima */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <Star className="h-4 w-4 text-yellow-400" />
+            <Star className="h-4 w-4 text-gold" />
             <span className="text-xs text-muted-foreground">Avaliação mínima:</span>
             <StarFilter value={minRating} onChange={setMinRating} />
           </div>

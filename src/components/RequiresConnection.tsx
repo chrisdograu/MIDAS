@@ -15,10 +15,10 @@ const variantConfigs: Record<Variant, { bg: string; border: string; text: string
     icon: 'text-muted-foreground',
   },
   warning: {
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/30',
-    text: 'text-yellow-600 dark:text-yellow-400',
-    icon: 'text-yellow-500',
+    bg: 'bg-warning/10',
+    border: 'border-warning/30',
+    text: 'text-warning dark:text-gold',
+    icon: 'text-warning',
   },
   error: {
     bg: 'bg-destructive/10',

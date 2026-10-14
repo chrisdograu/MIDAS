@@ -69,6 +69,10 @@ export default {
           foreground: "hsl(var(--seller-foreground))",
         },
         overlay: "hsl(var(--overlay))",
+        "on-media": "hsl(var(--on-media))",
+        info: "hsl(var(--info))",
+        highlight: "hsl(var(--highlight))",
+        playful: "hsl(var(--playful))",
 
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
