@@ -7653,6 +7653,10 @@ export type Database = {
           visibility: string
         }[]
       }
+      admin_move_team_member: {
+        Args: { _direction: string; _member_id: string }
+        Returns: undefined
+      }
       admin_refund_order: {
         Args: { _motivo: string; _pedido_id: string; _valor: number }
         Returns: string
