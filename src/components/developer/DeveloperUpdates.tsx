@@ -10,6 +10,7 @@ import ImageGalleryField from '@/desktop/components/ImageGalleryField';
 import { MessageSquare, Pin, Pencil, Trash2, Lock, Unlock, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
+import { removeStoredImages, unusedImages } from '@/lib/storageCleanup';
 
 type Update = Tables<'developer_updates'>;
 type Comment = Tables<'developer_update_comments'>;
@@ -43,6 +44,7 @@ function Comments({ post, manager }: { post: Update; manager: boolean }) {
       : await supabase.from('developer_update_comments').insert({ update_id: post.id, author_id: user.id, body: body.trim() });
     setBusy(false);
     if (result.error) { toast.error(result.error.message); return; }
+    if (editing) await removeStoredImages(unusedImages(editing.images, images));
     setBody(''); setEditing(null);
     await client.invalidateQueries({ queryKey: key });
   };
@@ -117,7 +119,14 @@ export default function DeveloperUpdates({ developerId, name, logo }: { develope
     if (!window.confirm('Excluir a publicação e seus comentários?')) return;
     const { error } = await supabase.from('developer_updates').delete().eq('id', post.id);
     if (error) { toast.error(error.message); return; }
+    await removeStoredImages(post.images);
     await client.invalidateQueries({ queryKey: key });
+  };
+  const cancelDraft = () => {
+    void removeStoredImages(unusedImages(images, editing?.images ?? []));
+    setEditing(null);
+    setBody('');
+    setImages([]);
   };
   return <section className="mt-10 border-t border-border pt-6 max-w-3xl">
     <h2 className="text-xl font-bold mb-4">Publicações oficiais</h2>
@@ -125,7 +134,7 @@ export default function DeveloperUpdates({ developerId, name, logo }: { develope
       <Textarea aria-label="Texto da publicação oficial" placeholder={`Novidades de ${name}…`} maxLength={10000} rows={4} value={body} onChange={e => setBody(e.target.value)} />
       <ImageGalleryField label="Fotos da publicação" value={images} onChange={setImages} maxImages={4} folder={`developer-updates/${developerId}`} />
       <div className="flex justify-end gap-2">
-        {editing && <Button variant="ghost" onClick={() => { setEditing(null); setBody(''); setImages([]); }}>Cancelar edição</Button>}
+        {(editing || body || images.length > 0) && <Button variant="ghost" onClick={cancelDraft}>{editing ? 'Cancelar edição' : 'Descartar'}</Button>}
         <Button onClick={save} disabled={busy || !body.trim()}><Send className="h-4 w-4 mr-2" />{editing ? 'Salvar publicação' : 'Publicar'}</Button>
       </div>
     </div>}

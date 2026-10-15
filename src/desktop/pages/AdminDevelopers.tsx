@@ -21,6 +21,7 @@ import ImageGalleryField from '../components/ImageGalleryField';
 import DeveloperChannelAccess from '@/components/developer/DeveloperChannelAccess';
 import { useSearchParams } from 'react-router-dom';
 import { escapeIlikeTerm } from '@/lib/escapeIlike';
+import { removeStoredImages, unusedImages } from '@/lib/storageCleanup';
 
 interface Developer {
   id: string;
@@ -217,6 +218,13 @@ export default function AdminDevelopers() {
     setDialogOpen(true);
   };
 
+  const closeDialog = () => {
+    const before = editing ? [editing.logo_url, editing.banner_url] : [];
+    void removeStoredImages(unusedImages([form.logo_url, form.banner_url], before));
+    setDialogOpen(false);
+    resetForm();
+  };
+
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -269,6 +277,10 @@ export default function AdminDevelopers() {
         const { data, error } = await supabase.from('developers').update(payload).eq('id', editing.id).select('id').maybeSingle();
         if (error) throw error;
         if (!data) throw new Error('Não foi possível atualizar o desenvolvedor. Verifique seu acesso.');
+        await removeStoredImages(unusedImages(
+          [editing.logo_url, editing.banner_url],
+          [payload.logo_url, payload.banner_url],
+        ));
 
         await adminLog({
           action: 'update_developer',
@@ -312,6 +324,7 @@ export default function AdminDevelopers() {
       const { data, error } = await supabase.from('developers').delete().eq('id', deleteTarget.id).select('id').maybeSingle();
       if (error) throw error;
       if (!data) throw new Error('Não foi possível excluir o desenvolvedor. Verifique seu acesso.');
+      await removeStoredImages([deleteTarget.logo_url, deleteTarget.banner_url]);
 
       await adminLog({
         action: 'delete_developer',
@@ -466,7 +479,7 @@ export default function AdminDevelopers() {
       </Card>
 
       {/* Dialog de Criação/Edição */}
-      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) setDialogOpen(false); }}>
+      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o && !saving) closeDialog(); }}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? 'Editar Desenvolvedor' : 'Novo Desenvolvedor'}</DialogTitle>
@@ -604,7 +617,7 @@ export default function AdminDevelopers() {
             {editing && <DeveloperChannelAccess developerId={editing.id} />}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={closeDialog} disabled={saving}>Cancelar</Button>
             <Button onClick={save} disabled={saving}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {editing ? 'Atualizar' : 'Criar'}

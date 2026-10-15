@@ -19,6 +19,7 @@ import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
 import { useDesktopAuth } from '@/hooks/useDesktopAuth';
 import ImageGalleryField from '../components/ImageGalleryField';
+import { removeStoredImages, unusedImages } from '@/lib/storageCleanup';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -32,6 +33,7 @@ export default function AdminTeamMembers() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [exporting, setExporting] = useState(false);
+  const [page, setPage] = useState(0);
 
   const [form, setForm] = useState({
     name: '',
@@ -72,7 +74,14 @@ export default function AdminTeamMembers() {
     }
   };
 
-  useEffect(() => { if (position === 'admin') load(); }, [search, position]);
+  useEffect(() => { setPage(0); if (position === 'admin') load(); }, [search, position]);
+
+  const closeDialog = () => {
+    const before = editing ? [editing.photo_url, editing.banner_url] : [];
+    void removeStoredImages(unusedImages([form.photo_url, form.banner_url], before));
+    setDialogOpen(false);
+    resetForm();
+  };
 
   const generateSlug = (name) => {
     return name
@@ -164,6 +173,10 @@ export default function AdminTeamMembers() {
 
         if (error) throw error;
         if (!data) throw new Error('Não foi possível atualizar o membro. Verifique seu acesso.');
+        await removeStoredImages(unusedImages(
+          [editing.photo_url, editing.banner_url],
+          [payload.photo_url, payload.banner_url],
+        ));
 
         await adminLog({
           action: 'update_team_member',
@@ -234,22 +247,10 @@ export default function AdminTeamMembers() {
     if (direction === 'up' && index === 0) return;
     if (direction === 'down' && index === members.length - 1) return;
 
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    const newOrder = [...members];
-    [newOrder[index].display_order, newOrder[newIndex].display_order] =
-      [newOrder[newIndex].display_order, newOrder[index].display_order];
-
     try {
-      await supabase
-        .from('team_members')
-        .update({ display_order: newOrder[index].display_order })
-        .eq('id', newOrder[index].id);
-      await supabase
-        .from('team_members')
-        .update({ display_order: newOrder[newIndex].display_order })
-        .eq('id', newOrder[newIndex].id);
-
-      setMembers(newOrder);
+      const { error } = await supabase.rpc('admin_move_team_member', { _member_id: member.id, _direction: direction });
+      if (error) throw error;
+      await load();
     } catch (error) {
       toast.error('Erro ao reordenar');
     }
@@ -265,6 +266,7 @@ export default function AdminTeamMembers() {
         .eq('id', deleteTarget.id);
 
       if (error) throw error;
+      await removeStoredImages([deleteTarget.photo_url, deleteTarget.banner_url]);
 
       await adminLog({
         action: 'delete_team_member',
@@ -361,7 +363,9 @@ export default function AdminTeamMembers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                members.map((m, index) => (
+                members.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE).map((m, visibleIndex) => {
+                  const index = page * ITEMS_PER_PAGE + visibleIndex;
+                  return (
                   <TableRow key={m.id}>
                     <TableCell className="text-sm text-muted-foreground">{index + 1}</TableCell>
                     <TableCell>
@@ -403,14 +407,21 @@ export default function AdminTeamMembers() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))
+                  );
+                })
               )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) setDialogOpen(false); }}>
+      {members.length > ITEMS_PER_PAGE && <div className="flex items-center justify-end gap-2">
+        <span className="text-sm text-muted-foreground">Página {page + 1} de {Math.ceil(members.length / ITEMS_PER_PAGE)}</span>
+        <Button variant="outline" size="sm" onClick={() => setPage(value => Math.max(0, value - 1))} disabled={page === 0}>Anterior</Button>
+        <Button variant="outline" size="sm" onClick={() => setPage(value => Math.min(Math.ceil(members.length / ITEMS_PER_PAGE) - 1, value + 1))} disabled={(page + 1) * ITEMS_PER_PAGE >= members.length}>Próxima</Button>
+      </div>}
+
+      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o && !saving) closeDialog(); }}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
              <DialogTitle>{editing ? 'Editar membro' : 'Novo membro'}</DialogTitle>
@@ -490,7 +501,7 @@ export default function AdminTeamMembers() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={closeDialog} disabled={saving}>Cancelar</Button>
             <Button onClick={save} disabled={saving}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {editing ? 'Atualizar' : 'Criar'}
