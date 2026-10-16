@@ -1,6 +1,6 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
-- [ ] Concluir reordenação e paginação da equipe, limpeza de fotos ao salvar/cancelar/excluir e permissão de limpeza por gestores; testar regressões e páginas públicas.
+- [x] Concluir reordenação e paginação da equipe, limpeza de fotos ao salvar/cancelar/excluir e permissão de limpeza por gestores; testar regressões e páginas públicas.
 - [x] Corrigir restauração e gravação das cores, atualização dos cosméticos por jogo e controles incompletos dos overlays; regressões cobertas por testes.
 - [x] Revisar edição e envio de fotos nas novas páginas desktop; corrigir chamadas a RPCs inexistentes de desenvolvedores com gravação protegida pelas permissões administrativas existentes.
 - [ ] Validar gravação e envio de fotos no painel com conta real — Supabase externo sem sessão disponível; testes isolados não validam a conta real.
