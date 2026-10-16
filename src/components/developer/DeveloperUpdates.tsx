@@ -44,7 +44,6 @@ function Comments({ post, manager }: { post: Update; manager: boolean }) {
       : await supabase.from('developer_update_comments').insert({ update_id: post.id, author_id: user.id, body: body.trim() });
     setBusy(false);
     if (result.error) { toast.error(result.error.message); return; }
-    if (editing) await removeStoredImages(unusedImages(editing.images, images));
     setBody(''); setEditing(null);
     await client.invalidateQueries({ queryKey: key });
   };
@@ -106,6 +105,7 @@ export default function DeveloperUpdates({ developerId, name, logo }: { develope
       : await supabase.from('developer_updates').insert({ developer_id: developerId, author_id: user.id, body: body.trim(), images });
     setBusy(false);
     if (result.error) { toast.error(result.error.message); return; }
+    if (editing) await removeStoredImages(unusedImages(editing.images, images));
     setBody(''); setImages([]); setEditing(null);
     await client.invalidateQueries({ queryKey: key });
     toast.success(editing ? 'Publicação atualizada' : 'Publicação criada');
