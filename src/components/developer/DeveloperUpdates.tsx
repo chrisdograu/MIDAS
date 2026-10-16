@@ -44,7 +44,6 @@ function Comments({ post, manager }: { post: Update; manager: boolean }) {
       : await supabase.from('developer_update_comments').insert({ update_id: post.id, author_id: user.id, body: body.trim() });
     setBusy(false);
     if (result.error) { toast.error(result.error.message); return; }
-    if (editing) await removeStoredImages(unusedImages(editing.images, images));
     setBody(''); setEditing(null);
     await client.invalidateQueries({ queryKey: key });
   };
