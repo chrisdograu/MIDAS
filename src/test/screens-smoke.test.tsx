@@ -28,6 +28,7 @@ const user = { id: 'u1', email: 'teste@exemplo.com' };
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user, session: { user }, loading: false, isAdmin: true, profile: null, signOut: vi.fn() }), AuthProvider: ({ children }: any) => children }));
 vi.mock('@/hooks/useDesktopAuth', () => ({ useDesktopAuth: () => ({ user, session: { user }, loading: false, isAdmin: true, role: 'admin', position: 'admin', hasPosition: () => true, signOut: vi.fn() }), DesktopAuthProvider: ({ children }: any) => children }));
 
+import { CartProvider } from '@/lib/cartStore';
 afterEach(cleanup);
 
 const screens: Record<string, Record<string, () => Promise<{ default: ComponentType<any> }>>> = {
@@ -64,7 +65,7 @@ for (const [platform, pages] of Object.entries(screens)) {
         const { default: Page } = await load();
         const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
         const { container } = render(
-          <QueryClientProvider client={qc}><MemoryRouter><Suspense fallback={null}><Page /></Suspense></MemoryRouter></QueryClientProvider>,
+          <QueryClientProvider client={qc}><MemoryRouter><CartProvider><Suspense fallback={null}><Page /></Suspense></CartProvider></MemoryRouter></QueryClientProvider>,
         );
         await waitFor(() => expect(container.textContent?.length).toBeGreaterThan(0));
         await new Promise((r) => setTimeout(r, 50));
