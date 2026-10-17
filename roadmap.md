@@ -47,3 +47,6 @@
 - [x] Popular os módulos que não dependem de novas contas, sem duplicações.
 - [x] Validar contagens, relacionamentos e regras administrativas.
 - [ ] Criar contas fictícias e os dados que dependem delas — aguardando o usuário criar as contas.
+
+- [x] Testes de abertura das telas menos testadas (web compra, mobile social, desktop gestão).
+- [ ] Testar ações dessas telas com login real — Supabase externo sem sessão de teste disponível.
