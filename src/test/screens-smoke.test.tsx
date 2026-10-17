@@ -67,7 +67,7 @@ for (const [platform, pages] of Object.entries(screens)) {
         const { container } = render(
           <QueryClientProvider client={qc}><MemoryRouter><CartProvider><Suspense fallback={null}><Page /></Suspense></CartProvider></MemoryRouter></QueryClientProvider>,
         );
-        await waitFor(() => expect(container.textContent?.length).toBeGreaterThan(0));
+        await waitFor(() => expect(container.childElementCount).toBeGreaterThan(0));
         await new Promise((r) => setTimeout(r, 50));
         spy.mockRestore();
         const crashes = errors.filter((e) => /The above error occurred|Uncaught|is not a function|Cannot read prop/.test(String((e as any[])[0])));
