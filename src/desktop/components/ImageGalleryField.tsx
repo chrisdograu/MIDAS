@@ -1,6 +1,6 @@
 // Campo de imagens para telas de cadastro que ainda não têm ID no banco.
 // Aceita upload (Supabase Storage) e link direto — os dois, não um ou outro.
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, forwardRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -187,7 +187,7 @@ const ImageGalleryField = forwardRef<HTMLDivElement, Props>(function ImageGaller
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" ref={outerRef}>
       <div className="flex items-center justify-between gap-3">
         <Label className="flex items-center gap-2">
           <ImagePlus className="h-4 w-4" aria-hidden /> 
