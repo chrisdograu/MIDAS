@@ -302,4 +302,6 @@ const ImageGalleryField = forwardRef<HTMLDivElement, Props>(function ImageGaller
       )}
     </div>
   );
-}
+});
+
+export default ImageGalleryField;
