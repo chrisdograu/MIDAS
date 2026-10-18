@@ -26,14 +26,14 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export default function ImageGalleryField({ 
-  label = 'Imagens', 
-  hint, 
-  value, 
-  onChange, 
+const ImageGalleryField = forwardRef<HTMLDivElement, Props>(function ImageGalleryField({
+  label = 'Imagens',
+  hint,
+  value,
+  onChange,
   folder = 'catalogo',
-  maxImages = 10 
-}: Props) {
+  maxImages = 10
+}: Props, outerRef) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [url, setUrl] = useState('');
