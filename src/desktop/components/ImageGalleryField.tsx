@@ -1,6 +1,6 @@
 // Campo de imagens para telas de cadastro que ainda não têm ID no banco.
 // Aceita upload (Supabase Storage) e link direto — os dois, não um ou outro.
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, forwardRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,14 +26,14 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export default function ImageGalleryField({ 
-  label = 'Imagens', 
-  hint, 
-  value, 
-  onChange, 
+const ImageGalleryField = forwardRef<HTMLDivElement, Props>(function ImageGalleryField({
+  label = 'Imagens',
+  hint,
+  value,
+  onChange,
   folder = 'catalogo',
-  maxImages = 10 
-}: Props) {
+  maxImages = 10
+}: Props, outerRef) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [url, setUrl] = useState('');
@@ -187,7 +187,7 @@ export default function ImageGalleryField({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" ref={outerRef}>
       <div className="flex items-center justify-between gap-3">
         <Label className="flex items-center gap-2">
           <ImagePlus className="h-4 w-4" aria-hidden /> 
@@ -302,4 +302,6 @@ export default function ImageGalleryField({
       )}
     </div>
   );
-}
+});
+
+export default ImageGalleryField;
