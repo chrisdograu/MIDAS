@@ -300,7 +300,7 @@ export default function MMarketplace() {
                 <Link to={`/m/marketplace/${a.id}`} className="block glass rounded-xl overflow-hidden hover:border-primary/40 transition-colors">
                   <div className="aspect-[3/4] bg-muted relative overflow-hidden">
                     {a.image
-                      ? <DataSaverImage src={a.image} alt={a.title} saverWidth={320} className="w-full h-full object-cover" />
+                      ? <DataSaverImage src={a.image} alt={a.title} saverWidth={320} className="w-full h-full object-contain bg-muted" />
                       : <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-8 w-8 text-muted-foreground" /></div>}
                     <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
                     <div className="absolute top-1.5 left-1.5 right-1.5 flex flex-wrap gap-1">

@@ -441,7 +441,7 @@ export default function SellerProfile() {
                   return (
                     <Link key={a.id} to={`/m/marketplace/${a.id}`} className="bg-card border border-border rounded-xl overflow-hidden hover:border-accent/40 transition-colors">
                       <div className="aspect-square bg-muted">
-                        {photo ? <img src={photo.image_url} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-8 w-8 text-muted-foreground" /></div>}
+                        {photo ? <img src={photo.image_url} alt="" className="w-full h-full object-contain bg-muted" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-8 w-8 text-muted-foreground" /></div>}
                       </div>
                       <div className="p-2.5">
                         <p className="text-sm font-medium line-clamp-1">{a.title}</p>
