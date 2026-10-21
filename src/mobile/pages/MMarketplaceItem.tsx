@@ -275,7 +275,7 @@ export default function MMarketplaceItem() {
             <img 
               src={photos[photoIdx]} 
               alt={ad.title} 
-              className="w-full h-full object-cover cursor-pointer"
+              className="w-full h-full object-contain bg-muted cursor-pointer"
               onClick={() => openLightbox(photoIdx)}
             />
             <button
@@ -433,7 +433,7 @@ export default function MMarketplaceItem() {
               {similar.map(s => (
                 <Link key={s.id} to={`/m/marketplace/${s.id}`} className="shrink-0 w-32 glass rounded-lg overflow-hidden">
                   <div className="aspect-square bg-muted">
-                    {s.image ? <img src={s.image} alt={s.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-6 w-6 text-muted-foreground" /></div>}
+                    {s.image ? <img src={s.image} alt={s.title} className="w-full h-full object-contain bg-muted" /> : <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="h-6 w-6 text-muted-foreground" /></div>}
                   </div>
                   <div className="p-2">
                     <p className="text-[11px] font-semibold line-clamp-2 leading-tight min-h-[28px]">{s.title}</p>
