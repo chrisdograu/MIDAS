@@ -58,7 +58,7 @@ function formatPhone(value: string): string {
 async function getCertificationHistory(userId: string) {
   const { data } = await supabase
     .from('certificados')
-    .select('status, created_at, reviewed_at, review_notes')
+    .select('status, created_at, reviewed_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   return data || [];
