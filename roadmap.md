@@ -1,5 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
+- [ ] Preencher torneios e biblioteca social com conteúdo de demonstração identificado, sem novas contas ou atividade inventada; conferir dados e páginas.
+- [ ] Corrigir a consulta inválida de certificados na página móvel do vendedor e testar a abertura.
 - [x] Concluir reordenação e paginação da equipe, limpeza de fotos ao salvar/cancelar/excluir e permissão de limpeza por gestores; testar regressões e páginas públicas.
 - [x] Corrigir restauração e gravação das cores, atualização dos cosméticos por jogo e controles incompletos dos overlays; regressões cobertas por testes.
 - [x] Revisar edição e envio de fotos nas novas páginas desktop; corrigir chamadas a RPCs inexistentes de desenvolvedores com gravação protegida pelas permissões administrativas existentes.
@@ -46,7 +48,7 @@
 - [x] Definir volume e escopo dos dados fictícios com o usuário.
 - [x] Popular os módulos que não dependem de novas contas, sem duplicações.
 - [x] Validar contagens, relacionamentos e regras administrativas.
-- [ ] Criar contas fictícias e os dados que dependem delas — aguardando o usuário criar as contas.
+- [ ] Preencher dados que exigem outras contas — aguardando o usuário criar as contas reais; não criar contas fictícias.
 
 - [x] Testes de abertura das telas menos testadas (web compra, mobile social, desktop gestão).
 - [ ] Testar ações dessas telas com login real — Supabase externo sem sessão de teste disponível.
