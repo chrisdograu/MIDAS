@@ -25,7 +25,6 @@ const SHORTCUTS = [
   { key: '⌘K', description: 'Buscar' },
   { key: '⌘P', description: 'Perfil' },
   { key: '⌘B', description: 'Biblioteca' },
-  { key: '⌘C', description: 'Carrinho' },
   { key: '⌘O', description: 'Ofertas' },
 ];
 
@@ -85,11 +84,6 @@ export default function Header() {
       if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
         e.preventDefault();
         if (user) navigate('/biblioteca');
-      }
-      // ⌘C para carrinho
-      if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
-        e.preventDefault();
-        navigate('/carrinho');
       }
       // ⌘O para ofertas
       if ((e.metaKey || e.ctrlKey) && e.key === 'o') {
