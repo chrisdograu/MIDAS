@@ -1,23 +1,23 @@
-import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Flag, X, Upload, File, CheckCircle, Eye, History } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-import { checkRateLimit, RL } from '@/lib/clientRateLimit';
-import SelectSimples from '@/components/SelectSimples';
-import { cn } from '@/lib/utils';
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Flag, X, Upload, File, CheckCircle, Eye, History } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { checkRateLimit, RL } from "@/lib/clientRateLimit";
+import SelectSimples from "@/components/SelectSimples";
+import { cn } from "@/lib/utils";
 
 type TargetType =
-  | 'profile'
-  | 'anuncio'
-  | 'forum_post'
-  | 'comentario_forum'
-  | 'review'
-  | 'comentario_review'
-  | 'mensagem'
-  | 'conversa'
-  | 'grupo';
+  | "profile"
+  | "anuncio"
+  | "forum_post"
+  | "comentario_forum"
+  | "review"
+  | "comentario_review"
+  | "mensagem"
+  | "conversa"
+  | "grupo";
 
 interface ReportDialogProps {
   open: boolean;
@@ -27,40 +27,26 @@ interface ReportDialogProps {
   label?: string;
 }
 
-const REASONS = [
-  'Spam',
-  'Conteúdo ofensivo',
-  'Assédio',
-  'Golpe / fraude',
-  'Conteúdo sexual',
-  'Violência',
-  'Outro',
-];
+const REASONS = ["Spam", "Conteúdo ofensivo", "Assédio", "Golpe / fraude", "Conteúdo sexual", "Violência", "Outro"];
 
 // Categoria da denúncia (item 100). A coluna `denuncias.category` já existe
 // mas nada gravava — todo mundo caía em 'outros'. Aqui a pessoa escolhe, e as
 // duas categorias sensíveis (íntimo/perfil falso) sobem `priority = 'alta'`
 // automaticamente para a fila de moderação.
-const CATEGORIES: { value: string; label: string; priority?: 'alta' }[] = [
-  { value: 'intimo_nao_consentido', label: 'Conteúdo íntimo não consentido', priority: 'alta' },
-  { value: 'perfil_falso', label: 'Perfil falso / se passando por outra pessoa', priority: 'alta' },
-  { value: 'mensagem_indevida', label: 'Mensagem indevida (assédio, spam, golpe)' },
-  { value: 'produto_mal_classificado', label: 'Produto/anúncio classificado incorretamente' },
-  { value: 'outros', label: 'Outros' },
+const CATEGORIES: { value: string; label: string; priority?: "alta" }[] = [
+  { value: "intimo_nao_consentido", label: "Conteúdo íntimo não consentido", priority: "alta" },
+  { value: "perfil_falso", label: "Perfil falso / se passando por outra pessoa", priority: "alta" },
+  { value: "mensagem_indevida", label: "Mensagem indevida (assédio, spam, golpe)" },
+  { value: "produto_mal_classificado", label: "Produto/anúncio classificado incorretamente" },
+  { value: "outros", label: "Outros" },
 ];
 
 // Denúncias com contexto de marketplace/troca ganham campo opcional de evidência
 // (link de print, foto, mensagem). Não trava o envio — só sinaliza que resolve mais rápido.
-const MARKETPLACE_TARGETS: TargetType[] = ['anuncio', 'mensagem', 'conversa'];
+const MARKETPLACE_TARGETS: TargetType[] = ["anuncio", "mensagem", "conversa"];
 
 // GAP-RP02: Tela de confirmação
-function ConfirmationScreen({ 
-  protocol, 
-  onClose 
-}: { 
-  protocol: string; 
-  onClose: () => void;
-}) {
+function ConfirmationScreen({ protocol, onClose }: { protocol: string; onClose: () => void }) {
   return (
     <div className="text-center py-4">
       <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
@@ -70,9 +56,7 @@ function ConfirmationScreen({
       <p className="text-sm text-muted-foreground mt-1">
         Seu protocolo é <strong className="text-primary">{protocol}</strong>
       </p>
-      <p className="text-xs text-muted-foreground mt-2">
-      Nossa equipe vai analisar e tomar as medidas cabíveis.
-      </p>
+      <p className="text-xs text-muted-foreground mt-2">Nossa equipe vai analisar e tomar as medidas cabíveis.</p>
       <button
         onClick={onClose}
         className="mt-4 px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90"
@@ -93,12 +77,12 @@ function ReportHistory({ targetId, targetType }: { targetId: string; targetType:
     if (!user) return;
     (async () => {
       const { data } = await supabase
-        .from('denuncias')
-        .select('id, reason, status, created_at, resolved_at')
-        .eq('target_id', targetId)
-        .eq('target_type', targetType)
-        .eq('reporter_id', user.id)
-        .order('created_at', { ascending: false })
+        .from("denuncias")
+        .select("id, reason, status, created_at, resolved_at")
+        .eq("target_id", targetId)
+        .eq("target_type", targetType)
+        .eq("reporter_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(10);
       setHistory(data || []);
       setLoading(false);
@@ -108,9 +92,13 @@ function ReportHistory({ targetId, targetType }: { targetId: string; targetType:
   if (loading || history.length === 0) return null;
 
   const statusColors: Record<string, string> = {
-    pendente: 'bg-warning/20 text-warning',
-    resolvida: 'bg-success/20 text-success',
-    recusada: 'bg-destructive/20 text-destructive',
+    pending: "bg-warning/20 text-warning",
+    pendente: "bg-warning/20 text-warning",
+    resolved: "bg-success/20 text-success",
+    resolvida: "bg-success/20 text-success",
+    rejected: "bg-destructive/20 text-destructive",
+    dismissed: "bg-destructive/20 text-destructive",
+    recusada: "bg-destructive/20 text-destructive",
   };
 
   return (
@@ -123,11 +111,13 @@ function ReportHistory({ targetId, targetType }: { targetId: string; targetType:
         {history.slice(0, 3).map((h) => (
           <div key={h.id} className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">{h.reason}</span>
-            <span className={cn(
-              "px-1.5 py-0.5 rounded text-[10px] font-medium",
-              statusColors[h.status] || 'bg-muted text-muted-foreground'
-            )}>
-              {h.status || 'pendente'}
+            <span
+              className={cn(
+                "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                statusColors[h.status] || "bg-muted text-muted-foreground",
+              )}
+            >
+              {h.status || "pendente"}
             </span>
           </div>
         ))}
@@ -140,11 +130,11 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
   const { user } = useAuth();
   const [reason, setReason] = useState(REASONS[0]);
   const [category, setCategory] = useState(CATEGORIES[0].value);
-  const [desc, setDesc] = useState('');
-  const [evidence, setEvidence] = useState('');
+  const [desc, setDesc] = useState("");
+  const [evidence, setEvidence] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [step, setStep] = useState<'form' | 'confirm' | 'done'>('form');
-  const [protocol, setProtocol] = useState('');
+  const [step, setStep] = useState<"form" | "confirm" | "done">("form");
+  const [protocol, setProtocol] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const showEvidence = MARKETPLACE_TARGETS.includes(targetType);
@@ -152,34 +142,34 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
   // GAP-RP01: Upload de anexos
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
+    const validFiles = files.filter((f) => f.size <= 5 * 1024 * 1024);
     if (validFiles.length !== files.length) {
-      toast.error('Alguns arquivos excedem 5MB');
+      toast.error("Alguns arquivos excedem 5MB");
     }
-    setAttachments(prev => [...prev, ...validFiles]);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    setAttachments((prev) => [...prev, ...validFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   // GAP-RP03: Preview do relatório
   const getPreview = () => {
-    const categoryLabel = CATEGORIES.find(c => c.value === category)?.label || category;
+    const categoryLabel = CATEGORIES.find((c) => c.value === category)?.label || category;
     return {
       type: label || targetType,
       reason,
       category: categoryLabel,
-      description: desc || 'Nenhum detalhe adicional',
-      evidence: evidence || 'Nenhuma evidência anexada',
+      description: desc || "Nenhum detalhe adicional",
+      evidence: evidence || "Nenhuma evidência anexada",
       attachments: attachments.length,
     };
   };
 
   const submit = async () => {
     if (!user) {
-      toast.error('Entre para denunciar');
+      toast.error("Entre para denunciar");
       return;
     }
     const rl = checkRateLimit(RL.REPORT);
@@ -187,62 +177,71 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
       toast.error(`Aguarde ${rl.retryInSec}s antes de enviar outra denúncia.`);
       return;
     }
-    
+
     setSubmitting(true);
     const evidenceTrim = evidence.trim();
     const descTrim = desc.trim();
-    const fullDescription = [
-      descTrim || null,
-      evidenceTrim ? `[Evidência anexada pelo denunciante]: ${evidenceTrim}` : null,
-    ].filter(Boolean).join('\n\n') || null;
+    const fullDescription =
+      [descTrim || null, evidenceTrim ? `[Evidência anexada pelo denunciante]: ${evidenceTrim}` : null]
+        .filter(Boolean)
+        .join("\n\n") || null;
     const catEntry = CATEGORIES.find((c) => c.value === category);
-    
+
     // GAP-RP01: Upload de anexos
     let attachmentUrls: string[] = [];
+    let uploadFailures = 0;
     for (const file of attachments) {
       try {
-        const path = `reports/${user.id}/${Date.now()}_${file.name}`;
-        const { error } = await supabase.storage.from('report-attachments').upload(path, file);
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `reports/${user.id}/${Date.now()}_${safeName}`;
+        const { error } = await supabase.storage.from("report-attachments").upload(path, file);
         if (!error) {
-          const { data: { publicUrl } } = supabase.storage.from('report-attachments').getPublicUrl(path);
-          attachmentUrls.push(publicUrl);
+          // Bucket privado: guarda o caminho; a moderação gera URL assinada (createSignedUrl)
+          attachmentUrls.push(`report-attachments/${path}`);
+        } else {
+          uploadFailures++;
+          console.error("Falha no upload do anexo:", error);
         }
       } catch {
-        // Ignorar erro de upload
+        uploadFailures++;
       }
     }
+    if (uploadFailures > 0) toast.warning(`${uploadFailures} anexo(s) não puderam ser enviados`);
 
-    const { data, error } = await supabase.from('denuncias').insert({
+    const reportId = crypto.randomUUID();
+    const { error } = await supabase.from("denuncias").insert({
+      id: reportId,
       reporter_id: user.id,
       target_type: targetType,
       target_id: targetId,
       reason,
       description: fullDescription,
       category,
-      priority: catEntry?.priority ?? 'normal',
+      priority: catEntry?.priority ?? "normal",
       attachments: attachmentUrls.length > 0 ? attachmentUrls : null,
-    } as any).select('id').single();
+    } as any);
 
     setSubmitting(false);
     if (error) {
-      toast.error('Erro ao denunciar');
+      console.error("Erro ao denunciar:", error);
+      toast.error(`Erro ao denunciar: ${error.message}`);
       return;
     }
 
     // GAP-RP02: Protocolo
-    const protocolId = data?.id || Date.now().toString(36).toUpperCase();
+    const protocolId = reportId.slice(0, 8).toUpperCase();
     setProtocol(protocolId);
-    setStep('done');
-    toast.success('Denúncia enviada com sucesso!');
+    setStep("done");
+    toast.success("Denúncia enviada com sucesso!");
   };
 
   const handleConfirm = () => {
     // GAP-RP03: Ir para confirmação
-    setStep('confirm');
+    setStep("confirm");
   };
 
   const handleBack = () => {
-    setStep('form');
+    setStep("form");
   };
 
   return (
@@ -264,8 +263,12 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
           >
             <div className="flex items-center justify-between">
               <h3 className="font-bold flex items-center gap-2">
-                <Flag className="h-4 w-4 text-destructive" /> 
-                {step === 'done' ? 'Denúncia enviada' : step === 'confirm' ? 'Confirmar denúncia' : `Denunciar ${label || 'conteúdo'}`}
+                <Flag className="h-4 w-4 text-destructive" />
+                {step === "done"
+                  ? "Denúncia enviada"
+                  : step === "confirm"
+                    ? "Confirmar denúncia"
+                    : `Denunciar ${label || "conteúdo"}`}
               </h3>
               <button onClick={onClose}>
                 <X className="h-5 w-5 text-muted-foreground" />
@@ -273,9 +276,9 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
             </div>
 
             {/* GAP-RP02: Tela de confirmação */}
-            {step === 'done' ? (
+            {step === "done" ? (
               <ConfirmationScreen protocol={protocol} onClose={onClose} />
-            ) : step === 'confirm' ? (
+            ) : step === "confirm" ? (
               // GAP-RP03: Preview do relatório
               <div className="space-y-3">
                 <div className="bg-secondary/30 rounded-lg p-3 space-y-1.5 text-sm">
@@ -305,7 +308,7 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
                     disabled={submitting}
                     className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold disabled:opacity-50"
                   >
-                    {submitting ? 'Enviando...' : 'Confirmar'}
+                    {submitting ? "Enviando..." : "Confirmar"}
                   </button>
                 </div>
               </div>
@@ -313,7 +316,9 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
               // Formulário
               <>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Categoria</label>
+                  <label className="block text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                    Categoria
+                  </label>
                   <SelectSimples
                     value={category}
                     onChange={setCategory}
@@ -321,7 +326,7 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
                     className="w-full"
                     options={CATEGORIES.map((c) => ({
                       value: c.value,
-                      label: `${c.label}${c.priority === 'alta' ? ' · prioridade alta' : ''}`,
+                      label: `${c.label}${c.priority === "alta" ? " · prioridade alta" : ""}`,
                     }))}
                   />
                 </div>
@@ -341,14 +346,15 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
                   placeholder="Detalhes (opcional)..."
                   className="w-full p-3 bg-background border border-border rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
-                
+
                 {showEvidence && (
                   <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
                     <p className="text-xs text-foreground font-semibold">
                       Anexar evidência (opcional, mas ajuda muito)
                     </p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Cole um link de print da conversa, foto do item ou comprovante. Denúncias com evidência são resolvidas mais rápido — protege quem denuncia e quem foi denunciado.
+                      Cole um link de print da conversa, foto do item ou comprovante. Denúncias com evidência são
+                      resolvidas mais rápido — protege quem denuncia e quem foi denunciado.
                     </p>
                     <input
                       value={evidence}
@@ -381,12 +387,18 @@ export function ReportDialog({ open, onClose, targetType, targetId, label }: Rep
                   {attachments.length > 0 && (
                     <div className="mt-2 space-y-1">
                       {attachments.map((file, i) => (
-                        <div key={i} className="flex items-center justify-between text-xs bg-secondary/50 rounded px-2 py-1">
+                        <div
+                          key={i}
+                          className="flex items-center justify-between text-xs bg-secondary/50 rounded px-2 py-1"
+                        >
                           <span className="flex items-center gap-1.5">
                             <File className="h-3 w-3" />
                             {file.name}
                           </span>
-                          <button onClick={() => removeAttachment(i)} className="text-muted-foreground hover:text-destructive">
+                          <button
+                            onClick={() => removeAttachment(i)}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
                             <X className="h-3 w-3" />
                           </button>
                         </div>
