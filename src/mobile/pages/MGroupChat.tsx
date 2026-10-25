@@ -85,25 +85,18 @@ export default function MGroupChat() {
 
   // GAP-1059: "digitando..."
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef(0);
+  const typingExpiryRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const memberMap = new Map(members.map((m) => [m.user_id, m]));
 
-  // GAP-1059: Enviar sinal de "digitando..."
+  // GAP-1059: Enviar sinal de "digitando..." (Realtime broadcast, sem gravar no banco)
   const sendTyping = () => {
-    if (!user || !id) return;
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    supabase
-      .from("groups")
-      .update({ typing_users: [...typingUsers, user.id] })
-      .eq("id", id)
-      .then(() => {});
-    typingTimeoutRef.current = setTimeout(() => {
-      supabase
-        .from("groups")
-        .update({ typing_users: typingUsers.filter((uid) => uid !== user.id) })
-        .eq("id", id)
-        .then(() => {});
-    }, 2000);
+    if (!user || !id || !typingChannelRef.current) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return; // no máx. 1 sinal a cada 2s
+    lastTypingSentRef.current = now;
+    typingChannelRef.current.send({ type: "broadcast", event: "typing", payload: { user_id: user.id } });
   };
 
   useEffect(() => {
@@ -120,23 +113,22 @@ export default function MGroupChat() {
       setLoading(false);
     })();
 
-    // GAP-1059: Escutar "digitando..."
+    // GAP-1059: Escutar "digitando..." via broadcast; cada sinal expira em 3s
+    const expiry = typingExpiryRef.current;
     const typingChannel = supabase
-      .channel(`typing-${id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "groups",
-          filter: `id=eq.${id}`,
-        },
-        (payload) => {
-          const typing = (payload.new as any)?.typing_users || [];
-          setTypingUsers(typing.filter((uid: string) => uid !== user.id));
-        },
-      )
+      .channel(`typing-${id}`, { config: { broadcast: { self: false } } })
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        const uid = payload?.user_id as string | undefined;
+        if (!uid || uid === user.id) return;
+        setTypingUsers((prev) => (prev.includes(uid) ? prev : [...prev, uid]));
+        if (expiry[uid]) clearTimeout(expiry[uid]);
+        expiry[uid] = setTimeout(() => {
+          setTypingUsers((prev) => prev.filter((x) => x !== uid));
+          delete expiry[uid];
+        }, 3000);
+      })
       .subscribe();
+    typingChannelRef.current = typingChannel;
 
     const ch = supabase
       .channel(`mg-${id}`)
@@ -149,7 +141,9 @@ export default function MGroupChat() {
     return () => {
       supabase.removeChannel(ch);
       supabase.removeChannel(typingChannel);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingChannelRef.current = null;
+      Object.values(expiry).forEach(clearTimeout);
+      typingExpiryRef.current = {};
     };
   }, [user?.id, id]);
 
@@ -189,14 +183,6 @@ export default function MGroupChat() {
 
   const send = async () => {
     if (!text.trim() || !user || !canSend || sending) return;
-    // Parar de digitar
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    supabase
-      .from("groups")
-      .update({ typing_users: typingUsers.filter((uid) => uid !== user.id) })
-      .eq("id", id)
-      .then(() => {});
-
     setSending(true);
     const content = text.trim();
     setText("");
