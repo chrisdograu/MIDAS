@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, BookmarkCheck, Loader2, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-import EstadoVazio from '@/components/EstadoVazio';
-import { timeAgo } from '@/lib/format';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, BookmarkCheck, Loader2, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import EstadoVazio from "@/components/EstadoVazio";
+import { timeAgo } from "@/lib/format";
 
 interface SavedPost {
   id: string;
@@ -32,11 +32,15 @@ export default function MSalvos() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    if (!user) { setLoading(false); return; }
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase
-      .from('saved_posts')
-      .select(`
+      .from("saved_posts")
+      .select(
+        `
         id,
         post_id,
         created_at,
@@ -49,12 +53,13 @@ export default function MSalvos() {
           profiles:user_id(display_name),
           produtos:product_id(title)
         )
-      `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-    
+      `,
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
     if (error) {
-      console.error('Erro ao carregar salvos:', error);
+      console.error("Erro ao carregar salvos:", error);
       setSavedPosts([]);
     } else {
       setSavedPosts((data || []) as any);
@@ -68,24 +73,25 @@ export default function MSalvos() {
 
   const removeSaved = async (postId: string) => {
     if (!user) return;
-    const { error } = await supabase
-      .from('saved_posts')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('post_id', postId);
+    const { error } = await supabase.from("saved_posts").delete().eq("user_id", user.id).eq("post_id", postId);
     if (error) {
-      toast.error('Erro ao remover dos salvos');
+      toast.error("Erro ao remover dos salvos");
       return;
     }
-    setSavedPosts(prev => prev.filter(sp => sp.post_id !== postId));
-    toast.success('Post removido dos salvos');
+    setSavedPosts((prev) => prev.filter((sp) => sp.post_id !== postId));
+    toast.success("Post removido dos salvos");
   };
 
   if (!user) {
     return (
       <div className="p-6 text-center">
         <p className="text-sm text-muted-foreground mb-4">Entre para ver seus posts salvos.</p>
-        <Link to="/m/auth" className="inline-block px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">Entrar</Link>
+        <Link
+          to="/m/auth"
+          className="inline-block px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold"
+        >
+          Entrar
+        </Link>
       </div>
     );
   }
@@ -103,27 +109,27 @@ export default function MSalvos() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
       ) : savedPosts.length === 0 ? (
         <EstadoVazio
           icone={BookmarkCheck}
           titulo="Nenhum post salvo"
           descricao="Salve posts do fórum para vê-los aqui."
-          acao={{ label: 'Explorar fórum', to: '/m/forum' }}
+          acao={{ label: "Explorar fórum", to: "/m/forum" }}
         />
       ) : (
         <div className="space-y-2">
           {savedPosts.map((sp) => {
             const post = sp.post;
-            const productTitle = (post as any)?.produtos?.title || 'Jogo';
-            const authorName = (post as any)?.profiles?.display_name || 'Usuário';
-            
+            if (!post) return null;
+            const productTitle = (post as any)?.produtos?.title || "Jogo";
+            const authorName = (post as any)?.profiles?.display_name || "Usuário";
+
             return (
               <div key={sp.id} className="flex items-start gap-3 p-3 bg-card border border-border rounded-xl">
-                <Link
-                  to={"/m/forum/post/" + post.id}
-                  className="flex-1 min-w-0"
-                >
+                <Link to={"/m/forum/post/" + post.id} className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-semibold text-foreground">{authorName}</span>
                     <span>em</span>
