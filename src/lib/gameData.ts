@@ -40,6 +40,7 @@ export function mapProdutoToGame(row: {
   tags: string[] | null;
   stock?: number;
   featured?: boolean | null;
+  product_type?: string | null;
 }): Game {
   return {
     id: row.id,
@@ -58,6 +59,7 @@ export function mapProdutoToGame(row: {
     tags: row.tags || [],
     stock: row.stock ?? 100,
     featured: !!row.featured,
+    type: row.product_type ?? undefined,
   };
 }
 

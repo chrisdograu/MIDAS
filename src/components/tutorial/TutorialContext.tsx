@@ -86,9 +86,9 @@ export const TutorialProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!user) { setSeen(new Set()); setFeaturesSeen(new Set()); setIsLoading(false); return; }
     (async () => {
-      const { data } = await supabase.from('tutorials_seen').select('tutorial_key, feature_key').eq('user_id', user.id);
+      const { data } = await supabase.from('tutorials_seen').select('tutorial_key').eq('user_id', user.id);
       const tutorialKeys = new Set((data ?? []).map(d => d.tutorial_key as TutorialKey));
-      const featureKeys = new Set((data ?? []).map(d => d.feature_key).filter(Boolean));
+      const featureKeys = new Set(Object.entries(FEATURE_MAP).filter(([, key]) => tutorialKeys.has(key)).map(([feature]) => feature));
       setSeen(tutorialKeys);
       setFeaturesSeen(featureKeys);
       setIsLoading(false);

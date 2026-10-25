@@ -194,8 +194,6 @@ export default function UserBadges({
     return Array.from(cats);
   }, [badges]);
 
-  if (!badges.length) return null;
-
   // GAP-UB03: Ordenar por raridade
   const sortedBadges = useMemo(() => {
     const rarityOrder = { legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 };
@@ -206,6 +204,8 @@ export default function UserBadges({
              (rarityOrder[rarityB as keyof typeof rarityOrder] || 0);
     });
   }, [badges]);
+
+  if (!badges.length) return null;
 
   return (
     <>

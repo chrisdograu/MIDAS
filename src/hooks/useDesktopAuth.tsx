@@ -102,8 +102,7 @@ export function DesktopAuthProvider({ children }: { children: ReactNode }) {
       
       // GAP-DA04: Registrar acesso
       try {
-        await supabase.rpc('record_admin_login' as any, {
-          _user_id: user.id,
+        await supabase.rpc('record_login' as any, {
           _user_agent: navigator.userAgent,
         });
       } catch {

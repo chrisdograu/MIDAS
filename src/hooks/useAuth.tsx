@@ -10,7 +10,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  profile: { display_name: string | null; avatar_url: string | null; banned_until: string | null; email_confirmed: boolean | null } | null;
+  profile: { display_name: string | null; avatar_url: string | null; banned_until: string | null } | null;
   isEmailVerified: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -29,7 +29,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<{ display_name: string | null; avatar_url: string | null; banned_until: string | null; email_confirmed: boolean | null } | null>(null);
+  const [profile, setProfile] = useState<{ display_name: string | null; avatar_url: string | null; banned_until: string | null } | null>(null);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const loadedProfileFor = useRef<string | null>(null);
   const lastUserId = useRef<string | null>(null);
@@ -71,6 +71,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const applySession = useCallback((session: Session | null) => {
     const nextUserId = session?.user?.id ?? null;
     setSession(session);
+    setIsEmailVerified(Boolean(session?.user?.email_confirmed_at));
+    setUser(session?.user ?? null);
     
     // GAP-UA02: Persistir sessão
     saveSession(session);
@@ -81,7 +83,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       if (session?.user) {
         void fetchProfile(session.user.id);
         // GAP-UA03: Verificar email
-        setIsEmailVerified(session.user.email_confirmed_at !== null);
       } else {
         loadedProfileFor.current = null;
         setProfile(null);
@@ -152,13 +153,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     loadedProfileFor.current = userId;
     const { data } = await supabase
       .from('profiles')
-      .select('display_name, avatar_url, banned_until, email_confirmed')
+      .select('display_name, avatar_url, banned_until')
       .eq('id', userId)
       .single();
     if (data) {
       setProfile(data);
-      // GAP-UA03: Atualizar status de email verificado do profile
-      setIsEmailVerified(!!data.email_confirmed);
     }
     // Rodada 22: login reativa conta pausada e registra o acesso no histórico.
     void (async () => {

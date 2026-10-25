@@ -73,7 +73,8 @@ export default function MNewAd() {
         accepts_counteroffer: ad.accepts_counteroffer || false,
       });
       setPlataformas(ad.plataformas || []);
-      setExpiresInDays(ad.expires_in_days || 60);
+      const remainingDays = ad.expires_at ? Math.ceil((Date.parse(ad.expires_at) - Date.now()) / 86400000) : 60;
+      setExpiresInDays(remainingDays <= 30 ? 30 : remainingDays <= 60 ? 60 : 90);
       setGameId((ad as any).forum_game_ids?.[0] || null);
       setGameTitle((ad as any).game_title || null);
       
@@ -172,7 +173,7 @@ export default function MNewAd() {
         desired_item: adType === 'troca' ? form.desired_item.trim() || null : null,
         plataformas: plataformas.length ? plataformas : null,
         accepts_counteroffer: form.accepts_counteroffer,
-        expires_in_days: expiresInDays,
+        expires_at: new Date(Date.now() + expiresInDays * 86400000).toISOString(),
         forum_game_ids: gameId ? [gameId] : [],
         game_title: gameTitle,
         updated_at: new Date().toISOString(),
@@ -225,7 +226,6 @@ export default function MNewAd() {
           plataformas: plataformas.length ? plataformas : null,
           accepts_counteroffer: form.accepts_counteroffer,
           expires_at: expiresAt,
-          expires_in_days: expiresInDays,
           image_hash: files.length ? await averageHash(files[0]) : null,
           forum_game_ids: gameId ? [gameId] : [],
           game_title: gameTitle,
@@ -241,9 +241,12 @@ export default function MNewAd() {
         const ext = f.name.split('.').pop() || 'jpg';
         const path = `${user.id}/${adId}/${Date.now()}-${i}.${ext}`;
         const { error: upErr } = await supabase.storage.from('ad-images').upload(path, f);
-        if (!upErr) {
-          const { data: pub } = supabase.storage.from('ad-images').getPublicUrl(path);
-          await supabase.from('fotos_anuncio').insert({ anuncio_id: adId, image_url: pub.publicUrl, position: i + existingPhotos.length });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from('ad-images').getPublicUrl(path);
+        const { error: photoError } = await supabase.from('fotos_anuncio').insert({ anuncio_id: adId, image_url: pub.publicUrl, position: i + existingPhotos.length });
+        if (photoError) {
+          await supabase.storage.from('ad-images').remove([path]);
+          throw photoError;
         }
       }
 
