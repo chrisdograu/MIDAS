@@ -36,6 +36,7 @@ import { ProfileCosmeticOverlay } from "@/components/cosmetics/ProfileCosmeticOv
 import { CosmeticUnlocksCenter } from "@/components/cosmetics/CosmeticUnlocksCenter";
 import { formatCurrency, formatMonthYear } from "@/lib/format";
 import { dbWrite } from "@/lib/dbWrite";
+import { ReportDialog } from "@/components/ReportDialog";
 
 interface Profile {
   id: string;
@@ -124,7 +125,6 @@ export default function MProfile() {
     setLibPage(1);
   }, [libFilter]);
   const [reportOpen, setReportOpen] = useState(false);
-  const [reportText, setReportText] = useState("");
   const [customizeOpen, setCustomizeOpen] = useState(false);
   useEffect(() => {
     if (isOwn && searchParams.get("tab") === "customizacao") setCustomizeOpen(true);
@@ -367,20 +367,6 @@ export default function MProfile() {
     else if (row.status === "pending_guardian") toast.success("Aguardando aprovação do responsável");
     navigate(`/m/chat/${row.id}`);
   };
-  const submitReport = async () => {
-    if (!user || !targetId || !reportText.trim()) return;
-    const { error } = await supabase
-      .from("denuncias")
-      .insert({ reporter_id: user.id, target_type: "profile", target_id: targetId, reason: reportText.trim() });
-    if (error) {
-      toast.error("Erro ao enviar denúncia");
-      return;
-    }
-    toast.success("Denúncia enviada");
-    setReportOpen(false);
-    setReportText("");
-  };
-
   if (!user && isOwn)
     return (
       <div className="px-6 py-12 text-center">
@@ -880,35 +866,13 @@ export default function MProfile() {
         </button>
       )}
 
-      {reportOpen && (
-        <div className="fixed inset-0 z-50 overlay-scrim flex items-end" onClick={() => setReportOpen(false)}>
-          <div className="w-full bg-card rounded-t-2xl p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold">Denunciar usuário</h3>
-            <textarea
-              value={reportText}
-              onChange={(e) => setReportText(e.target.value)}
-              maxLength={500}
-              rows={4}
-              placeholder="Motivo..."
-              className="w-full p-3 bg-background border border-border rounded-lg text-sm resize-none"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => setReportOpen(false)}
-                className="flex-1 py-2.5 rounded-lg bg-secondary text-sm font-semibold"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={submitReport}
-                className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold"
-              >
-                Enviar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReportDialog
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        targetType="profile"
+        targetId={targetId!}
+        label="usuário"
+      />
 
       {followersOpen && (
         <div className="fixed inset-0 z-50 overlay-scrim flex items-end" onClick={() => setFollowersOpen(null)}>
