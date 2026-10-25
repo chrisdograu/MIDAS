@@ -1,34 +1,36 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Search } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, Home, Search } from "lucide-react";
 
 export default function MNotFound() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [autoRedirect, setAutoRedirect] = useState(true); // cancela se a pessoa começar a usar a busca
 
   // Auto-recover: se a rota está sob /m mas não bateu em nada, manda pra home mobile depois de 1.5s
   useEffect(() => {
-    if (location.pathname.startsWith('/m')) {
-      const t = setTimeout(() => navigate('/m', { replace: true }), 1500);
+    if (autoRedirect && location.pathname.startsWith("/m")) {
+      const t = setTimeout(() => navigate("/m", { replace: true }), 6000);
       return () => clearTimeout(t);
     }
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, autoRedirect]);
 
   // GAP-1097: Busca na página 404
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/busca?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/m/marketplace?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
   return (
     <div className="px-6 py-12 flex flex-col items-center text-center space-y-5 min-h-[70vh] justify-center">
       <div className="text-6xl">🎮</div>
-      <h1 className="font-display text-3xl font-bold gradient-text">Redirecionando…</h1>
+      <h1 className="font-display text-3xl font-bold gradient-text">Página não encontrada</h1>
       <p className="text-sm text-muted-foreground max-w-xs">
-        Não encontramos <code className="text-foreground">{location.pathname}</code>. Voltando ao início mobile.
+        Não encontramos <code className="text-foreground">{location.pathname}</code>.{" "}
+        {autoRedirect ? "Voltando ao início em instantes." : "Use a busca ou volte ao início."}
       </p>
 
       {/* GAP-1097: Campo de busca */}
@@ -36,8 +38,12 @@ export default function MNotFound() {
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar no MIDIAS..."
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setAutoRedirect(false);
+          }}
+          onFocus={() => setAutoRedirect(false)}
+          placeholder="Buscar anúncios no MIDIAS..."
           className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
