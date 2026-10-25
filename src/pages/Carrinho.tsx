@@ -25,9 +25,6 @@ export default function Carrinho() {
   const [stockIssues, setStockIssues] = useState<{ id: string; title: string; available: number; requested: number }[]>([]);
   const [checkingStock, setCheckingStock] = useState(false);
   
-  // GAP-118: Persistência cross-device (salvar carrinho no banco)
-  const [savingToCloud, setSavingToCloud] = useState(false);
-
   // GAP-115: Verificar estoque ao carregar
   useEffect(() => {
     if (items.length === 0) return;
@@ -63,55 +60,6 @@ export default function Carrinho() {
     setStockIssues(issues);
     setCheckingStock(false);
   };
-
-  // GAP-118: Salvar carrinho no banco (cross-device)
-  useEffect(() => {
-    if (!user || items.length === 0) return;
-    
-    const saveCart = async () => {
-      try {
-        const cartData = items.map(item => ({
-          product_id: item.game.id,
-          quantity: item.quantity,
-          bundle_id: item.bundleId || null,
-        }));
-        
-        await supabase
-          .from('carrinho_salvo' as any)
-          .upsert({
-            user_id: user.id,
-            items: cartData,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' });
-      } catch (e) {
-        // Silencioso — fallback para localStorage
-      }
-    };
-    
-    const debounce = setTimeout(saveCart, 1000);
-    return () => clearTimeout(debounce);
-  }, [items, user]);
-
-  // GAP-118: Restaurar carrinho do banco ao logar
-  useEffect(() => {
-    if (!user) return;
-    
-    const loadCart = async () => {
-      const { data } = await supabase
-        .from('carrinho_salvo' as any)
-        .select('items')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      if (data?.items && data.items.length > 0 && items.length === 0) {
-        // Em produção, isso seria integrado com o useCart
-        // Aqui apenas notificamos o usuário
-        toast.info('Carrinho restaurado da nuvem!');
-      }
-    };
-    
-    loadCart();
-  }, [user]);
 
   // GAP-119: Mover para favoritos
   const moveToFavorites = async (gameId: string, gameTitle: string) => {

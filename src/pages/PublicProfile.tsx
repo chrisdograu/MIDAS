@@ -205,8 +205,9 @@ export default function PublicProfile() {
       const { data } = await supabase
         .from('privacy_grants' as any)
         .select('id')
-        .eq('user_id', userId)
-        .eq('granted_user_id', user.id)
+        .eq('owner_id', userId)
+        .eq('viewer_id', user.id)
+        .limit(1)
         .maybeSingle();
       return !!data;
     },
