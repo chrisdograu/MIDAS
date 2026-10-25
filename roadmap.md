@@ -1,6 +1,6 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
-- [ ] Terminar a verificação do roteiro com as três contas reais: ler novamente compra e biblioteca; concluir contato, mensagens, certificado e denúncia; registrar falhas sem prometer 100%.
+- [x] Terminar a verificação do roteiro com as três contas reais; compra, biblioteca, curtida, aceite de contato e certificado confirmados; etapas bloqueadas e limites registrados em docs/VERIFICACAO_ROTEIRO.md.
 - [ ] Preencher torneios e biblioteca social com conteúdo de demonstração identificado, sem novas contas ou atividade inventada; conferir dados e páginas.
 - [ ] Corrigir a consulta inválida de certificados na página móvel do vendedor e testar a abertura.
 - [x] Concluir reordenação e paginação da equipe, limpeza de fotos ao salvar/cancelar/excluir e permissão de limpeza por gestores; testar regressões e páginas públicas.
