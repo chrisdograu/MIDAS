@@ -37,32 +37,50 @@ export default function MSalvos() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase
+    const { data: saved, error } = await supabase
       .from("saved_posts")
-      .select(
-        `
-        id,
-        post_id,
-        created_at,
-        post:forum_posts(
-          id,
-          content,
-          created_at,
-          user_id,
-          product_id,
-          profiles:user_id(display_name),
-          produtos:product_id(title)
-        )
-      `,
-      )
+      .select("id, post_id, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-
     if (error) {
       console.error("Erro ao carregar salvos:", error);
       setSavedPosts([]);
     } else {
-      setSavedPosts((data || []) as any);
+      const postIds = (saved || []).map((s: any) => s.post_id);
+      const { data: posts } = postIds.length
+        ? await supabase.from("forum_posts").select("id, content, created_at, user_id, product_id").in("id", postIds)
+        : { data: [] as any[] };
+      const userIds = [...new Set((posts || []).map((p: any) => p.user_id))];
+      const prodIds = [...new Set((posts || []).map((p: any) => p.product_id).filter(Boolean))];
+      const [{ data: profs }, { data: prods }] = await Promise.all([
+        userIds.length
+          ? supabase
+              .from("profiles")
+              .select("id, display_name")
+              .in("id", userIds as string[])
+          : Promise.resolve({ data: [] as any[] }),
+        prodIds.length
+          ? supabase
+              .from("produtos")
+              .select("id, title")
+              .in("id", prodIds as string[])
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const pMap = new Map((posts || []).map((p: any) => [p.id, p]));
+      const uMap = new Map((profs || []).map((p: any) => [p.id, p]));
+      const gMap = new Map((prods || []).map((p: any) => [p.id, p]));
+      setSavedPosts(
+        (saved || [])
+          .map((s: any) => {
+            const p: any = pMap.get(s.post_id);
+            if (!p) return null; // post apagado ou sem permissão
+            return {
+              ...s,
+              post: { ...p, profiles: uMap.get(p.user_id) || null, produtos: gMap.get(p.product_id) || null },
+            };
+          })
+          .filter(Boolean) as any,
+      );
     }
     setLoading(false);
   };
