@@ -178,6 +178,7 @@ export type Database = {
           desired_item: string | null
           duplicate_of: string | null
           expires_at: string | null
+          expires_in_days: number | null
           flagged_duplicate: boolean
           forum_game_ids: string[]
           game_title: string | null
@@ -203,6 +204,7 @@ export type Database = {
           desired_item?: string | null
           duplicate_of?: string | null
           expires_at?: string | null
+          expires_in_days?: number | null
           flagged_duplicate?: boolean
           forum_game_ids?: string[]
           game_title?: string | null
@@ -228,6 +230,7 @@ export type Database = {
           desired_item?: string | null
           duplicate_of?: string | null
           expires_at?: string | null
+          expires_in_days?: number | null
           flagged_duplicate?: boolean
           forum_game_ids?: string[]
           game_title?: string | null
@@ -285,6 +288,7 @@ export type Database = {
           achievement_lock: string | null
           comment: string | null
           created_at: string
+          edited_at: string | null
           id: string
           is_approved: boolean
           is_spoiler: boolean
@@ -298,6 +302,7 @@ export type Database = {
           achievement_lock?: string | null
           comment?: string | null
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_approved?: boolean
           is_spoiler?: boolean
@@ -311,6 +316,7 @@ export type Database = {
           achievement_lock?: string | null
           comment?: string | null
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_approved?: boolean
           is_spoiler?: boolean
@@ -1434,6 +1440,7 @@ export type Database = {
       }
       denuncias: {
         Row: {
+          attachments: Json | null
           category: string
           cautionary_action: string | null
           created_at: string
@@ -1451,6 +1458,7 @@ export type Database = {
           target_type: string
         }
         Insert: {
+          attachments?: Json | null
           category?: string
           cautionary_action?: string | null
           created_at?: string
@@ -1468,6 +1476,7 @@ export type Database = {
           target_type: string
         }
         Update: {
+          attachments?: Json | null
           category?: string
           cautionary_action?: string | null
           created_at?: string
@@ -2066,6 +2075,7 @@ export type Database = {
           category_slug: string | null
           content: string
           created_at: string | null
+          edited_at: string | null
           id: string
           is_locked: boolean
           is_pinned: boolean
@@ -2084,6 +2094,7 @@ export type Database = {
           category_slug?: string | null
           content: string
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           is_locked?: boolean
           is_pinned?: boolean
@@ -2102,6 +2113,7 @@ export type Database = {
           category_slug?: string | null
           content?: string
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           is_locked?: boolean
           is_pinned?: boolean
@@ -2157,6 +2169,7 @@ export type Database = {
         Row: {
           content: string
           created_at: string | null
+          edited_at: string | null
           id: string
           is_solution: boolean
           likes_count: number
@@ -2166,6 +2179,7 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           is_solution?: boolean
           likes_count?: number
@@ -2175,6 +2189,7 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           is_solution?: boolean
           likes_count?: number
@@ -2981,6 +2996,7 @@ export type Database = {
       }
       group_members: {
         Row: {
+          archived_at: string | null
           group_id: string
           id: string
           joined_at: string
@@ -2988,6 +3004,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           group_id: string
           id?: string
           joined_at?: string
@@ -2995,6 +3012,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           group_id?: string
           id?: string
           joined_at?: string
@@ -3502,6 +3520,7 @@ export type Database = {
           anuncio_id: string | null
           content: string
           created_at: string
+          edited_at: string | null
           flagged_auto: boolean
           group_id: string | null
           id: string
@@ -3520,6 +3539,7 @@ export type Database = {
           anuncio_id?: string | null
           content: string
           created_at?: string
+          edited_at?: string | null
           flagged_auto?: boolean
           group_id?: string | null
           id?: string
@@ -3538,6 +3558,7 @@ export type Database = {
           anuncio_id?: string | null
           content?: string
           created_at?: string
+          edited_at?: string | null
           flagged_auto?: boolean
           group_id?: string | null
           id?: string
@@ -5196,6 +5217,35 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_posts: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -8213,7 +8263,10 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       start_conversation:
-        | { Args: { _channel?: string; _other: string }; Returns: Json }
+        | {
+            Args: { _anuncio_id?: string; _channel?: string; _other: string }
+            Returns: Json
+          }
         | {
             Args: {
               p_anuncio_id?: string
