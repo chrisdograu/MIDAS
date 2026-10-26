@@ -46,14 +46,14 @@ export default function Cupons() {
     let usedByMap = new Map<string, string[]>();
     if (cupomIds.length > 0) {
       const { data: usages } = await supabase
-        .from('cupom_usages')
-        .select('cupom_id, user_id')
-        .in('cupom_id', cupomIds);
+        .from('cupon_usos')
+        .select('coupon_id, user_id')
+        .in('coupon_id', cupomIds);
       
       usages?.forEach(u => {
-        const list = usedByMap.get(u.cupom_id) || [];
+        const list = usedByMap.get(u.coupon_id) || [];
         list.push(u.user_id);
-        usedByMap.set(u.cupom_id, list);
+        usedByMap.set(u.coupon_id, list);
       });
     }
     
