@@ -210,7 +210,7 @@ export default function MChatThread() {
   };
 
   const sendText = async () => {
-    if (!text.trim() || !user || !other || sending) return;
+    if (!text.trim() || !user || !conv || sending) return;
     setSending(true);
     const content = text.trim().slice(0, 1000);
     setText('');
@@ -221,7 +221,7 @@ export default function MChatThread() {
       return;
     }
     const { data: inserted, error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id, content,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1, content,
       anuncio_id: conv?.anuncio_id || null, message_type: 'text',
       reply_to_id: replyTo?.id || null,
     } as any).select('id, sender_id, receiver_id, content, created_at, is_read, message_type, payload, image_url, reply_to_id, edited_at').single();
@@ -248,7 +248,7 @@ export default function MChatThread() {
   };
 
   const sendImage = async (raw: File) => {
-    if (!user || !other) return;
+    if (!user || !conv) return;
     if (raw.size > 5 * 1024 * 1024) { toast.error('Imagem deve ter no máximo 5MB'); return; }
     setSending(true);
     const file = await stripImageExif(raw);
@@ -257,7 +257,7 @@ export default function MChatThread() {
     if (upErr) { toast.error('Erro ao enviar imagem'); setSending(false); return; }
     const { data: pub } = supabase.storage.from('chat-images').getPublicUrl(path);
     const { error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id, content: '[imagem]', image_url: pub.publicUrl,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1, content: '[imagem]', image_url: pub.publicUrl,
       anuncio_id: conv?.anuncio_id || null, message_type: 'image',
     });
     if (error) { toast.error(`Erro ao enviar imagem: ${error.message}`); setSending(false); return; }
@@ -266,11 +266,11 @@ export default function MChatThread() {
   };
 
   const sendGif = async (url: string) => {
-    if (!user || !other) return;
+    if (!user || !conv) return;
     setGifOpen(false);
     setSending(true);
     const { error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id, content: '[gif]', image_url: url,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1, content: '[gif]', image_url: url,
       anuncio_id: conv?.anuncio_id || null, message_type: 'image',
     });
     if (error) { toast.error(`Erro ao enviar GIF: ${error.message}`); setSending(false); return; }
@@ -279,7 +279,7 @@ export default function MChatThread() {
   };
 
   const sendOffer = async () => {
-    if (!user || !other) return;
+    if (!user || !conv) return;
     const payload = offerType === 'money'
       ? { type: 'money', amount: Number(offerAmount), status: 'pending' }
       : { type: 'item', desc: offerDesc.trim().slice(0, 200), status: 'pending' };
@@ -287,7 +287,7 @@ export default function MChatThread() {
     if (offerType === 'item' && !offerDesc.trim()) { toast.error('Descreva o item'); return; }
     setSending(true);
     const { error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1,
       content: offerType === 'money' ? `Contraoferta: R$ ${offerAmount}` : `Contraoferta de troca: ${offerDesc}`,
       anuncio_id: conv?.anuncio_id || null, message_type: 'counteroffer', payload,
     });
