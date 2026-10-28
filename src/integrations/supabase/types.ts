@@ -8262,23 +8262,10 @@ export type Database = {
       should_notify: { Args: { _pref: string; _uid: string }; Returns: boolean }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
-      start_conversation:
-        | {
-            Args: { _anuncio_id?: string; _channel?: string; _other: string }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_anuncio_id?: string
-              p_channel?: string
-              p_target: string
-              p_torneio_id?: string
-            }
-            Returns: {
-              conversation_id: string
-              status: string
-            }[]
-          }
+      start_conversation: {
+        Args: { _anuncio_id?: string; _channel?: string; _other: string }
+        Returns: Json
+      }
       stats_blocked: {
         Args: { _owner: string; _tipo: string }
         Returns: boolean

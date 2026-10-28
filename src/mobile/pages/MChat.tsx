@@ -230,6 +230,7 @@ export default function MChat() {
   }
 
   const pending = conversas.filter(c => c.status === 'pending' && c.participant_2 === user.id);
+  const sentPending = conversas.filter(c => c.status === 'pending' && c.participant_1 === user.id);
   const active = conversas.filter(c => c.status === 'accepted');
   const tournamentConvs = active.filter(c => c.tournament_id);
   const sellerCh = (c: Conv) => c.channel === 'seller' || (!c.channel && !!c.anuncio_id);
@@ -329,6 +330,23 @@ export default function MChat() {
                     <button onClick={() => handleAccept(c.id)} className="w-11 h-11 focus-ring rounded-full bg-success/20 text-success flex items-center justify-center"><Check className="h-4 w-4" /></button>
                     <button onClick={() => handleReject(c.id)} className="w-11 h-11 focus-ring rounded-full bg-destructive/20 text-destructive flex items-center justify-center"><X className="h-4 w-4" /></button>
                   </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {tab === 'amigos' && sentPending.length > 0 && (
+            <section>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Aguardando resposta ({sentPending.length})</h2>
+              <div className="space-y-2">
+                {sentPending.map(c => (
+                  <Link key={c.id} to={`/m/chat/${c.id}`} className="glass rounded-xl p-3 flex items-start gap-3 opacity-80">
+                    <Avatar name={c.other_name} url={c.other_avatar} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{c.other_name}</p>
+                      <p className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground">Pedido enviado · aguardando aceite</p>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </section>

@@ -210,7 +210,7 @@ export default function MChatThread() {
   };
 
   const sendText = async () => {
-    if (!text.trim() || !user || !other || sending) return;
+    if (!text.trim() || !user || !conv || sending) return;
     setSending(true);
     const content = text.trim().slice(0, 1000);
     setText('');
@@ -221,7 +221,7 @@ export default function MChatThread() {
       return;
     }
     const { data: inserted, error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id, content,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1, content,
       anuncio_id: conv?.anuncio_id || null, message_type: 'text',
       reply_to_id: replyTo?.id || null,
     } as any).select('id, sender_id, receiver_id, content, created_at, is_read, message_type, payload, image_url, reply_to_id, edited_at').single();
@@ -248,7 +248,7 @@ export default function MChatThread() {
   };
 
   const sendImage = async (raw: File) => {
-    if (!user || !other) return;
+    if (!user || !conv) return;
     if (raw.size > 5 * 1024 * 1024) { toast.error('Imagem deve ter no máximo 5MB'); return; }
     setSending(true);
     const file = await stripImageExif(raw);
@@ -257,7 +257,7 @@ export default function MChatThread() {
     if (upErr) { toast.error('Erro ao enviar imagem'); setSending(false); return; }
     const { data: pub } = supabase.storage.from('chat-images').getPublicUrl(path);
     const { error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id, content: '[imagem]', image_url: pub.publicUrl,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1, content: '[imagem]', image_url: pub.publicUrl,
       anuncio_id: conv?.anuncio_id || null, message_type: 'image',
     });
     if (error) { toast.error(`Erro ao enviar imagem: ${error.message}`); setSending(false); return; }
@@ -266,11 +266,11 @@ export default function MChatThread() {
   };
 
   const sendGif = async (url: string) => {
-    if (!user || !other) return;
+    if (!user || !conv) return;
     setGifOpen(false);
     setSending(true);
     const { error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id, content: '[gif]', image_url: url,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1, content: '[gif]', image_url: url,
       anuncio_id: conv?.anuncio_id || null, message_type: 'image',
     });
     if (error) { toast.error(`Erro ao enviar GIF: ${error.message}`); setSending(false); return; }
@@ -279,7 +279,7 @@ export default function MChatThread() {
   };
 
   const sendOffer = async () => {
-    if (!user || !other) return;
+    if (!user || !conv) return;
     const payload = offerType === 'money'
       ? { type: 'money', amount: Number(offerAmount), status: 'pending' }
       : { type: 'item', desc: offerDesc.trim().slice(0, 200), status: 'pending' };
@@ -287,7 +287,7 @@ export default function MChatThread() {
     if (offerType === 'item' && !offerDesc.trim()) { toast.error('Descreva o item'); return; }
     setSending(true);
     const { error } = await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: other.id,
+      sender_id: user.id, receiver_id: conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1,
       content: offerType === 'money' ? `Contraoferta: R$ ${offerAmount}` : `Contraoferta de troca: ${offerDesc}`,
       anuncio_id: conv?.anuncio_id || null, message_type: 'counteroffer', payload,
     });
@@ -317,7 +317,7 @@ export default function MChatThread() {
   };
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!conv || !other) return <div className="p-6 text-center text-muted-foreground">Conversa não encontrada.</div>;
+  if (!conv) return <div className="p-6 text-center text-muted-foreground">Conversa não encontrada.</div>;
 
   const canCounteroffer = ad && (ad.accepts_counteroffer || ad.ad_type === 'troca');
   const threadHeight = 'calc(100dvh - 57px - 68px - env(safe-area-inset-bottom))';
@@ -328,10 +328,10 @@ export default function MChatThread() {
         <button onClick={() => navigate('/m/chat')} className="p-1"><ArrowLeft className="h-5 w-5" /></button>
         <Link to={`/m/chat/${conversationId}/info`} className="flex items-center gap-2 flex-1 min-w-0">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent overflow-hidden flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
-            {other.avatar_url ? <img src={other.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" /> : other.display_name?.[0]?.toUpperCase() || <User className="h-4 w-4" />}
+            {other?.avatar_url ? <img src={other.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" /> : other?.display_name?.[0]?.toUpperCase() || <User className="h-4 w-4" />}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">{other.display_name || 'Usuário'}</p>
+            <p className="text-sm font-semibold truncate">{other?.display_name || 'Usuário'}</p>
             {ad && <p className="text-[10px] text-muted-foreground truncate">📦 {ad.title}</p>}
           </div>
         </Link>
