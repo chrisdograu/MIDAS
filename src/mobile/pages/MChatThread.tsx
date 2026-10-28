@@ -317,7 +317,7 @@ export default function MChatThread() {
   };
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!conv || !other) return <div className="p-6 text-center text-muted-foreground">Conversa não encontrada.</div>;
+  if (!conv) return <div className="p-6 text-center text-muted-foreground">Conversa não encontrada.</div>;
 
   const canCounteroffer = ad && (ad.accepts_counteroffer || ad.ad_type === 'troca');
   const threadHeight = 'calc(100dvh - 57px - 68px - env(safe-area-inset-bottom))';
@@ -328,10 +328,10 @@ export default function MChatThread() {
         <button onClick={() => navigate('/m/chat')} className="p-1"><ArrowLeft className="h-5 w-5" /></button>
         <Link to={`/m/chat/${conversationId}/info`} className="flex items-center gap-2 flex-1 min-w-0">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent overflow-hidden flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
-            {other.avatar_url ? <img src={other.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" /> : other.display_name?.[0]?.toUpperCase() || <User className="h-4 w-4" />}
+            {other?.avatar_url ? <img src={other.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" /> : other?.display_name?.[0]?.toUpperCase() || <User className="h-4 w-4" />}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">{other.display_name || 'Usuário'}</p>
+            <p className="text-sm font-semibold truncate">{other?.display_name || 'Usuário'}</p>
             {ad && <p className="text-[10px] text-muted-foreground truncate">📦 {ad.title}</p>}
           </div>
         </Link>
