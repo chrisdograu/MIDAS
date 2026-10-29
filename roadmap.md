@@ -1,5 +1,6 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
+- [ ] Acrescentar torneios de demonstração com jogos e contas reais existentes, sem novas contas; verificar leitura pública, inscrição e grupo mobile, registrando limites dos testes autenticados.
 - [ ] Ampliar torneios, biblioteca social, produtos e periféricos no banco atual, preservando registros existentes e contas reais; verificar os dados e as páginas.
 - [ ] Corrigir as falhas reais do roteiro: catálogo de conta comum, fórum/comentários, anúncio, chat/contraoferta, denúncia e consultas compartilhadas; retestar com contas existentes.
 - [x] Terminar a verificação do roteiro com as três contas reais; compra, biblioteca, curtida, aceite de contato e certificado confirmados; etapas bloqueadas e limites registrados em docs/VERIFICACAO_ROTEIRO.md.
