@@ -15,6 +15,7 @@ import { motion } from 'framer-motion';
 import { useDataSaver } from '@/hooks/useDataSaver';
 import { formatTime } from '@/lib/format';
 import { Slider } from '@/components/ui/slider';
+import { tournamentStreamHistory } from '@/lib/tournamentFields';
 
 interface Props {
   tournamentId: string;
@@ -106,19 +107,10 @@ export default function TournamentLivePanel({
     return () => { cancel = true; supabase.removeChannel(ch); };
   }, [tournamentId, onChange]);
 
-  // GAP-TL02: Carregar histórico de streams
+  // O histórico é registrado junto aos eventos da transmissão.
   useEffect(() => {
-    if (!tournamentId) return;
-    (async () => {
-      const { data } = await supabase
-        .from('tournament_stream_history' as any)
-        .select('url, platform, used_at')
-        .eq('tournament_id', tournamentId)
-        .order('used_at', { ascending: false })
-        .limit(5);
-      setStreamHistory((data as any) || []);
-    })();
-  }, [tournamentId]);
+    setStreamHistory(tournamentStreamHistory(events));
+  }, [events]);
 
   const dataSaver = useDataSaver();
   const [playStream, setPlayStream] = useState(false);

@@ -26,7 +26,7 @@ interface Tournament {
   product_id?: string | null; stream_url?: string | null;
 }
 interface GameOpt { id: string; title: string; image_url: string | null }
-interface WaitlistEntry { user_id: string; joined_at: string; }
+interface WaitlistEntry { user_id: string; created_at: string; }
 
 // GAP-615: Contar participantes
 async function getParticipantCount(tournamentId: string): Promise<number> {
@@ -41,9 +41,9 @@ async function getParticipantCount(tournamentId: string): Promise<number> {
 async function getWaitlist(tournamentId: string): Promise<WaitlistEntry[]> {
   const { data } = await supabase
     .from('tournament_waitlist' as any)
-    .select('user_id, joined_at')
+    .select('user_id, created_at')
     .eq('tournament_id', tournamentId)
-    .order('joined_at', { ascending: true });
+    .order('created_at', { ascending: true });
   return (data || []) as WaitlistEntry[];
 }
 
@@ -264,7 +264,8 @@ export default function Torneios() {
   };
 
   const leave = async (t: Tournament) => {
-    const { error } = await supabase.from('tournament_participants' as any).delete().eq('tournament_id', t.id).eq('user_id', user!.id);
+    if (!user) return;
+    const { error } = await supabase.from('tournament_participants' as any).delete().eq('tournament_id', t.id).eq('user_id', user.id);
     if (error) return toast.error(error.message);
     toast.success('Inscrição cancelada');
     load();
@@ -401,11 +402,11 @@ export default function Torneios() {
             : isFull ? (
               // GAP-617: Botão de lista de espera
               inWaitlist ? (
-                <Button size="sm" variant="ghost" onClick={() => leaveWaitlist(t.id, user!.id)}>
+                <Button size="sm" variant="ghost" onClick={() => { if (user) leaveWaitlist(t.id, user.id).then(load); else toast.error('Entre para participar'); }}>
                   <UserMinus className="h-3.5 w-3.5 mr-1" /> Sair da espera
                 </Button>
               ) : (
-                <Button size="sm" variant="outline" onClick={() => joinWaitlist(t.id, user!.id)}>
+                <Button size="sm" variant="outline" onClick={() => { if (user) joinWaitlist(t.id, user.id).then(load); else toast.error('Entre para participar'); }}>
                   <UserPlus className="h-3.5 w-3.5 mr-1" /> Entrar na espera
                 </Button>
               )

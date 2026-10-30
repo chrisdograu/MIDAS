@@ -6588,6 +6588,7 @@ export type Database = {
           bracket_type: string
           created_at: string
           created_by: string | null
+          custom_rules: string | null
           default_bo: number
           default_format: string
           description: string | null
@@ -6615,6 +6616,7 @@ export type Database = {
           prize_title: string | null
           prize_types: string[]
           prize_xp_bonus: number
+          product_id: string | null
           refund_policy: string | null
           rewards_distributed: boolean
           runner_up_id: string | null
@@ -6640,6 +6642,7 @@ export type Database = {
           bracket_type?: string
           created_at?: string
           created_by?: string | null
+          custom_rules?: string | null
           default_bo?: number
           default_format?: string
           description?: string | null
@@ -6667,6 +6670,7 @@ export type Database = {
           prize_title?: string | null
           prize_types?: string[]
           prize_xp_bonus?: number
+          product_id?: string | null
           refund_policy?: string | null
           rewards_distributed?: boolean
           runner_up_id?: string | null
@@ -6692,6 +6696,7 @@ export type Database = {
           bracket_type?: string
           created_at?: string
           created_by?: string | null
+          custom_rules?: string | null
           default_bo?: number
           default_format?: string
           description?: string | null
@@ -6719,6 +6724,7 @@ export type Database = {
           prize_title?: string | null
           prize_types?: string[]
           prize_xp_bonus?: number
+          product_id?: string | null
           refund_policy?: string | null
           rewards_distributed?: boolean
           runner_up_id?: string | null
@@ -6820,6 +6826,13 @@ export type Database = {
             columns: ["winner_id"]
             isOneToOne: false
             referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournaments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
             referencedColumns: ["id"]
           },
         ]

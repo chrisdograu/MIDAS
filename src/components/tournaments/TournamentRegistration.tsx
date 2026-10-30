@@ -42,9 +42,9 @@ export default function TournamentRegistration({ open, onOpenChange, tournament,
     (async () => {
       const { data } = await supabase
         .from('tournament_participants')
-        .select('tournament_id, created_at, tournaments(title, status, kind, starts_at)')
+        .select('tournament_id, joined_at, tournaments(title, status, kind, starts_at)')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .order('joined_at', { ascending: false })
         .limit(5);
       setPastRegistrations((data as any) || []);
       setLoadingHistory(false);
