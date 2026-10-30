@@ -173,7 +173,7 @@ export default function TorneiosAdmin() {
       max_participants: Number(form.max_participants) || 16,
       starts_at: form.starts_at || null, ends_at: form.ends_at || null,
       verified: !!form.verified,
-      prize_types: form.prize_types?.length ? form.prize_types : null,
+      prize_types: form.prize_types?.length ? form.prize_types : [],
       prize_xp_bonus: Number(form.prize_xp_bonus) || 0,
       prize_title: form.prize_title || null,
       stream_url: form.stream_url?.trim() || null,

@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { AdminPageHeader } from '../components/AdminPageHeader';
 import { GameProductSelect } from '../components/GameProductSelect';
 import { adminLog } from '../lib/adminLog';
+import { tournamentCreateFields } from '@/lib/tournamentFields';
 
 // GAP-D82: Simulação de bracket
 function BracketPreview({ participants }: { participants: number }) {
@@ -132,26 +133,13 @@ export default function CriarTorneio() {
     
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    
-    // GAP-D83: Calcular XP base automático
-    const max = Number(form.max_participants) || 0;
-    let xpBase = 30;
-    if (max >= 64) xpBase = 90;
-    else if (max >= 32) xpBase = 70;
-    else if (max >= 16) xpBase = 55;
-    else if (max >= 9) xpBase = 40;
-    
-    const payload = {
-      ...form,
-      created_by: user!.id,
-      status: 'open',
-      event_state: 'upcoming',
-      product_id: productId,
-      starts_at: form.starts_at || null,
-      ends_at: form.ends_at || null,
-      xp_base: xpBase,
-      max_participants: max,
-    };
+    if (!user || !productId) {
+      setSaving(false);
+      toast.error('Entre novamente e selecione um jogo');
+      return;
+    }
+    const max = Number(form.max_participants);
+    const payload = tournamentCreateFields(form, productId, user.id);
     
     const { data: created, error } = await supabase
       .from('tournaments')
@@ -171,7 +159,7 @@ export default function CriarTorneio() {
         titulo: form.title, 
         participantes: max, 
         tipo: form.type,
-        xp_base: xpBase,
+        formato: payload.default_format,
       },
     });
     
