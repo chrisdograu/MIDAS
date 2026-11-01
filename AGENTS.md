@@ -10,6 +10,7 @@
 - Developer search shares a named-record loader and destination mapper across web and desktop; public results link to profiles, and admin results filter the existing management screen without widening permissions.
 
 - Checkout applies and records coupons atomically inside `create_order_secure`; the client must never redeem a coupon separately.
+- Checkout blocks confirmation while coupon validation is pending, so a rehearsal cannot submit an unintended undiscounted order.
 - Customer-facing code must not update order status directly; order state changes belong to trusted database functions or staff workflows.
 - Public team and developer pages read the same Supabase records managed by admin-only desktop screens, so edits appear publicly without hardcoded duplicate content.
 - Desktop developer CRUD uses table writes protected by existing administrator RLS, not absent admin RPCs; updates and deletes verify returned rows before reporting success.

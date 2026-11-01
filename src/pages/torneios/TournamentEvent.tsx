@@ -274,7 +274,7 @@ export default function TournamentEvent() {
       {/* GAP-647: Regras do torneio */}
       {(t.rules || t.regulations) && (
         <div className="container mx-auto px-4 pt-6">
-          <RulesSection rules={t.rules || t.regulations} />
+          <RulesSection rules={t.custom_rules || t.rules || t.regulations} />
         </div>
       )}
 

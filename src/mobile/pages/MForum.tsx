@@ -170,8 +170,8 @@ export default function MForum() {
 
       const userIds = new Set<string>();
       const productIds = new Set<string>();
-      rawPosts?.forEach(p => { userIds.add(p.user_id); productIds.add(p.product_id); });
-      rawReviews?.forEach(r => { userIds.add(r.user_id); productIds.add(r.product_id); });
+      rawPosts?.forEach(p => { if (p.user_id) userIds.add(p.user_id); if (p.product_id) productIds.add(p.product_id); });
+      rawReviews?.forEach(r => { if (r.user_id) userIds.add(r.user_id); if (r.product_id) productIds.add(r.product_id); });
       const postIds = rawPosts?.map(p => p.id) || [];
       const reviewIds = rawReviews?.map(r => r.id) || [];
 
@@ -189,8 +189,8 @@ export default function MForum() {
       (rLikes || []).forEach((l: any) => likeCount.set(l.review_id, (likeCount.get(l.review_id) || 0) + 1));
 
       const countByGame = new Map<string, number>();
-      rawPosts?.forEach(p => countByGame.set(p.product_id, (countByGame.get(p.product_id) || 0) + 1));
-      rawReviews?.forEach(r => countByGame.set(r.product_id, (countByGame.get(r.product_id) || 0) + 1));
+      rawPosts?.forEach(p => { if (p.product_id) countByGame.set(p.product_id, (countByGame.get(p.product_id) || 0) + 1); });
+      rawReviews?.forEach(r => { if (r.product_id) countByGame.set(r.product_id, (countByGame.get(r.product_id) || 0) + 1); });
       const top: TopGame[] = [...countByGame.entries()]
         .sort((a, b) => b[1] - a[1]).slice(0, 10)
         .map(([id, c]) => {
@@ -257,8 +257,8 @@ export default function MForum() {
 
     const userIds = new Set<string>();
     const productIds = new Set<string>();
-    rawPosts?.forEach(p => { userIds.add(p.user_id); productIds.add(p.product_id); });
-    rawReviews?.forEach(r => { userIds.add(r.user_id); productIds.add(r.product_id); });
+    rawPosts?.forEach(p => { if (p.user_id) userIds.add(p.user_id); if (p.product_id) productIds.add(p.product_id); });
+    rawReviews?.forEach(r => { if (r.user_id) userIds.add(r.user_id); if (r.product_id) productIds.add(r.product_id); });
     const postIds = rawPosts?.map(p => p.id) || [];
     const reviewIds = rawReviews?.map(r => r.id) || [];
 
@@ -287,7 +287,7 @@ export default function MForum() {
       id: r.id, rating: Number(r.rating), comment: r.comment, created_at: r.created_at,
       user_id: r.user_id, product_id: r.product_id,
       author: profileMap.get(r.user_id) || 'Usuário',
-      product: productMap.get(r.product_id) || 'Jogo',
+        product: productMap.get(r.product_id)?.title || 'Comunidade',
       likes: likeCount.get(r.id) || 0,
       is_spoiler: !!r.is_spoiler, spoiler_achievement_name: r.spoiler_achievement_name || null,
       user_liked: userLikes.has(r.id),
