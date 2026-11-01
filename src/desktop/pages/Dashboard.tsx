@@ -115,7 +115,7 @@ function DashboardContent() {
       // GAP-D109: Usuários online (últimos 15 min)
       const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
       const { count: onlineCount } = await supabase
-        .from("user_sessions")
+        .from("login_history")
         .select("*", { count: "exact", head: true })
         .gt("created_at", fifteenMinAgo);
 
