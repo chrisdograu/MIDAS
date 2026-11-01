@@ -115,28 +115,23 @@ function DashboardContent() {
       // GAP-D109: Usuários online (últimos 15 min)
       const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
       const { count: onlineCount } = await supabase
-        .from("sessions")
+        .from("login_history")
         .select("*", { count: "exact", head: true })
         .gt("created_at", fifteenMinAgo);
 
       // GAP-D111: Estatísticas por plataforma
-      const { data: platformUsers } = await supabase.from("profiles").select("platform_connected");
+      const { data: platformUsers } = await supabase.from("connected_platforms").select("user_id, platform");
 
       const platStats = new Map<string, { users: number; sales: number }>();
       platformUsers?.forEach((p) => {
-        const platforms = p.platform_connected || [];
-        if (Array.isArray(platforms)) {
-          platforms.forEach((plat: string) => {
-            if (!platStats.has(plat)) platStats.set(plat, { users: 0, sales: 0 });
-            platStats.get(plat)!.users++;
-          });
-        }
+        const plat = p.platform;
+        if (!plat) return;
+        const current = platStats.get(plat) ?? { users: 0, sales: 0 };
+        current.users++;
+        platStats.set(plat, current);
       });
 
-      // Calcular vendas por plataforma (simulado)
-      platStats.forEach((value) => {
-        value.sales = Math.floor(Math.random() * 50) + 10;
-      });
+      // Sales cannot be attributed to a platform without a persisted order source.
       setPlatformStats(
         Array.from(platStats.entries()).map(([platform, data]) => ({
           platform,

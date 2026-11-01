@@ -18,6 +18,8 @@ import EstadoVazio from '@/components/EstadoVazio';
 import { ShoppingBag } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import SelectSimples from '@/components/SelectSimples';
+import { Button } from '@/components/ui/button';
+import { checkoutReady } from '@/lib/checkoutReadiness';
 
 type PaymentMethod = 'credit' | 'pix' | 'boleto';
 
@@ -203,6 +205,10 @@ export default function Checkout() {
   };
 
   const handlePurchase = guard(async () => {
+    if (cupomLoading) {
+      toast.error('Aguarde a validação do cupom antes de confirmar');
+      return;
+    }
     // GAP-115: Validar estoque
     const stockOk = await validateStock();
     if (!stockOk) return;
@@ -519,10 +525,10 @@ export default function Checkout() {
             {paymentMethod === 'credit' && installments > 1 && <p className="text-xs text-muted-foreground">{installments}x de {formatCurrency((finalTotal / installments))}</p>}
 
             <RequiresConnection message="A finalização da compra exige internet — nada é enviado offline para não gerar pedido duplicado.">
-              <button onClick={handlePurchase} disabled={processing}
+              <Button onClick={handlePurchase} disabled={!checkoutReady(processing, cupomLoading)}
                 className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-all glow-primary disabled:opacity-50">
                 {processing ? <span className="animate-pulse">Processando...</span> : <><Lock className="h-4 w-4" /> Confirmar Compra</>}
-              </button>
+              </Button>
             </RequiresConnection>
 
             {/* GAP-124: Confirmar e-mail (reforço visual) */}
