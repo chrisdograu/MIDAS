@@ -14,6 +14,8 @@ import { recordMentions } from '@/mobile/lib/mentions';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatCurrency, formatTime } from '@/lib/format';
 import { toggleMessageReaction } from '@/lib/toggleLike';
+import { Button } from '@/components/ui/button';
+import { canRespondToOffer, validOfferAmount } from '@/lib/counteroffer';
 
 interface Msg {
   id: string; sender_id: string; receiver_id: string; content: string;
@@ -65,6 +67,7 @@ export default function MChatThread() {
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [respondingOffer, setRespondingOffer] = useState<string | null>(null);
   const [offerOpen, setOfferOpen] = useState(false);
   const [offerType, setOfferType] = useState<'money' | 'item'>('money');
   const [offerAmount, setOfferAmount] = useState('');
@@ -283,7 +286,7 @@ export default function MChatThread() {
     const payload = offerType === 'money'
       ? { type: 'money', amount: Number(offerAmount), status: 'pending' }
       : { type: 'item', desc: offerDesc.trim().slice(0, 200), status: 'pending' };
-    if (offerType === 'money' && (!offerAmount || isNaN(Number(offerAmount)))) { toast.error('Valor inválido'); return; }
+    if (offerType === 'money' && !validOfferAmount(offerAmount)) { toast.error('Informe um valor maior que zero'); return; }
     if (offerType === 'item' && !offerDesc.trim()) { toast.error('Descreva o item'); return; }
     setSending(true);
     const { error } = await supabase.from('mensagens').insert({
@@ -298,14 +301,29 @@ export default function MChatThread() {
   };
 
   const respondOffer = async (msg: Msg, accepted: boolean) => {
-    if (!user) return;
+    if (!user || respondingOffer || !canRespondToOffer(msg, user.id)) return;
+    setRespondingOffer(msg.id);
     const newPayload = { ...msg.payload, status: accepted ? 'accepted' : 'rejected' };
-    await supabase.from('mensagens').update({ payload: newPayload }).eq('id', msg.id);
-    await supabase.from('mensagens').insert({
-      sender_id: user.id, receiver_id: msg.sender_id,
-      content: accepted ? '✅ Contraoferta aceita' : '❌ Contraoferta recusada',
-      anuncio_id: conv?.anuncio_id || null, message_type: 'text',
-    });
+    try {
+      const { data, error } = await supabase.from('mensagens')
+        .update({ payload: newPayload }).eq('id', msg.id).eq('receiver_id', user.id)
+        .eq('message_type', 'counteroffer').eq('payload->>status', 'pending')
+        .select('id').maybeSingle();
+      if (error) throw error;
+      if (!data) { toast.error('A contraoferta já foi respondida ou não está disponível'); return; }
+      setMsgs(prev => prev.map(m => m.id === msg.id ? { ...m, payload: newPayload } : m));
+      const { error: responseError } = await supabase.from('mensagens').insert({
+        sender_id: user.id, receiver_id: msg.sender_id,
+        content: accepted ? '✅ Contraoferta aceita' : '❌ Contraoferta recusada',
+        anuncio_id: conv?.anuncio_id || null, message_type: 'text',
+      });
+      if (responseError) toast.warning('Resposta salva, mas o aviso na conversa não foi enviado');
+      else await load();
+    } catch {
+      toast.error('Não foi possível responder à contraoferta');
+    } finally {
+      setRespondingOffer(null);
+    }
   };
 
   const deleteMessage = async (m: Msg) => {
@@ -383,8 +401,8 @@ export default function MChatThread() {
                   </p>
                   {status === 'pending' && !own && (
                     <div className="flex gap-2">
-                      <button onClick={() => respondOffer(m, true)} className="flex-1 py-1.5 rounded-lg bg-success/20 text-success text-xs font-semibold flex items-center justify-center gap-1"><Check className="h-3 w-3" />Aceitar</button>
-                      <button onClick={() => respondOffer(m, false)} className="flex-1 py-1.5 rounded-lg bg-destructive/20 text-destructive text-xs font-semibold flex items-center justify-center gap-1"><X className="h-3 w-3" />Recusar</button>
+                      <Button size="sm" variant="outline" disabled={respondingOffer !== null} onClick={() => respondOffer(m, true)} className="flex-1 text-success"><Check className="h-3 w-3" />Aceitar</Button>
+                      <Button size="sm" variant="outline" disabled={respondingOffer !== null} onClick={() => respondOffer(m, false)} className="flex-1 text-destructive"><X className="h-3 w-3" />Recusar</Button>
                     </div>
                   )}
                   {status !== 'pending' && (

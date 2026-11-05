@@ -57,9 +57,7 @@ function DashboardContent() {
     totalPedidos: 0,
     denunciasAbertas: 0,
     torneiosAtivos: 0,
-    usuariosOnline: 0,
-    retencaoD7: 0,
-    retencaoD30: 0,
+    acessosRecentes: 0,
   });
   const [alertProducts, setAlertProducts] = useState<
     {
@@ -112,12 +110,12 @@ function DashboardContent() {
         .eq("status", "open")
         .limit(5);
 
-      // GAP-D109: Usuários online (últimos 15 min)
+      // Recent logins are not online sessions.
       const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
       const { count: onlineCount } = await supabase
         .from("login_history")
         .select("*", { count: "exact", head: true })
-        .gt("created_at", fifteenMinAgo);
+        .gt("logged_in_at", fifteenMinAgo);
 
       // GAP-D111: Estatísticas por plataforma
       const { data: platformUsers } = await supabase.from("connected_platforms").select("user_id, platform");
@@ -200,26 +198,25 @@ function DashboardContent() {
         })),
       );
 
-      // GAP-D109: Retenção (simulada)
-      const retentionD7 = Math.floor(Math.random() * 30) + 50;
-      const retentionD30 = Math.floor(Math.random() * 20) + 20;
-
-      // GAP-D110: Atividade recente (simulada)
-      const activities = [
-        { id: "1", type: "pedido", message: "Novo pedido #1234 confirmado", time: "5 min" },
-        { id: "2", type: "usuario", message: "João Gamer se cadastrou", time: "15 min" },
-        { id: "3", type: "review", message: "Nova review de Elden Ring", time: "25 min" },
-        { id: "4", type: "torneio", message: "Inscrições abertas para Copa MIDIAS", time: "1 hora" },
-        { id: "5", type: "denuncia", message: "Nova denúncia de anúncio", time: "2 horas" },
-      ];
+      const activities = (pedidos || []).slice(0, 5).map((p) => ({
+        id: p.id,
+        type: "pedido",
+        message: `Pedido #${p.id.slice(0, 8)} · ${statusLabels[p.status] || p.status}`,
+        time: formatRelativeTime(new Date(p.created_at)),
+      }));
       setRecentActivity(activities);
+
+      const tournamentIds = (tournaments || []).map((t) => t.id);
+      const { data: participants } = tournamentIds.length
+        ? await supabase.from("tournament_participants").select("tournament_id").in("tournament_id", tournamentIds)
+        : { data: [] };
 
       // GAP-D110: Torneios ativos
       setActiveTournaments(
         (tournaments || []).map((t) => ({
           id: t.id,
           title: t.title,
-          participants: Math.floor(Math.random() * t.max_participants) + 1,
+          participants: (participants || []).filter((p) => p.tournament_id === t.id).length,
           status: t.status,
         })),
       );
@@ -233,9 +230,7 @@ function DashboardContent() {
         totalPedidos: (pedidos || []).length,
         denunciasAbertas: denunciasCount || 0,
         torneiosAtivos: (tournaments || []).length,
-        usuariosOnline: onlineCount || 0,
-        retencaoD7: retentionD7,
-        retencaoD30: retentionD30,
+        acessosRecentes: onlineCount || 0,
       });
       setAtualizadoEm(new Date());
       setErro(null);
@@ -320,19 +315,7 @@ function DashboardContent() {
       color: stats.denunciasAbertas > 5 ? "text-destructive" : "text-warning",
     },
     { label: "Torneios Ativos", value: stats.torneiosAtivos, icon: Trophy, color: "text-primary" },
-    { label: "Usuários Online", value: stats.usuariosOnline, icon: Activity, color: "text-success" },
-    {
-      label: "Retenção D7",
-      value: `${stats.retencaoD7}%`,
-      icon: Users,
-      color: stats.retencaoD7 > 60 ? "text-success" : "text-warning",
-    },
-    {
-      label: "Retenção D30",
-      value: `${stats.retencaoD30}%`,
-      icon: Clock,
-      color: stats.retencaoD30 > 40 ? "text-success" : "text-warning",
-    },
+    { label: "Acessos nos últimos 15 min", value: stats.acessosRecentes, icon: Activity, color: "text-success" },
   ];
 
   return (

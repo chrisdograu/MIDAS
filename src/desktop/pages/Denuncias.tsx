@@ -26,18 +26,14 @@ import { formatDateTime, formatDate } from '@/lib/format';
 
 type Action = 'resolve' | 'dismiss' | 'warn' | 'ban' | 'mark_spoiler' | 'delete_content';
 
-const SEVERITY_OPTIONS = ['all', 'low', 'medium', 'high', 'critical'];
+const SEVERITY_OPTIONS = ['all', 'normal', 'alta'];
 const SEVERITY_LABELS: Record<string, string> = {
-  low: 'Baixa',
-  medium: 'Média',
-  high: 'Alta',
-  critical: 'Crítica',
+  normal: 'Normal',
+  alta: 'Alta',
 };
 const SEVERITY_COLORS: Record<string, string> = {
-  low: 'bg-muted text-muted-foreground',
-  medium: 'bg-warning/15 text-warning',
-  high: 'bg-warning/15 text-warning',
-  critical: 'bg-destructive/20 text-destructive',
+  normal: 'bg-muted text-muted-foreground',
+  alta: 'bg-destructive/20 text-destructive',
 };
 
 const BAN_OPTIONS = [
@@ -109,13 +105,18 @@ export default function Denuncias() {
 
     if (status !== 'all') query = query.eq('status', status);
     if (type !== 'all') query = query.eq('target_type', type);
-    if (severity !== 'all') query = query.eq('severity', severity);
+    if (severity !== 'all') query = query.eq('priority', severity);
     
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     query = query.range(from, to);
 
-    const { data } = await query;
+    const { data, error } = await query;
+    if (error) {
+      toast.error(`Não foi possível carregar denúncias: ${error.message}`);
+      setLoading(false);
+      return;
+    }
     const newRows = data || [];
     
     if (append) {
@@ -456,7 +457,7 @@ export default function Denuncias() {
       motivo: r.reason,
       descricao: r.description || '',
       status: r.status,
-      severidade: SEVERITY_LABELS[r.severity] || r.severity,
+      prioridade: SEVERITY_LABELS[r.priority] || r.priority,
       reporter: r.reporter_name || '',
       criado_em: formatDateTime(r.created_at),
       resolvido_em: r.resolved_at ? formatDateTime(r.resolved_at) : '',
@@ -520,7 +521,7 @@ export default function Denuncias() {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Severidade</Label>
+            <Label className="text-xs">Prioridade</Label>
             <Select value={severity} onValueChange={setSeverity}>
               <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -626,8 +627,8 @@ export default function Denuncias() {
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge className={SEVERITY_COLORS[r.severity] || 'bg-muted'}>
-                          {SEVERITY_LABELS[r.severity] || r.severity}
+                        <Badge className={SEVERITY_COLORS[r.priority] || 'bg-muted'}>
+                          {SEVERITY_LABELS[r.priority] || r.priority}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">

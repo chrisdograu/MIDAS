@@ -74,7 +74,12 @@ export function usePedidos() {
       if (error) throw error;
       return { id: (data as any)?.order_id, ...(data as any) };
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pedidos'] }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['pedidos', user?.id] }),
+        queryClient.invalidateQueries({ queryKey: ['biblioteca', user?.id] }),
+      ]);
+    },
   });
 
   return { pedidos, criarPedido, isLoading: query.isLoading, refetch: query.refetch };
