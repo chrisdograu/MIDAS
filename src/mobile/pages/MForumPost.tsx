@@ -14,6 +14,7 @@ import SpoilerGuard from '@/components/spoiler/SpoilerGuard';
 import EstadoVazio from '@/components/EstadoVazio';
 import { toggleLike } from '@/lib/toggleLike';
 import { dbWrite } from '@/lib/dbWrite';
+import ErroCarregamento from '@/components/ErroCarregamento';
 
 const IMG_RE = /\[img:(https?:\/\/[^\]\s]+)\]/;
 function parseContent(raw: string): { text: string; image: string | null } {
@@ -41,6 +42,7 @@ export default function MForumPost() {
   const [post, setPost] = useState<Post | null>(null);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [text, setText] = useState('');
   const [replyTo, setReplyTo] = useState<{ id: string; user: string } | null>(null);
   const [sortBy, setSortBy] = useState<'top' | 'recent'>('top');
@@ -64,19 +66,7 @@ export default function MForumPost() {
     const content = `${prefix}[img:${url}] ${text.trim()}`.slice(0, 1000);
     const { error } = await supabase.from('forum_replies').insert({ user_id: user.id, post_id: postId, content });
     if (error) { toast.error(error.message); return; }
-    // GAP-1050: Notificação de resposta
-    if (user.id !== post?.user_id) {
-      await dbWrite(
-        supabase.from('notifications').insert({
-          user_id: post?.user_id,
-          type: 'forum_reply',
-          title: `${(user as any).display_name || 'Alguém'} respondeu seu post`,
-          body: content.slice(0, 100),
-          reference_type: 'forum_post',
-          reference_id: postId,
-        })
-      );
-    }
+    // The trusted reply trigger notifies the author; clients cannot write other users' notifications.
     setText(''); setReplyTo(null); load();
   };
   
@@ -178,14 +168,17 @@ export default function MForumPost() {
       return;
     }
     setLoading(true);
-    const { data: p } = await supabase.from('forum_posts').select('id, content, created_at, likes_count, user_id, product_id, is_spoiler, spoiler_achievement_name, is_locked, edited_at').eq('id', postId).maybeSingle();
+    setLoadError(false);
+    const { data: p, error: postError } = await supabase.from('forum_posts').select('id, content, created_at, likes_count, user_id, product_id, is_spoiler, spoiler_achievement_name, is_locked, edited_at').eq('id', postId).maybeSingle();
+    if (postError) { setLoadError(true); setLoading(false); return; }
     if (!p) { setLoading(false); return; }
-    const { data: rs } = await supabase.from('forum_replies').select('id, content, created_at, user_id, likes_count, edited_at').eq('post_id', postId).order('created_at');
+    const { data: rs, error: replyError } = await supabase.from('forum_replies').select('id, content, created_at, user_id, likes_count, edited_at').eq('post_id', postId).order('created_at');
+    if (replyError) { setLoadError(true); setLoading(false); return; }
     const userIds = new Set<string>([p.user_id]); rs?.forEach((r: any) => userIds.add(r.user_id));
     const replyIds = (rs || []).map((r: any) => r.id);
     const [{ data: profiles }, { data: prod }, { data: postLikes }, { data: replyLikes }, { data: savedData }] = await Promise.all([
       supabase.from('profiles').select('id, display_name').in('id', [...userIds]),
-      supabase.from('produtos').select('title').eq('id', p.product_id).maybeSingle(),
+      p.product_id ? supabase.from('produtos').select('title').eq('id', p.product_id).maybeSingle() : Promise.resolve({ data: null }),
       user ? supabase.from('forum_post_likes').select('post_id').eq('post_id', postId).eq('user_id', user.id) : Promise.resolve({ data: [] }),
       user && replyIds.length ? supabase.from('forum_reply_likes').select('reply_id').in('reply_id', replyIds).eq('user_id', user.id) : Promise.resolve({ data: [] }),
       user ? supabase.from('saved_posts').select('post_id').eq('post_id', postId).eq('user_id', user.id) : Promise.resolve({ data: [] }),
@@ -232,19 +225,7 @@ export default function MForumPost() {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success('Comentário publicado');
-    // GAP-1050: Notificação de resposta
-    if (user.id !== post?.user_id) {
-      await dbWrite(
-        supabase.from('notifications').insert({
-          user_id: post?.user_id,
-          type: 'forum_reply',
-          title: `${(user as any).display_name || 'Alguém'} respondeu seu post`,
-          body: content.slice(0, 100),
-          reference_type: 'forum_post',
-          reference_id: postId,
-        })
-      );
-    }
+    // Notification delivery is handled by the trusted reply trigger.
     setText(''); setReplyTo(null); load();
   };
 
@@ -289,6 +270,7 @@ export default function MForumPost() {
   const topReply = replies.length > 0 ? [...replies].sort((a, b) => b.likes_count - a.likes_count)[0] : null;
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (loadError) return <ErroCarregamento titulo="Não foi possível abrir a publicação" onRetry={load} />;
   if (!post) return <div className="p-6 text-center text-muted-foreground">Post não encontrado.</div>;
 
   return (

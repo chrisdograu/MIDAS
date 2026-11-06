@@ -81,10 +81,11 @@ export default function MTournamentGroup() {
   }, [messages.length]);
 
   const loadMessages = async () => {
+    if (!id) return;
     const { data } = await supabase
       .from("mensagens")
       .select("id, sender_id, content, created_at")
-      .eq("tournament_id", id!)
+      .eq("tournament_id", id)
       .is("group_id", null)
       .order("created_at", { ascending: true })
       .limit(200);
@@ -101,10 +102,11 @@ export default function MTournamentGroup() {
     }
   };
   const loadParticipants = async () => {
+    if (!id) return;
     const { data } = await supabase
       .from("tournament_participants")
       .select("user_id, chat_role, profiles:user_id(display_name, avatar_url)")
-      .eq("tournament_id", id!);
+      .eq("tournament_id", id);
     setParticipants((data as any) || []);
   };
 
@@ -113,7 +115,7 @@ export default function MTournamentGroup() {
   const canSend = me && me.chat_role !== "observer";
 
   const send = async () => {
-    if (!text.trim() || !user || !canSend || sending) return;
+    if (!text.trim() || !user || !id || !canSend || sending) return;
     const content = text.trim();
     setSending(true);
     setText("");
@@ -123,7 +125,7 @@ export default function MTournamentGroup() {
         sender_id: user.id,
         receiver_id: user.id,
         content,
-        tournament_id: id!,
+        tournament_id: id,
         message_type: "text",
         is_read: true,
       } as any)
@@ -135,7 +137,10 @@ export default function MTournamentGroup() {
       setText(content);
       return;
     }
-    if (inserted) recordMentions({ text: content, mentionedBy: user.id, sourceType: "message", sourceId: inserted.id });
+    if (inserted) {
+      recordMentions({ text: content, mentionedBy: user.id, sourceType: "message", sourceId: inserted.id });
+      await loadMessages();
+    }
   };
 
   const deleteMsg = async (mid: string) => {
@@ -171,17 +176,23 @@ export default function MTournamentGroup() {
   };
 
   const setRole = async (uid: string, role: Role) => {
-    const { error } = await supabase
+    if (!id) return;
+    const { data, error } = await supabase
       .from("tournament_participants")
       .update({ chat_role: role } as any)
-      .eq("tournament_id", id!)
-      .eq("user_id", uid);
-    if (error) toast.error(error.message);
-    else toast.success("Permissão atualizada");
+      .eq("tournament_id", id)
+      .eq("user_id", uid)
+      .select("user_id").maybeSingle();
+    if (error || !data) toast.error(error?.message || "Permissão não foi atualizada");
+    else {
+      toast.success("Permissão atualizada");
+      await loadParticipants();
+    }
   };
 
   // Controles globais — não tocam em admins
   const bulkSetRole = async (role: "member" | "observer") => {
+    if (!id) return;
     if (
       !confirm(
         role === "member"
@@ -194,7 +205,7 @@ export default function MTournamentGroup() {
     const { error } = await supabase
       .from("tournament_participants")
       .update({ chat_role: role } as any)
-      .eq("tournament_id", id!)
+      .eq("tournament_id", id)
       .eq("chat_role", target);
     if (error) toast.error(error.message);
     else {

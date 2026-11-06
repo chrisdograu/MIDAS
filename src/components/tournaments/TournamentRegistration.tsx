@@ -85,12 +85,7 @@ export default function TournamentRegistration({ open, onOpenChange, tournament,
         });
         if (error) throw error;
         
-        // GAP-TR03: Simular envio de email
-        await new Promise(r => setTimeout(r, 300));
-        
-        toast.success(isPaid 
-          ? `Inscrição confirmada! Email de confirmação enviado.` 
-          : 'Inscrição confirmada!');
+        toast.success('Inscrição confirmada!');
       }
       onSuccess();
       onOpenChange(false);
@@ -134,7 +129,7 @@ export default function TournamentRegistration({ open, onOpenChange, tournament,
           {user?.email && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 rounded-lg px-3 py-2 border border-primary/20">
               <Mail className="h-3.5 w-3.5 text-primary" />
-              <span>Confirmação enviada para <strong className="text-foreground">{user.email}</strong></span>
+              <span>Conta inscrita: <strong className="text-foreground">{user.email}</strong></span>
             </div>
           )}
 
