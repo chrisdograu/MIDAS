@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePrefetchRoute } from '@/hooks/usePrefetchRoute';
 import { escapeIlikeTerm } from '@/lib/escapeIlike';
 import { formatDate } from '@/lib/format';
+import { useProduto } from '@/hooks/useProdutos';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ListChecks } from 'lucide-react';
@@ -194,9 +195,14 @@ export default function Header() {
   };
 
   // GAP-HE02: Breadcrumbs
+  const gameRouteMatch = location.pathname.match(/^\/(jogo|biblioteca)\/([0-9a-f-]{36})/i);
+  const { data: routeGame } = useProduto(gameRouteMatch?.[2]);
+
   const getBreadcrumbs = () => {
     const path = location.pathname;
     const segments = path.split('/').filter(Boolean);
+    // Páginas de jogo: mostra apenas o nome do jogo, nunca o ID
+    if (gameRouteMatch) return [{ label: routeGame?.title ?? '', path }];
     
     if (segments.length === 0) return [{ label: 'Início', path: '/' }];
     
