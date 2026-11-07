@@ -93,7 +93,6 @@ export default function Cupons() {
       code: fCode.toUpperCase().trim(),
       discount_percent: Number(fDiscount),
       max_uses: fMaxUses ? Number(fMaxUses) : null,
-      max_uses_per_user: fMaxUsesPerUser ? Number(fMaxUsesPerUser) : null,
       is_active: fActive,
       valid_until: fValidUntil ? new Date(fValidUntil).toISOString() : null,
     };
