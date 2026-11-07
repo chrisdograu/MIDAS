@@ -111,8 +111,9 @@ export default function MTournamentGroup() {
   };
 
   const me = participants.find((p) => p.user_id === user?.id);
-  const isAdmin = me?.chat_role === "admin";
-  const canSend = me && me.chat_role !== "observer";
+  const isOrganizer = !!user && tournament?.created_by === user.id;
+  const isAdmin = isOrganizer || me?.chat_role === "admin";
+  const canSend = isOrganizer || (me && me.chat_role !== "observer");
 
   const send = async () => {
     if (!text.trim() || !user || !id || !canSend || sending) return;

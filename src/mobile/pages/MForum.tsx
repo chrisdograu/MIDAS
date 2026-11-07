@@ -551,7 +551,7 @@ function PostCard({ p, onDeleted }: { p: ForumPost; onDeleted?: () => void }) {
       onKeyDown={e => { if (e.key === 'Enter') navigate(`/m/forum/post/${p.id}`); }}
       className="block glass rounded-xl p-3 hover:border-primary/40 transition-colors cursor-pointer">
       <div className="flex items-center justify-between mb-1.5">
-        <button onClick={e => { e.stopPropagation(); navigate(`/m/forum/${p.product_id}`); }} className="bg-transparent border-0 p-0 cursor-pointer">
+        <button onClick={e => { e.stopPropagation(); if (p.product_id) navigate(`/m/forum/${p.product_id}`); }} className="bg-transparent border-0 p-0 cursor-pointer">
           <MForumTag name={p.product.toLowerCase().replace(/\s+/g, '').slice(0, 12)} />
         </button>
         <div className="flex items-center gap-1">

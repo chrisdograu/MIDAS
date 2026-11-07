@@ -259,7 +259,7 @@ export default function TournamentEvent() {
                   ⏳ Você está na fila de espera
                 </div>
               )}
-              {isFinished && t.forum_thread_id && (
+              {t.forum_thread_id && (
                 <Button asChild variant="outline" size="lg" className="w-full">
                   <Link to={`/m/forum/post/${t.forum_thread_id}`}>
                     <MessageSquare className="h-4 w-4 mr-2" /> Discussão no fórum
