@@ -437,6 +437,18 @@ export default function Header() {
             </div>
           </div>
 
+          <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-1 pb-2 -mt-1 text-sm">
+            {navLinks.map(link => {
+              const active = location.pathname === link.to || location.pathname.startsWith(link.to + '/');
+              return (
+                <Link key={link.to} to={link.to}
+                  className={`px-3 py-1.5 rounded-md transition-colors ${active ? 'bg-secondary text-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
           <AnimatePresence>
             {mobileMenuOpen && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
