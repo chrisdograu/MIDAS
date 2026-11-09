@@ -49,6 +49,10 @@ const Oportunidades = lazy(() => import("@/pages/Oportunidades"));
 const DevelopersList = lazy(() => import("@/pages/DevelopersList"));
 const DeveloperProfile = lazy(() => import("@/pages/DeveloperProfile"));
 const Equipe = lazy(() => import("@/pages/Equipe"));
+const Comparador = lazy(() => import("@/pages/Comparador"));
+const GenrePage = lazy(() => import("@/pages/GenrePage"));
+const PublisherProfile = lazy(() => import("@/pages/PublisherProfile"));
+const PoliticaPrivacidade = lazy(() => import("@/pages/PoliticaPrivacidade"));
 
 type Meta = { title: string; description: string; type?: 'website' | 'profile' | 'article' | 'product' };
 
@@ -111,6 +115,10 @@ const entries: { path: string; el: React.ReactNode; meta: Meta }[] = [
   { path: '/desenvolvedores', el: <DevelopersList />, meta: { title: 'Desenvolvedores | MIDIAS', description: 'Conheça os estúdios responsáveis pelos jogos do catálogo MIDIAS.' } },
   { path: '/desenvolvedor/:id', el: <DeveloperProfile />, meta: { title: 'Desenvolvedor | MIDIAS', description: 'Conheça o estúdio e os seus jogos disponíveis no catálogo MIDIAS.' } },
   { path: '/equipe', el: <Equipe />, meta: { title: 'Equipe | MIDIAS', description: 'Conheça a equipe do projeto MIDIAS.' } },
+  { path: '/comparador', el: <Comparador />, meta: { title: 'Comparar jogos | MIDIAS', description: 'Compare até 4 jogos lado a lado: preço, plataforma, avaliação e mais.' } },
+  { path: '/genero/:slug', el: <GenrePage />, meta: { title: 'Jogos por gênero | MIDIAS', description: 'Jogos do catálogo MIDIAS filtrados por gênero.' } },
+  { path: '/publisher/:id', el: <PublisherProfile />, meta: { title: 'Publicadora | MIDIAS', description: 'Conheça a publicadora e os seus jogos no catálogo MIDIAS.' } },
+  { path: '/politica-privacidade', el: <PoliticaPrivacidade />, meta: { title: 'Política de privacidade | MIDIAS', description: 'Como a MIDIAS coleta, usa e protege seus dados pessoais.', type: 'article' } },
 ];
 
 function GlobalCatchAll() {

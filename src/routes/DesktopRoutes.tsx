@@ -56,6 +56,8 @@ const ChatAlertsQueue = lazy(() => import("@/desktop/pages/ChatAlertsQueue"));
 const ParametrosSistema = lazy(() => import("@/desktop/pages/ParametrosSistema"));
 const AdminDevelopers = lazy(() => import("@/desktop/pages/AdminDevelopers"));
 const AdminTeamMembers = lazy(() => import("@/desktop/pages/AdminTeamMembers"));
+const AdminChaves = lazy(() => import("@/desktop/pages/AdminChaves"));
+const AdminPublishers = lazy(() => import("@/desktop/pages/AdminPublishers"));
 
 export const desktopRoutes = (
   <>
@@ -69,6 +71,8 @@ export const desktopRoutes = (
       <Route path="categorias" element={<Categorias />} />
       <Route path="desenvolvedores" element={<AdminDevelopers />} />
       <Route path="equipe" element={<AdminTeamMembers />} />
+      <Route path="chaves" element={<AdminChaves />} />
+      <Route path="publishers" element={<AdminPublishers />} />
       <Route path="cupons" element={<Cupons />} />
       <Route path="estoque" element={<Estoque />} />
       <Route path="pedidos" element={<PedidosOnline />} />

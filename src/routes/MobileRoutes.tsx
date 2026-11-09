@@ -31,6 +31,7 @@ const MTutoriais = lazy(() => import("@/mobile/pages/MTutoriais"));
 const MNotificacoes = lazy(() => import("@/mobile/pages/MNotificacoes"));
 const MTutorial = lazy(() => import("@/mobile/pages/MTutorial"));
 const MForumComunidade = lazy(() => import("@/mobile/pages/MForumComunidade"));
+const MSalvos = lazy(() => import("@/mobile/pages/MSalvos"));
 const MNotFound = lazy(() => import("@/mobile/pages/MNotFound"));
 const VendedorConfig = lazy(() => import("@/pages/VendedorConfig"));
 
@@ -63,6 +64,7 @@ export const mobileRoutes = (
     <Route path="/m/config/bloqueados" element={wrap(protect(<MBlockedUsers />))} />
     <Route path="/m/trocas" element={wrap(protect(<MTrocas />))} />
     <Route path="/m/favoritos" element={wrap(protect(<MFavoritos />))} />
+    <Route path="/m/salvos" element={wrap(protect(<MSalvos />))} />
     <Route path="/m/amigos" element={wrap(protect(<MFriends />))} />
     <Route path="/m/friends" element={wrap(protect(<MFriends />))} />
     <Route path="/m/biblioteca-social" element={wrap(protect(<MSocialLibrary />))} />
