@@ -53,6 +53,8 @@ const Comparador = lazy(() => import("@/pages/Comparador"));
 const GenrePage = lazy(() => import("@/pages/GenrePage"));
 const PublisherProfile = lazy(() => import("@/pages/PublisherProfile"));
 const PoliticaPrivacidade = lazy(() => import("@/pages/PoliticaPrivacidade"));
+const ListasCuradas = lazy(() => import("@/pages/ListasCuradas"));
+const ListaDetalhe = lazy(() => import("@/pages/ListaDetalhe"));
 
 type Meta = { title: string; description: string; type?: 'website' | 'profile' | 'article' | 'product' };
 
@@ -88,6 +90,8 @@ const entries: { path: string; el: React.ReactNode; meta: Meta }[] = [
   { path: '/perfil/:userId/jogo/:productId/opniao/:opinionId/conversa/:convId', el: <ProtectedRoute><OpinionConversation /></ProtectedRoute>, meta: { title: 'Conversa | MIDIAS', description: 'Conversa privada sobre uma opinião publicada na comunidade.' } },
   { path: '/amigo/:userId', el: <ProtectedRoute><FriendProfile /></ProtectedRoute>, meta: { title: 'Perfil de amigo | MIDIAS', description: 'Biblioteca, favoritos e atividade recente do seu amigo no MIDIAS.', type: 'profile' } },
   { path: '/bundle/:id', el: <BundleDetail />, meta: { title: 'Bundle de jogos | MIDIAS', description: 'Pacotes de jogos com preço fechado e economia em relação à compra separada.', type: 'product' } },
+  { path: '/listas', el: <ListasCuradas />, meta: { title: 'Listas de jogos | MIDIAS', description: 'Listas de jogos selecionados pela comunidade e pela equipe.' } },
+  { path: '/lista/:id', el: <ListaDetalhe />, meta: { title: 'Lista de jogos | MIDIAS', description: 'Jogos selecionados nesta lista; salve ou siga com sua conta.' } },
   { path: '/biblioteca/:productId', el: <ProtectedRoute><BibliotecaJogo /></ProtectedRoute>, meta: { title: 'Meu jogo na biblioteca | MIDIAS', description: 'Status, etiquetas, diário e sua avaliação deste jogo da sua biblioteca.' } },
   { path: '/carrinho', el: <Carrinho />, meta: { title: 'Carrinho | MIDIAS', description: 'Revise os jogos do seu carrinho, aplique cupons e siga para o checkout.' } },
   { path: '/checkout', el: <ProtectedRoute><Checkout /></ProtectedRoute>, meta: { title: 'Checkout | MIDIAS', description: 'Finalize seu pedido escolhendo Pix com desconto ou cartão parcelado.' } },

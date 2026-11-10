@@ -25,3 +25,13 @@
 - Tournament forms write explicit live-schema fields, resolve games through product_id, and read registration timestamps as joined_at (waitlists use created_at); this avoids legacy-field failures.
 - Tournament stream history is derived from persisted tournament_live_events rather than a separate assumed history table; public pages never query nonexistent resources.
 - Key search and publisher pagination operate only on records already authorized and loaded by their management screens, using shared catalog-list helpers; navigation aliases redirect to the existing permission-protected canonical route.
+- Bundle gallery records synchronize persisted bundle cover/images through a database trigger; this keeps admin uploads and public carousels consistent.
+- Order transitions and privacy changes write immutable history through database triggers; customer refund requests create support tickets, never change order status.
+- List saves/follows are user-scoped database records; public follower counts expose only aggregates, not follower identities.
+- Price alerts are claimed atomically in the database and reset only when the target changes; this prevents concurrent devices from repeating the same alert.
+- Presence timestamps live in private user_presence records with authenticated heartbeats and privacy-filtered RPC reads; direct profile reads cannot bypass presence preferences.
+- Category moves use one permission-checked transaction; this prevents partial reordering and concurrent lost swaps.
+- Review comments reference either a short review or a complete review and an immutable same-review parent; database policies apply equally to root comments and replies.
+- Data deletion requests are durable, idempotent, owner-authenticated workflows completed only by full administrators; the UI must not simulate identity emails or promise automatic erasure.
+- Exposed RPC wrappers use SECURITY INVOKER over permission-checked implementations in app_private; trigger functions are not directly executable by application roles.
+- Forum reactions reuse forum_post_likes with a reaction type and the existing count trigger; changing emoji does not remove and reinsert the user's reaction.

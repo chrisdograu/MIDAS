@@ -170,7 +170,7 @@ export default function Catalogo() {
   const { data: dbCategories = [] } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      const { data } = await supabase.from('categorias').select('name').order('name');
+      const { data } = await supabase.from('categorias').select('name').order('sort_order').order('name');
       return data ? ['Todos', ...data.map(c => c.name)] : ['Todos'];
     },
     staleTime: 10 * 60_000,

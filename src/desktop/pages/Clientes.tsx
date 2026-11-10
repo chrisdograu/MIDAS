@@ -17,6 +17,7 @@ import EstadoVazio from '@/components/EstadoVazio';
 import { formatCurrency, formatDate, formatRelativeTime } from '@/lib/format';
 import { adminLog } from '../lib/adminLog';
 import { toast } from 'sonner';
+import DataDeletionRequests from '../components/DataDeletionRequests';
 
 interface Cliente {
   id: string; display_name: string | null; phone: string | null; cpf: string | null;
@@ -315,6 +316,8 @@ export default function Clientes() {
           )}
         </CardContent>
       </Card>
+
+      <DataDeletionRequests />
 
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={(o) => { setDetailOpen(o); if (!o) setSelectedCliente(null); }}>

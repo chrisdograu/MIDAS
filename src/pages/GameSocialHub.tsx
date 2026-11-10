@@ -20,6 +20,7 @@ import EstadoVazio from '@/components/EstadoVazio';
 import { formatDate, formatDateTime } from '@/lib/format';
 import { toast } from 'sonner';
 import { dbWrite } from '@/lib/dbWrite';
+import { Button } from '@/components/ui/button';
 
 type Tab = 'biblioteca' | 'reviews' | 'reviewsCompletas' | 'screenshots' | 'discussoes' | 'historico';
 type SortKey = 'recent' | 'liked' | 'trending' | 'close';
@@ -151,12 +152,13 @@ function useReactions(postId: string) {
   const { user } = useAuth();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['post-reactions', postId],
+    queryKey: ['post-reactions', postId, user?.id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('post_reactions')
-        .select('type, user_id')
+      const { data, error } = await supabase
+        .from('forum_post_likes')
+        .select('reaction_type, user_id')
         .eq('post_id', postId);
+      if (error) throw error;
       
       const counts: Record<ReactionType, number> = { 
         like: 0, love: 0, laugh: 0, wow: 0, sad: 0, angry: 0 
@@ -164,11 +166,11 @@ function useReactions(postId: string) {
       let userReaction: ReactionType | null = null;
       
       (data || []).forEach((r: any) => {
-        if (r.type in counts) {
-          counts[r.type as ReactionType] = (counts[r.type as ReactionType] || 0) + 1;
+        if (r.reaction_type in counts) {
+          counts[r.reaction_type as ReactionType] = (counts[r.reaction_type as ReactionType] || 0) + 1;
         }
         if (r.user_id === user?.id) {
-          userReaction = r.type as ReactionType;
+          userReaction = r.reaction_type as ReactionType;
         }
       });
       
@@ -189,31 +191,31 @@ function useReactions(postId: string) {
       if (data?.userReaction === type) {
         await dbWrite(
           supabase
-            .from('post_reactions')
+            .from('forum_post_likes')
             .delete()
             .eq('post_id', postId)
             .eq('user_id', user.id)
-            .eq('type', type)
+            .eq('reaction_type', type)
         );
       } else {
-        // Se reagiu com outro tipo, troca
+        // Troca o tipo sem remover a curtida ou alterar o contador.
         if (data?.userReaction) {
           await dbWrite(
             supabase
-              .from('post_reactions')
-              .delete()
+              .from('forum_post_likes')
+              .update({ reaction_type: type })
               .eq('post_id', postId)
               .eq('user_id', user.id)
           );
-        }
-        await dbWrite(
+        } else await dbWrite(
           supabase
-            .from('post_reactions')
-            .insert({ post_id: postId, user_id: user.id, type })
+            .from('forum_post_likes')
+            .insert({ post_id: postId, user_id: user.id, reaction_type: type })
         );
       }
       
       queryClient.invalidateQueries({ queryKey: ['post-reactions', postId] });
+      queryClient.invalidateQueries({ queryKey: ['gsh-posts'] });
     },
   });
 
@@ -711,7 +713,7 @@ function PostCard({ post, productId }: { post: any; productId?: string }) {
         </Link>
         <span className="text-[10px] text-muted-foreground">{formatDate(post.created_at)}</span>
         <span className="ml-auto text-[10px] text-muted-foreground flex items-center gap-1">
-          <Heart className="h-3 w-3" /> {post.likes_count || 0}
+          <Heart className="h-3 w-3" /> {Object.values(reactions).reduce((sum, value) => sum + value, 0)}
         </span>
       </div>
       <SpoilerGuard

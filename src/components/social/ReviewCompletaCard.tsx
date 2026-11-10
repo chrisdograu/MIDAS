@@ -192,42 +192,9 @@ export default function ReviewCompletaCard({ review }: { review: ReviewCompletaD
     if (error) { toast.error('Não foi possível carregar os comentários'); setLoadingComments(false); return; }
     const rawComments = (data || []) as any[];
 
-    // ─── REGRA DE VISIBILIDADE (GRAFO DE AMIZADES) ──────────────────────
-    // Comentário visível SE:
-    // 1. Usuário é amigo do autor do review OU é o autor
-    // 2. Usuário é amigo do autor do comentário OU é o autor do comentário
-
-    if (user) {
-      // Buscar amigos do usuário atual
-      const { data: friends } = await supabase
-        .from('v_friendships')
-        .select('friend_id')
-        .eq('user_id', user.id);
-      const friendIds = new Set((friends || []).map((f: any) => f.friend_id));
-      friendIds.add(user.id); // Usuário vê os próprios comentários
-
-      // Buscar amigos do autor da review
-      const { data: authorFriends } = await supabase
-        .from('v_friendships')
-        .select('friend_id')
-        .eq('user_id', review.user_id);
-      const authorFriendIds = new Set((authorFriends || []).map((f: any) => f.friend_id));
-      authorFriendIds.add(review.user_id);
-
-      const filtered = rawComments.filter(c => {
-        const isFriendOfAuthor = friendIds.has(review.user_id) || review.user_id === user.id;
-        const isFriendOfCommenter = friendIds.has(c.user_id) || c.user_id === user.id;
-        // Só mostra se o usuário é amigo do autor E amigo do comentarista
-        return isFriendOfAuthor && isFriendOfCommenter;
-      });
-
-      setComments(filtered);
-      setCommentCount(filtered.length);
-    } else {
-      // Usuário deslogado: não vê comentários
-      setComments([]);
-      setCommentCount(0);
-    }
+    // O banco aplica a mesma privacidade a comentários raiz e respostas.
+    setComments(rawComments);
+    setCommentCount(rawComments.length);
 
     setLoadingComments(false);
   }, [review.id, review.user_id, user, showComments]);

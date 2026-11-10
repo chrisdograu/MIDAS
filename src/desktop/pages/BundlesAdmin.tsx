@@ -297,7 +297,7 @@ export default function BundlesAdmin() {
 
   // GAP-D55: Ver na loja
   const viewInStore = (bundleId: string) => {
-    window.open(`/bundles/${bundleId}`, '_blank');
+    window.open(`/bundle/${bundleId}`, '_blank');
   };
 
   // GAP-D56: Histórico de alterações
