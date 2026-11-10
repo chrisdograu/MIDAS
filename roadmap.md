@@ -1,5 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
+- [ ] Implementar os pontos 1–10 do documento: galeria de pacotes, histórico de pedidos, curtidas, listas salvas/seguidas, auditoria de privacidade, alertas únicos de preço, última atividade, ordenação de categorias, respostas aninhadas e solicitações de exclusão.
+- [ ] Validar os pontos 1–10 com testes e consultas ao banco; registrar os limites da verificação autenticada no Supabase externo.
 - [x] Corrigir Salvos no celular (acesso e posts gerais), Chaves no painel (importação e busca) e Publicadoras (menu, endereço em português e paginação); 99 testes passaram, menus e controles verificados com Chris conectado, post real salvo/reaberto/removido sem alterar o estado original. Nenhuma chave artificial foi importada; paginação com 21 registros coberta por teste isolado.
 - [ ] Ensaiar o roteiro completo com as contas reais, corrigir bloqueios confirmados e deixar os dados reutilizáveis sem apagar histórico legítimo; registrar resultados e limites.
 - [ ] Acrescentar torneios de demonstração com jogos e contas reais existentes, sem novas contas; verificar leitura pública, inscrição e grupo mobile, registrando limites dos testes autenticados.
