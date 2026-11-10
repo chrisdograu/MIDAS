@@ -3,12 +3,14 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { orderStatusTone } from '@/lib/semanticTone';
 import { formatCurrency, formatDateTime } from '@/lib/format';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Printer, Share2, Package, MapPin, Clock, RefreshCw, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { requestOrderRefund } from '@/lib/orderSupport';
 
 // GAP-OD01: Status de entrega
 interface TrackingEvent {
@@ -36,23 +38,31 @@ export default function OrderDetailModal({
   const { user } = useAuth();
   const [refunding, setRefunding] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [history, setHistory] = useState<TrackingEvent[]>([]);
+  const [historyError, setHistoryError] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  useEffect(() => {
+    setHistory([]);
+    setHistoryError(false);
+    if (!pedido?.id) return;
+    let cancelled = false;
+    setLoadingHistory(true);
+    void supabase.from('pedido_status_history').select('status, note, created_at')
+      .eq('order_id', pedido.id).order('created_at').then(({ data, error }) => {
+        if (cancelled) return;
+        setHistoryError(Boolean(error));
+        setHistory((data || []).map(row => ({ status: orderStatusTone(row.status).label,
+          description: row.note || 'Alteração registrada', timestamp: row.created_at })));
+        setLoadingHistory(false);
+      });
+    return () => { cancelled = true; };
+  }, [pedido?.id, user?.id]);
 
   if (!pedido) return null;
   const s = orderStatusTone(pedido.status);
-  const isDelivered = pedido.status === 'entregue' || pedido.status === 'finalizado';
-  const isRefundable = allowRefund && 
-    (pedido.status === 'entregue' || pedido.status === 'finalizado') && 
-    !pedido.refunded;
-
-  // GAP-OD01: Tracking events mock
-  const trackingEvents: TrackingEvent[] = pedido.tracking_events || [
-    { status: 'Pedido confirmado', description: 'Seu pedido foi confirmado', timestamp: pedido.created_at },
-    { status: 'Em preparação', description: 'Seu pedido está sendo preparado', timestamp: new Date(new Date(pedido.created_at).getTime() + 60 * 60 * 1000).toISOString() },
-    ...(isDelivered ? [
-      { status: 'Enviado', description: 'Seu pedido foi enviado', timestamp: new Date().toISOString() },
-      { status: 'Entregue', description: 'Seu pedido foi entregue', timestamp: new Date().toISOString() },
-    ] : []),
-  ];
+  const isRefundable = allowRefund && pedido.status !== 'refunded' && pedido.status !== 'cancelled';
+  const trackingEvents = history;
 
   // GAP-OD02: Solicitar reembolso
   const handleRefund = async () => {
@@ -60,24 +70,8 @@ export default function OrderDetailModal({
     setRefunding(true);
     
     try {
-      const { error } = await supabase
-        .from('pedidos')
-        .update({ status: 'reembolsado', refunded_at: new Date().toISOString() })
-        .eq('id', pedido.id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      // Registrar no histórico
-      await supabase
-        .from('order_history')
-        .insert({
-          order_id: pedido.id,
-          status: 'reembolsado',
-          note: 'Reembolso solicitado pelo cliente'
-        });
-
-      toast.success('Reembolso solicitado com sucesso!');
+      await requestOrderRefund(pedido.id, 'Reembolso solicitado pelo cliente na página do pedido.');
+      toast.success('Solicitação enviada ao atendimento; o pedido ainda não foi reembolsado.');
       onClose();
     } catch {
       toast.error('Erro ao solicitar reembolso');
@@ -164,6 +158,9 @@ export default function OrderDetailModal({
               <span className="text-xs font-semibold">Rastreamento</span>
             </div>
             <div className="space-y-2">
+              {loadingHistory && <p className="text-xs text-muted-foreground">Carregando histórico...</p>}
+              {historyError && <p className="text-xs text-destructive">Não foi possível carregar o histórico.</p>}
+              {!loadingHistory && !historyError && history.length === 0 && <p className="text-xs text-muted-foreground">Sem transições registradas.</p>}
               {trackingEvents.map((event, index) => {
                 const isLast = index === trackingEvents.length - 1;
                 const isActive = event.status === 'Entregue' || isLast;
@@ -238,7 +235,7 @@ export default function OrderDetailModal({
             <>
               <Separator />
               <div className="flex justify-end">
-                <button
+                <Button variant="outline"
                   onClick={handleRefund}
                   disabled={refunding}
                   className="px-4 py-2 rounded-lg bg-destructive/10 text-destructive text-sm font-semibold hover:bg-destructive/20 transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -248,7 +245,7 @@ export default function OrderDetailModal({
                   ) : (
                     'Solicitar Reembolso'
                   )}
-                </button>
+                </Button>
               </div>
             </>
           )}

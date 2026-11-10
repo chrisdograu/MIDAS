@@ -12,27 +12,10 @@ import { GameCardGridSkeleton } from '@/components/skeletons';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
+import { claimPriceAlerts } from '@/lib/priceAlerts';
 
 type SortKey = 'recent' | 'title' | 'price';
 type FilterKey = 'all' | 'on_sale' | 'target_reached';
-
-// GAP-130, GAP-482: Função para verificar quedas de preço
-async function checkPriceDrops(favorites: string[], currentPrices: Record<string, number>) {
-  const { data } = await supabase
-    .from('favoritos')
-    .select('product_id, target_price, price_alert_sent')
-    .in('product_id', favorites)
-    .not('target_price', 'is', null);
-  
-  const drops: { productId: string; currentPrice: number; targetPrice: number }[] = [];
-  (data || []).forEach((row: any) => {
-    const current = currentPrices[row.product_id];
-    if (current && current <= row.target_price && !row.price_alert_sent) {
-      drops.push({ productId: row.product_id, currentPrice: current, targetPrice: row.target_price });
-    }
-  });
-  return drops;
-}
 
 // GAP-133, GAP-485: Componente de comparação de preço
 function PriceComparison({ currentPrice, targetPrice }: { currentPrice: number; targetPrice: number | null }) {
@@ -81,28 +64,23 @@ export default function Favoritos() {
 
   // GAP-130, GAP-482: Verificar quedas de preço
   useEffect(() => {
-    if (favGames.length === 0) return;
-    
-    const prices: Record<string, number> = {};
-    favGames.forEach(g => { prices[g.id] = g.price; });
-    setCurrentPrices(prices);
-    
-    // Verificar drops a cada 30 segundos (em produção seria um job)
-    const interval = setInterval(async () => {
-      const drops = await checkPriceDrops(favoritos, prices);
-      drops.forEach(drop => {
-        toast.info(`🎉 ${favGames.find(g => g.id === drop.productId)?.title} atingiu seu preço-alvo!`, {
-          duration: 10000,
-          action: {
-            label: 'Ver',
-            onClick: () => window.location.href = `/jogo/${drop.productId}`
-          }
+    if (!user || favGames.length === 0) return;
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const drops = await claimPriceAlerts();
+        if (cancelled) return;
+        drops.forEach(drop => {
+          toast.info(`🎉 ${favGames.find(g => g.id === drop.product_id)?.title || 'Um favorito'} atingiu seu preço-alvo!`, {
+            duration: 10000, action: { label: 'Ver', onClick: () => window.location.href = `/jogo/${drop.product_id}` },
+          });
         });
-      });
-    }, 30000);
-    
-    return () => clearInterval(interval);
-  }, [favGames, favoritos]);
+      } catch { /* Uma falha de consulta não marca alertas como enviados. */ }
+    };
+    void check();
+    const interval = setInterval(check, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [favGames, user?.id]);
 
   useEffect(() => {
     if (loading) return;
@@ -181,7 +159,7 @@ export default function Favoritos() {
     setSavingId(productId);
     const { error } = await supabase
       .from('favoritos')
-      .update({ target_price: value, price_alert_sent: false })
+      .update({ target_price: value })
       .eq('user_id', user.id)
       .eq('product_id', productId);
     setSavingId(null);

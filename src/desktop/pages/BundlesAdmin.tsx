@@ -163,7 +163,6 @@ export default function BundlesAdmin() {
       price: form.price, 
       image_url: form.image_url || null, 
       is_active: form.is_active,
-      discount_percent: form.discount_percent || 0,
     };
 
     if (editing?.id) {
@@ -196,7 +195,12 @@ export default function BundlesAdmin() {
       is_primary: isPrimary,
     });
     setUploadingImage(false);
-    if (error) { toast.error('Erro ao salvar imagem'); return null; }
+    if (error) {
+      await supabase.storage.from('product-images').remove([path]);
+      toast.error('Erro ao salvar imagem'); return null;
+    }
+    await load();
+    if (isPrimary) setForm(prev => ({ ...prev, image_url: publicUrl }));
     return publicUrl;
   };
 
@@ -204,16 +208,30 @@ export default function BundlesAdmin() {
     const { error } = await supabase.from('bundle_images').delete().eq('id', imageId);
     if (error) { toast.error('Erro ao remover imagem'); return; }
     toast.success('Imagem removida');
-    loadImages(bundleImages[0]?.bundle_id || '');
+    if (editing?.id) {
+      await loadImages(editing.id);
+      const { data } = await supabase.from('bundles').select('image_url').eq('id', editing.id).single();
+      setForm(prev => ({ ...prev, image_url: data?.image_url || '' }));
+      await load();
+    }
+  };
+
+  const setPrimaryImage = async (image: BundleImage) => {
+    const { error } = await supabase.rpc('set_bundle_primary_image', { _image_id: image.id });
+    if (error) { toast.error('Não foi possível alterar a capa'); return; }
+    setForm(prev => ({ ...prev, image_url: image.image_url }));
+    if (editing?.id) await loadImages(editing.id);
+    await load();
   };
 
   const loadImages = async (bundleId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('bundle_images')
       .select('*')
       .eq('bundle_id', bundleId)
       .order('is_primary', { ascending: false })
       .order('created_at');
+    if (error) { toast.error('Não foi possível carregar a galeria'); return; }
     setBundleImages(data || []);
   };
 
@@ -468,12 +486,13 @@ export default function BundlesAdmin() {
                     <div key={img.id} className="relative w-16 h-16 rounded border border-border overflow-hidden">
                       <img src={img.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                       {img.is_primary && <Badge className="absolute top-0 right-0 text-[8px] p-0.5">Principal</Badge>}
-                      <button 
+                      <Button variant="destructive" size="icon" aria-label="Remover foto"
                         onClick={() => removeBundleImage(img.id)}
                         className="absolute top-0 right-0 w-5 h-5 bg-destructive text-destructive-foreground rounded-bl rounded-tr flex items-center justify-center"
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </Button>
+                      {!img.is_primary && <Button variant="secondary" size="icon" className="absolute bottom-0 left-0 h-5 w-5" title="Usar como capa" aria-label="Usar como capa" onClick={() => setPrimaryImage(img)}><Star className="h-3 w-3" /></Button>}
                     </div>
                   ))}
                   <label className="w-16 h-16 rounded border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary">

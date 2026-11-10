@@ -23,6 +23,7 @@ import GuardianLinkSection from '@/components/perfil/GuardianLinkSection';
 import LoginHistoryList from '@/components/perfil/LoginHistoryList';
 import { formatDateTime } from '@/lib/format';
 import { dbWrite } from '@/lib/dbWrite';
+import { requestMyDataDeletion } from '@/lib/dataDeletion';
 
 // GAP-572: Calcular tempo restante de pausa
 function getPauseRemaining(pausedAt: string | null): string | null {
@@ -70,21 +71,6 @@ function exportAsCSV(data: any[], filename: string) {
   toast.success('CSV exportado!');
 }
 
-// GAP-574: Esquecimento de dados (GDPR)
-async function requestDataForget(userId: string): Promise<void> {
-  // Marca a conta para esquecimento em 30 dias (período de carência)
-  const ok = await dbWrite(
-    supabase
-      .from('profiles')
-      .update({ 
-        forget_requested_at: new Date().toISOString(),
-        forget_scheduled_for: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      })
-      .eq('id', userId)
-  );
-  if (!ok) throw new Error('forget failed');
-}
-
 export default function PrivacidadeCentral() {
   const { user, signOut } = useAuth();
   const [isPrivate, setIsPrivate] = useState(false);
@@ -102,9 +88,6 @@ export default function PrivacidadeCentral() {
   const [pausing, setPausing] = useState(false);
   const [hideAdult, setHideAdult] = useState(false);
   
-  // GAP-570: Confirmação por e-mail para exclusão
-  const [emailConfirmStep, setEmailConfirmStep] = useState<'idle' | 'sending' | 'sent' | 'confirming'>('idle');
-  const [emailConfirmCode, setEmailConfirmCode] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   // GAP-572: Tempo restante de pausa
@@ -121,7 +104,7 @@ export default function PrivacidadeCentral() {
   useEffect(() => {
     if (!user) return;
     supabase.from('profiles')
-      .select('is_private, require_follow_approval, ban_reason_public, banned_until, is_paused, hide_adult_content, paused_at, forget_requested_at, forget_scheduled_for')
+      .select('is_private, require_follow_approval, ban_reason_public, banned_until, is_paused, hide_adult_content, paused_at')
       .eq('id', user.id).maybeSingle().then(({ data }) => {
         const d = data as any;
         if (d) {
@@ -132,10 +115,17 @@ export default function PrivacidadeCentral() {
           setIsPaused(!!d.is_paused);
           setHideAdult(!!d.hide_adult_content);
           setPausedAt(d.paused_at || null);
-          setForgetRequested(!!d.forget_requested_at);
-          setForgetScheduledFor(d.forget_scheduled_for || null);
         }
         setLoaded(true);
+      });
+    setForgetRequested(false);
+    setForgetScheduledFor(null);
+    void supabase.from('data_deletion_requests').select('status, scheduled_for')
+      .eq('user_id', user.id).in('status', ['solicitado', 'agendado']).order('requested_at', { ascending: false })
+      .limit(1).maybeSingle().then(({ data, error }) => {
+        if (error) { toast.error('Não foi possível consultar sua solicitação de exclusão'); return; }
+        setForgetRequested(Boolean(data));
+        setForgetScheduledFor(data?.scheduled_for ?? null);
       });
     
     // GAP-571: Buscar histórico de contestação
@@ -241,61 +231,20 @@ export default function PrivacidadeCentral() {
     } finally { setExporting(false); }
   };
 
-  // GAP-570: Enviar código de confirmação por e-mail
-  const sendDeleteConfirmation = async () => {
-    setEmailConfirmStep('sending');
-    try {
-      // Simular envio de código (em produção, seria um e-mail real)
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      localStorage.setItem('delete_confirm_code', code);
-      localStorage.setItem('delete_confirm_expiry', Date.now() + 600000 + '');
-      
-      // Em produção, enviar e-mail com o código
-      // await supabase.functions.invoke('send-delete-code', { body: { email: user?.email, code } });
-      
-      setEmailConfirmStep('sent');
-      toast.info(`Código enviado para ${user?.email} (simulado: ${code})`);
-    } catch {
-      toast.error('Erro ao enviar código de confirmação');
-      setEmailConfirmStep('idle');
-    }
-  };
-
-  // GAP-570: Confirmar código de exclusão
+  // Solicitação autenticada; não inventa confirmação por e-mail nem apaga a conta no navegador.
   const confirmDelete = async () => {
-    setEmailConfirmStep('confirming');
+    if (!user || deleting) return;
+    setDeleting(true);
     try {
-      const storedCode = localStorage.getItem('delete_confirm_code');
-      const expiry = parseInt(localStorage.getItem('delete_confirm_expiry') || '0');
-      
-      if (!storedCode || Date.now() > expiry) {
-        toast.error('Código expirado. Solicite um novo.');
-        setEmailConfirmStep('idle');
-        return;
-      }
-      
-      if (emailConfirmCode !== storedCode) {
-        toast.error('Código incorreto.');
-        setEmailConfirmStep('sent');
-        return;
-      }
-      
-      // Código correto → proceder com exclusão
-      setDeleting(true);
-      const { error } = await supabase.rpc('delete_my_account' as any);
-      if (error) { setDeleting(false); return toast.error(error.message); }
-      
-      localStorage.removeItem('delete_confirm_code');
-      localStorage.removeItem('delete_confirm_expiry');
-      
-      toast.success('Conta anonimizada. Sentimos sua saída.');
+      const result = await requestMyDataDeletion();
+      setForgetRequested(true);
+      setForgetScheduledFor(result.scheduled_for);
+      toast.success('Solicitação registrada para análise e anonimização pela equipe.');
       setShowDeleteDialog(false);
-      await signOut();
     } catch {
-      toast.error('Erro ao confirmar exclusão');
+      toast.error('Não foi possível registrar a solicitação');
     } finally {
       setDeleting(false);
-      setEmailConfirmStep('idle');
     }
   };
 
@@ -303,10 +252,10 @@ export default function PrivacidadeCentral() {
   const handleForgetRequest = async () => {
     if (!user) return;
     try {
-      await requestDataForget(user.id);
+      const result = await requestMyDataDeletion();
       setForgetRequested(true);
-      setForgetScheduledFor(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
-      toast.success('Solicitação de esquecimento registrada. Seus dados serão removidos em 30 dias.');
+      setForgetScheduledFor(result.scheduled_for);
+      toast.success('Solicitação registrada para análise e anonimização pela equipe.');
     } catch {
       toast.error('Erro ao solicitar esquecimento de dados');
     }
@@ -327,8 +276,6 @@ export default function PrivacidadeCentral() {
   const deleteAccount = async () => {
     // GAP-570: Agora usa o fluxo de confirmação por e-mail
     setShowDeleteDialog(true);
-    setEmailConfirmStep('idle');
-    setEmailConfirmCode('');
   };
 
   const isBanned = bannedUntil && new Date(bannedUntil) > new Date();
@@ -425,9 +372,9 @@ export default function PrivacidadeCentral() {
         </Button>
       </section>
 
-      {/* GAP-574: Esquecimento de dados */}
+      {/* Solicitação persistida de exclusão */}
       <section className="bg-card border border-border rounded-xl p-5 mb-6">
-        <Row icon={<Eraser className="h-4 w-4 text-warning" />} title="Direito ao esquecimento (GDPR)" desc="Solicite a remoção completa de seus dados. Seus dados serão anonimizados em até 30 dias.">
+        <Row icon={<Eraser className="h-4 w-4 text-warning" />} title="Direito ao esquecimento (LGPD)" desc="Solicite a análise e anonimização dos seus dados pela equipe, com prazo registrado de 30 dias. Registros necessários por obrigação legal podem ser preservados.">
           {forgetRequested ? (
             <div className="flex items-center gap-2 text-success">
               <CheckCircle2 className="h-4 w-4" />
@@ -469,74 +416,27 @@ export default function PrivacidadeCentral() {
       <section className="bg-card border border-destructive/40 rounded-xl p-5 mb-6 flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold flex items-center gap-1.5 text-destructive"><Trash2 className="h-4 w-4" /> Excluir minha conta</p>
-          <p className="text-xs text-muted-foreground">Seu perfil (nome, e-mail, CPF, telefone) é anonimizado. Reviews e posts ficam com identificação "usuário removido".</p>
+          <p className="text-xs text-muted-foreground">Solicite a anonimização de seu perfil. A equipe acompanha e conclui o pedido de exclusão.</p>
         </div>
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogTrigger asChild>
-            <Button size="sm" variant="destructive" disabled={!user}>Excluir</Button>
+            <Button size="sm" variant="destructive" disabled={!user || forgetRequested}>Solicitar exclusão</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirme sua identidade</AlertDialogTitle>
+              <AlertDialogTitle>Solicitar exclusão de dados?</AlertDialogTitle>
               <AlertDialogDescription>
-                Para excluir sua conta, precisamos confirmar que é você. 
-                Um código de verificação foi enviado para <strong>{user?.email}</strong>.
+                Seu pedido será registrado com prazo de 30 dias para a equipe analisar e concluir a anonimização.
+                Nenhum dado será apagado ao confirmar esta solicitação.
               </AlertDialogDescription>
             </AlertDialogHeader>
             
-            {emailConfirmStep === 'idle' && (
-              <Button onClick={sendDeleteConfirmation} className="w-full">
-                <Mail className="h-4 w-4 mr-2" /> Enviar código de verificação
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+              <Button variant="destructive" disabled={deleting} onClick={confirmDelete}>
+                {deleting && <Loader2 className="h-4 w-4 animate-spin" />}Confirmar solicitação
               </Button>
-            )}
-            
-            {emailConfirmStep === 'sending' && (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <span className="ml-2 text-sm text-muted-foreground">Enviando código...</span>
-              </div>
-            )}
-            
-            {emailConfirmStep === 'sent' && (
-              <>
-                <div className="space-y-2">
-                  <Label>Digite o código recebido por e-mail</Label>
-                  <input
-                    type="text"
-                    value={emailConfirmCode}
-                    onChange={(e) => setEmailConfirmCode(e.target.value)}
-                    placeholder="000000"
-                    className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-center text-2xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    maxLength={6}
-                  />
-                  <button 
-                    onClick={sendDeleteConfirmation}
-                    className="text-xs text-primary hover:underline"
-                    disabled={(emailConfirmStep as string) === 'sending'}
-                  >
-                    Reenviar código
-                  </button>
-                </div>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={confirmDelete} 
-                    disabled={emailConfirmCode.length !== 6 || deleting}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    {deleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Confirmar exclusão
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </>
-            )}
-            
-            {emailConfirmStep === 'confirming' && (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <span className="ml-2 text-sm text-muted-foreground">Confirmando...</span>
-              </div>
-            )}
+            </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </section>

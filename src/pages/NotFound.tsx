@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, Smartphone, Search, ArrowRight, Gamepad2, Store, Users, Trophy, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 // GAP-526: Registrar tentativa de acesso (para análise)
 async function logNotFoundAttempt(path: string) {
@@ -10,17 +9,6 @@ async function logNotFoundAttempt(path: string) {
     // Aqui apenas registramos no console e, se possível, no banco
     console.log(`[404] Tentativa de acesso: ${path} em ${new Date().toISOString()}`);
     
-    // Opção: salvar no banco para análise posterior
-    // Descomente se quiser salvar no banco
-    /*
-    await supabase
-      .from('page_not_found_logs')
-      .insert({ 
-        path, 
-        user_agent: navigator.userAgent,
-        created_at: new Date().toISOString()
-      });
-    */
   } catch {
     // Silencioso — não quebrar a página por causa do log
   }

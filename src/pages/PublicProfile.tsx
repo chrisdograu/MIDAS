@@ -18,6 +18,7 @@ import HighlightsStrip from '@/components/social/HighlightsStrip';
 import { formatCurrency, formatMonthYear, formatRelativeTime } from '@/lib/format';
 import { toast } from 'sonner';
 import { dbWrite } from '@/lib/dbWrite';
+import { useUserPresence } from '@/hooks/useUserPresence';
 
 const JA_JOGUEI = ['ja_joguei', 'zerado', 'jogando', 'pausado', 'abandonado'];
 const formatMemberSince = (iso?: string | null) => {
@@ -322,6 +323,7 @@ export default function PublicProfile() {
   });
 
   const isOwn = user?.id === userId;
+  const { data: presence } = useUserPresence(userId);
 
   useDocumentMeta({
     title: profile?.display_name ? `${profile.display_name} · MIDIAS` : 'Perfil · MIDIAS',
@@ -331,32 +333,11 @@ export default function PublicProfile() {
   });
 
   // GAP-580: Verificar se o usuário está online (4 níveis)
-  const onlineVisibility = (profile as any)?.online_status_visibility || 'friends';
-  const canSeeOnline = canViewContent(
-    onlineVisibility,
-    user?.id,
-    userId || '',
-    isFriend,
-    isCloseFriend,
-    hasException,
-    isOwn
-  );
-  
-  const isUserOnline = canSeeOnline && profile?.last_seen_at 
-    ? new Date(profile.last_seen_at).getTime() > Date.now() - 5 * 60 * 1000
-    : false;
+  const canSeeOnline = presence?.is_online != null;
+  const isUserOnline = presence?.is_online === true;
 
   // GAP-581: Verificar se pode ver última atividade (4 níveis)
-  const lastActivityVisibility = (profile as any)?.last_activity_visibility || 'friends';
-  const canSeeLastActivity = canViewContent(
-    lastActivityVisibility,
-    user?.id,
-    userId || '',
-    isFriend,
-    isCloseFriend,
-    hasException,
-    isOwn
-  );
+  const canSeeLastActivity = Boolean(presence?.last_seen_at);
 
   // Configurações de visibilidade para biblioteca (já existem)
   const libraryVisibility = (profile as any)?.library_visibility || 'friends';
@@ -489,15 +470,15 @@ export default function PublicProfile() {
         <h1 className="text-xl font-bold text-foreground">{profile.display_name || 'Usuário'}</h1>
         
         {/* GAP-580: Online agora + GAP-581: Última atividade */}
-        {canSeeOnline && (
+        {(canSeeOnline || canSeeLastActivity) && (
           <div className="flex items-center justify-center gap-2 mt-1">
-            <div className={`flex items-center gap-1 text-xs ${isUserOnline ? 'text-success' : 'text-muted-foreground'}`}>
+            {canSeeOnline && <div className={`flex items-center gap-1 text-xs ${isUserOnline ? 'text-success' : 'text-muted-foreground'}`}>
               <Circle className={`h-2.5 w-2.5 ${isUserOnline ? 'fill-success' : ''}`} />
               {isUserOnline ? 'Online agora' : 'Offline'}
-            </div>
-            {!isUserOnline && canSeeLastActivity && profile.last_seen_at && (
+            </div>}
+            {!isUserOnline && canSeeLastActivity && presence?.last_seen_at && (
               <span className="text-xs text-muted-foreground">
-                · visto por último {formatRelativeTime(profile.last_seen_at)}
+                · visto por último {formatRelativeTime(presence.last_seen_at)}
               </span>
             )}
           </div>

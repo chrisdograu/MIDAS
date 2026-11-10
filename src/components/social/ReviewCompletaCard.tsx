@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
 export interface ReviewCompletaData {
   id: string;
@@ -41,7 +42,9 @@ export interface ReviewCompletaData {
 interface Comment {
   id: string;
   user_id: string;
-  review_id: string;
+  review_id: string | null;
+  review_completa_id: string | null;
+  parent_id: string | null;
   content: string;
   created_at: string;
   updated_at?: string | null;
@@ -51,6 +54,7 @@ interface Comment {
 // ─── COMPONENTE DE COMENTÁRIO ──────────────────────────────────────────────
 
 function CommentItem({ comment, isOwn }: { comment: Comment; isOwn: boolean }) {
+  const { user } = useAuth();
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [replies, setReplies] = useState<Comment[]>([]);
@@ -58,23 +62,25 @@ function CommentItem({ comment, isOwn }: { comment: Comment; isOwn: boolean }) {
   const [sendingReply, setSendingReply] = useState(false);
 
   const loadReplies = useCallback(async () => {
-    if (replies.length > 0) return;
     setLoadingReplies(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('review_comments')
       .select('*, profile:profiles!user_id(display_name, avatar_url)')
       .eq('parent_id', comment.id)
       .order('created_at', { ascending: true });
-    setReplies((data as any) || []);
+    if (error) toast.error('Não foi possível carregar as respostas');
+    else setReplies((data as any) || []);
     setLoadingReplies(false);
-  }, [comment.id, replies.length]);
+  }, [comment.id]);
+
+  useEffect(() => { void loadReplies(); }, [loadReplies]);
 
   const sendReply = async () => {
-    if (!replyText.trim()) return;
+    if (!user || !replyText.trim() || sendingReply) return;
     setSendingReply(true);
     const { error } = await supabase.from('review_comments').insert({
-      review_id: comment.review_id,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
+      review_completa_id: comment.review_completa_id,
+      user_id: user.id,
       content: replyText.trim(),
       parent_id: comment.id,
     });
@@ -111,12 +117,12 @@ function CommentItem({ comment, isOwn }: { comment: Comment; isOwn: boolean }) {
             )}
           </div>
           <p className="text-xs text-foreground/90 mt-0.5 whitespace-pre-wrap">{comment.content}</p>
-          <button
+          <Button variant="link" size="sm" disabled={!user}
             onClick={() => setShowReply(!showReply)}
             className="text-[10px] text-muted-foreground hover:text-primary mt-1 transition"
           >
             Responder
-          </button>
+          </Button>
           {showReply && (
             <div className="mt-2 flex items-center gap-2">
               <input
@@ -126,13 +132,13 @@ function CommentItem({ comment, isOwn }: { comment: Comment; isOwn: boolean }) {
                 className="flex-1 text-xs bg-background border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
                 onKeyDown={e => e.key === 'Enter' && sendReply()}
               />
-              <button
+              <Button size="icon" aria-label="Enviar resposta"
                 onClick={sendReply}
                 disabled={!replyText.trim() || sendingReply}
                 className="p-1.5 rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
               >
                 <Send className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           )}
           {loadingReplies ? (
@@ -176,13 +182,14 @@ export default function ReviewCompletaCard({ review }: { review: ReviewCompletaD
     setLoadingComments(true);
 
     // Busca comentários raiz (sem parent_id)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('review_comments')
       .select('*, profile:profiles!user_id(display_name, avatar_url)')
-      .eq('review_id', review.id)
+      .eq('review_completa_id', review.id)
       .is('parent_id', null)
       .order('created_at', { ascending: true });
 
+    if (error) { toast.error('Não foi possível carregar os comentários'); setLoadingComments(false); return; }
     const rawComments = (data || []) as any[];
 
     // ─── REGRA DE VISIBILIDADE (GRAFO DE AMIZADES) ──────────────────────
@@ -236,22 +243,10 @@ export default function ReviewCompletaCard({ review }: { review: ReviewCompletaD
   const sendComment = async () => {
     if (!user || !commentText.trim()) return;
 
-    // Verifica se o usuário é amigo do autor da review
-    const { data: isFriend } = await supabase
-      .from('v_friendships')
-      .select('friend_id')
-      .eq('user_id', user.id)
-      .eq('friend_id', review.user_id)
-      .maybeSingle();
-
-    if (!isFriend && user.id !== review.user_id) {
-      toast.error('Apenas amigos do autor podem comentar');
-      return;
-    }
-
+    // A permissão de comentário é validada no banco, inclusive para respostas.
     setSendingComment(true);
     const { error } = await supabase.from('review_comments').insert({
-      review_id: review.id,
+      review_completa_id: review.id,
       user_id: user.id,
       content: commentText.trim(),
     });

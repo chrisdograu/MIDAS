@@ -142,22 +142,10 @@ export default function Categorias() {
 
   // GAP-D66: Reordenar categorias
   const moveCategory = async (id: string, direction: 'up' | 'down') => {
-    const index = categorias.findIndex(c => c.id === id);
-    if (direction === 'up' && index === 0) return;
-    if (direction === 'down' && index === categorias.length - 1) return;
-    
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    const newOrder = [...categorias];
-    [newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]];
-    
-    // Atualizar sort_order no banco
-    for (let i = 0; i < newOrder.length; i++) {
-      await supabase.from('categorias').update({ sort_order: i }).eq('id', newOrder[i].id);
-    }
-    
-    await adminLog({ action: 'categoria_reordenar', entity: 'categorias', payload: { id, direction } });
-    setCategorias(newOrder);
-    toast.success('Ordem atualizada');
+    const { error } = await supabase.rpc('admin_move_category', { _id: id, _direction: direction });
+    if (error) { toast({ title: 'Não foi possível alterar a ordem', description: error.message, variant: 'destructive' }); return; }
+    await fetchCategorias();
+    toast({ title: 'Ordem atualizada' });
   };
 
   const filteredCategorias = useMemo(() => {

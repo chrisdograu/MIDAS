@@ -10,6 +10,7 @@ import PersonalThemePanel from '@/components/perfil/PersonalThemePanel';
 import { dbWrite } from '@/lib/dbWrite';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { loadPrivacyHistory } from '@/lib/privacyAudit';
 
 // Rodada 23 · item 2 — sem opção pública; 'nobody' é bloqueio total.
 type Visibility = 'friends' | 'nobody' | 'private';
@@ -100,17 +101,17 @@ export default function PrivacyTab() {
       setGrants(map);
       
       // GAP-PR02: Carregar histórico
-      const { data: logs } = await supabase
-        .from('privacy_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('changed_at', { ascending: false })
-        .limit(10);
-      setHistory(logs || []);
+      try { setHistory(await loadPrivacyHistory(user.id)); }
+      catch { toast.error('Não foi possível carregar o histórico de privacidade'); }
       
       setLoading(false);
     })();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user || !showHistory) return;
+    void loadPrivacyHistory(user.id).then(setHistory).catch(() => toast.error('Não foi possível carregar o histórico'));
+  }, [user?.id, showHistory, visibility, alwaysHide, hiddenStats, exceptions, grants]);
 
   // GAP-PR03: Carregar lista de amigos para importação
   const loadFriendsForImport = async () => {
@@ -169,12 +170,13 @@ export default function PrivacyTab() {
   };
 
   const search = async () => {
+    if (!user) return;
     if (!query.trim()) { setResults([]); return; }
     const { data } = await supabase
       .from('profiles')
       .select('id, display_name, avatar_url')
       .ilike('display_name', `%${escapeIlikeTerm(query)}%`)
-      .neq('id', user!.id)
+      .neq('id', user.id)
       .limit(8);
     setResults((data as any) || []);
   };

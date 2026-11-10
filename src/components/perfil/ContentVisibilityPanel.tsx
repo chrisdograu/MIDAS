@@ -9,6 +9,7 @@ import { Eye, Loader2, History, Sparkles, Users, UserX, AlertCircle, Check } fro
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { loadPrivacyHistory } from '@/lib/privacyAudit';
 
 type Vis = 'friends' | 'nobody' | 'private';
 
@@ -26,17 +27,6 @@ const PRIVACY_SUGGESTIONS: Record<string, { suggested: Vis; reason: string }> = 
     suggested: 'friends',
     reason: 'Sua jornada gamer é mais divertida compartilhada',
   },
-};
-
-// GAP-CV02: Registrar mudança de visibilidade
-const logVisibilityChange = async (userId: string, field: string, oldValue: string, newValue: string) => {
-  await supabase.from('visibility_logs').insert({
-    user_id: userId,
-    field,
-    old_value: oldValue,
-    new_value: newValue,
-    changed_at: new Date().toISOString(),
-  });
 };
 
 const LEVELS: { id: Vis; label: string; description: string; icon: any }[] = [
@@ -84,14 +74,9 @@ export default function ContentVisibilityPanel({ compact = false }: { compact?: 
   // GAP-CV02: Carregar histórico
   useEffect(() => {
     if (!user || !showHistory) return;
-    supabase
-      .from('visibility_logs')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('changed_at', { ascending: false })
-      .limit(10)
-      .then(({ data }) => setHistory(data || []));
-  }, [user, showHistory]);
+    void loadPrivacyHistory(user.id, FIELDS.map(field => field.col)).then(setHistory)
+      .catch(() => toast.error('Não foi possível carregar o histórico'));
+  }, [user?.id, showHistory, saving]);
 
   const save = async (col: string, value: Vis) => {
     if (!user) return;
@@ -99,9 +84,7 @@ export default function ContentVisibilityPanel({ compact = false }: { compact?: 
     setValues(v => ({ ...v, [col]: value }));
     setSaving(col);
     
-    // GAP-CV02: Registrar mudança
-    await logVisibilityChange(user.id, col, prev, value);
-    
+    // A alteração e o registro de auditoria são uma única transação no banco.
     const { error } = await supabase.from('profiles').update({ [col]: value } as any).eq('id', user.id);
     setSaving(null);
     if (error) {

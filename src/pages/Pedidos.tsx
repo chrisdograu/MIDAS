@@ -12,6 +12,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import SelectSimples from '@/components/SelectSimples';
 import { toast } from 'sonner';
 import { dbWrite } from '@/lib/dbWrite';
+import { requestOrderRefund } from '@/lib/orderSupport';
 
 // GAP-554: Interface para rastreio
 interface TrackingInfo {
@@ -110,20 +111,9 @@ export default function Pedidos() {
     setRefundModal(prev => ({ ...prev, loading: true }));
     
     try {
-      const ok = await dbWrite(
-        supabase
-          .from('pedidos')
-          .update({ 
-            status: 'refunded',
-            refund_reason: refundReason,
-            refund_requested_at: new Date().toISOString(),
-          })
-          .eq('id', refundModal.pedido.id)
-      );
+      await requestOrderRefund(refundModal.pedido.id, refundReason);
       
-      if (!ok) return;
-      
-      toast.success('Reembolso solicitado com sucesso!');
+      toast.success('Solicitação enviada ao atendimento; o pedido ainda não foi reembolsado.');
       setRefundModal({ open: false, pedido: null, loading: false });
       setRefundReason('');
       refetch();

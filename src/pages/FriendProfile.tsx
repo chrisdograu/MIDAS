@@ -23,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, formatDateTime, formatRelativeTime } from '@/lib/format';
 import { toast } from 'sonner';
 import { dbWrite } from '@/lib/dbWrite';
+import { useUserPresence } from '@/hooks/useUserPresence';
 
 type Tab = 'overview' | 'biblioteca' | 'atividade' | 'timeline' | 'estatisticas' | 'amizade';
 
@@ -60,19 +61,7 @@ export default function FriendProfile() {
   });
 
   // GAP-489: Verificar status online
-  const { data: onlineStatus } = useQuery({
-    queryKey: ['online-status', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('last_seen_at, online_status_visibility')
-        .eq('id', userId!)
-        .maybeSingle();
-      return data as { last_seen_at: string | null; online_status_visibility: string | null } | null;
-    },
-    refetchInterval: 30000,
-  });
+  const { data: onlineStatus } = useUserPresence(userId);
 
   // GAP-491: Amigos em comum
   const { data: mutualFriends = [] } = useQuery({
@@ -227,9 +216,7 @@ export default function FriendProfile() {
   };
 
   // Verificar se está online (GAP-489)
-  const isOnline = onlineStatus?.last_seen_at 
-    ? new Date(onlineStatus.last_seen_at).getTime() > Date.now() - 5 * 60 * 1000
-    : false;
+  const isOnline = onlineStatus?.is_online === true;
 
   const accessible = !!user && (user.id === userId || isMutual);
 
@@ -442,9 +429,9 @@ export default function FriendProfile() {
                   </span>
                 )}
                 {/* GAP-492: Última atividade */}
-                {profile.last_seen_at && !isOnline && (
+                {onlineStatus?.last_seen_at && !isOnline && (
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {formatRelativeTime(profile.last_seen_at)}
+                    <Clock className="h-3 w-3" /> {formatRelativeTime(onlineStatus.last_seen_at)}
                   </span>
                 )}
               </div>

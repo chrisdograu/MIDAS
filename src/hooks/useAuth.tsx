@@ -148,6 +148,29 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
   }, [applySession, setupTokenRefresh]);
 
+  useEffect(() => {
+    if (!user || !session?.access_token) return;
+    let lastTouch = 0;
+    const touch = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastTouch < 60_000) return;
+      lastTouch = Date.now();
+      void supabase.rpc('touch_my_presence').then(({ error }) => {
+        if (error) lastTouch = 0;
+      });
+    };
+    touch();
+    const interval = setInterval(touch, 60_000);
+    document.addEventListener('visibilitychange', touch);
+    window.addEventListener('pointerdown', touch);
+    window.addEventListener('keydown', touch);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', touch);
+      window.removeEventListener('pointerdown', touch);
+      window.removeEventListener('keydown', touch);
+    };
+  }, [user?.id, session?.access_token]);
+
   const fetchProfile = async (userId: string) => {
     if (loadedProfileFor.current === userId) return;
     loadedProfileFor.current = userId;
