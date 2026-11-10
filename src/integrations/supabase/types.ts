@@ -283,6 +283,48 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       avaliacoes: {
         Row: {
           achievement_lock: string | null
@@ -760,6 +802,41 @@ export type Database = {
           },
         ]
       }
+      bundle_images: {
+        Row: {
+          bundle_id: string
+          created_at: string
+          id: string
+          image_url: string
+          is_primary: boolean
+          updated_at: string
+        }
+        Insert: {
+          bundle_id: string
+          created_at?: string
+          id?: string
+          image_url: string
+          is_primary?: boolean
+          updated_at?: string
+        }
+        Update: {
+          bundle_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_primary?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_images_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "bundles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bundle_items: {
         Row: {
           bundle_id: string
@@ -826,6 +903,7 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          sort_order: number
         }
         Insert: {
           created_at?: string
@@ -833,6 +911,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          sort_order?: number
         }
         Update: {
           created_at?: string
@@ -840,6 +919,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -1354,6 +1434,97 @@ export type Database = {
         }
         Relationships: []
       }
+      curated_list_follows: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curated_list_follows_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "curated_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curated_list_follows_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curated_list_follows_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curated_list_items: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string
+          notes: string | null
+          product_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id: string
+          notes?: string | null
+          product_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string
+          notes?: string | null
+          product_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curated_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "curated_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curated_list_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       curated_lists: {
         Row: {
           approved_at: string | null
@@ -1412,7 +1583,22 @@ export type Database = {
           updated_at?: string | null
           view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "curated_lists_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curated_lists_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       daily_pick_overrides: {
         Row: {
@@ -1437,6 +1623,71 @@ export type Database = {
           set_by?: string | null
         }
         Relationships: []
+      }
+      data_deletion_requests: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          requested_at: string
+          scheduled_for: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          requested_at?: string
+          scheduled_for?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          requested_at?: string
+          scheduled_for?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_deletion_requests_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_deletion_requests_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_deletion_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_deletion_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       denuncias: {
         Row: {
@@ -1789,6 +2040,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          price_alert_sent: boolean
           product_id: string
           target_price: number | null
           user_id: string
@@ -1796,6 +2048,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          price_alert_sent?: boolean
           product_id: string
           target_price?: number | null
           user_id: string
@@ -1803,6 +2056,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          price_alert_sent?: boolean
           product_id?: string
           target_price?: number | null
           user_id?: string
@@ -4098,6 +4352,61 @@ export type Database = {
           },
         ]
       }
+      pedido_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          note: string | null
+          order_id: string
+          previous_status: Database["public"]["Enums"]["order_status"] | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id: string
+          previous_status?: Database["public"]["Enums"]["order_status"] | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string
+          previous_status?: Database["public"]["Enums"]["order_status"] | null
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pedidos: {
         Row: {
           coupon_code: string | null
@@ -4956,29 +5265,63 @@ export type Database = {
           content: string
           created_at: string
           id: string
-          review_id: string
+          parent_id: string | null
+          review_completa_id: string | null
+          review_id: string | null
           user_id: string
         }
         Insert: {
           content: string
           created_at?: string
           id?: string
-          review_id: string
+          parent_id?: string | null
+          review_completa_id?: string | null
+          review_id?: string | null
           user_id: string
         }
         Update: {
           content?: string
           created_at?: string
           id?: string
-          review_id?: string
+          parent_id?: string | null
+          review_completa_id?: string | null
+          review_id?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "review_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "review_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_comments_review_completa_id_fkey"
+            columns: ["review_completa_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_completas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "review_comments_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
             referencedRelation: "avaliacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
             referencedColumns: ["id"]
           },
         ]
@@ -5214,6 +5557,52 @@ export type Database = {
           },
           {
             foreignKeyName: "fk_reviews_completas_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_lists: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_lists_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "curated_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_lists_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_lists_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "public_profiles_view"
@@ -7364,6 +7753,42 @@ export type Database = {
           },
         ]
       }
+      user_presence: {
+        Row: {
+          created_at: string
+          last_seen_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_presence_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_presence_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -7690,6 +8115,10 @@ export type Database = {
         Args: { _reason: string; _until?: string; _user_id: string }
         Returns: undefined
       }
+      admin_complete_data_deletion: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
       admin_delete_game_media: {
         Args: { _id: string; _kind: string; _reason: string }
         Returns: undefined
@@ -7715,6 +8144,10 @@ export type Database = {
           user_id: string
           visibility: string
         }[]
+      }
+      admin_move_category: {
+        Args: { _direction: string; _id: string }
+        Returns: undefined
       }
       admin_move_team_member: {
         Args: { _direction: string; _member_id: string }
@@ -7835,6 +8268,14 @@ export type Database = {
         Args: { _product_id: string; _user_id: string }
         Returns: undefined
       }
+      claim_price_alerts: {
+        Args: never
+        Returns: {
+          current_price: number
+          product_id: string
+          target_price: number
+        }[]
+      }
       confirm_match_result: {
         Args: { _agree: boolean; _match_id: string }
         Returns: undefined
@@ -7852,6 +8293,13 @@ export type Database = {
           _payment_method: string
         }
         Returns: Json
+      }
+      curated_list_follow_counts: {
+        Args: { _list_ids: string[] }
+        Returns: {
+          follow_count: number
+          list_id: string
+        }[]
       }
       delete_my_account: { Args: never; Returns: undefined }
       emit_webhook_event: {
@@ -8099,6 +8547,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_user_presence: {
+        Args: { _user_id: string }
+        Returns: {
+          is_online: boolean
+          last_seen_at: string
+        }[]
+      }
       has_active_certificate: { Args: { _user_id: string }; Returns: boolean }
       has_position: { Args: { _positions: string[] }; Returns: boolean }
       has_role: {
@@ -8263,6 +8718,26 @@ export type Database = {
         Args: { _match_id: string; _score_a: number; _score_b: number }
         Returns: undefined
       }
+      request_my_data_deletion: {
+        Args: never
+        Returns: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          requested_at: string
+          scheduled_for: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "data_deletion_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reserve_product_key: {
         Args: { _order_id: string; _product_id: string }
         Returns: string
@@ -8270,6 +8745,10 @@ export type Database = {
       resume_my_account: { Args: never; Returns: undefined }
       review_chat_ai_alert: {
         Args: { _action: string; _id: string; _safe: boolean }
+        Returns: undefined
+      }
+      set_bundle_primary_image: {
+        Args: { _image_id: string }
         Returns: undefined
       }
       should_notify: { Args: { _pref: string; _uid: string }; Returns: boolean }
@@ -8304,6 +8783,7 @@ export type Database = {
         Args: { p_emoji: string; p_message_id: string }
         Returns: Json
       }
+      touch_my_presence: { Args: never; Returns: undefined }
       tournament_post_live_message: {
         Args: { _kind: string; _text: string; _tournament_id: string }
         Returns: string
