@@ -16,6 +16,8 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { adminLog, exportCsv } from '../lib/adminLog';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
+import { filterCatalogRecords } from '../lib/catalogList';
+import type { Tables } from '@/integrations/supabase/types';
 
 const STATUS_LABELS = {
   available: 'Disponivel',
@@ -34,8 +36,8 @@ const STATUS_COLORS = {
 };
 
 export default function AdminChaves() {
-  const [keys, setKeys] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [keys, setKeys] = useState<(Tables<'product_keys'> & { product_title: string })[]>([]);
+  const [products, setProducts] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -45,7 +47,8 @@ export default function AdminChaves() {
   const [exporting, setExporting] = useState(false);
   const [csvText, setCsvText] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
-  const [selectedPlatform, setSelectedPlatform] = useState('');
+  const [selectedPlatform, setSelectedPlatform] = useState('none');
+  const filteredKeys = filterCatalogRecords(keys, search, key => key.key_code);
 
   const load = async () => {
     setLoading(true);
@@ -119,8 +122,8 @@ export default function AdminChaves() {
     const keysToInsert = lines.map((key) => ({
       product_id: selectedProduct,
       key_code: key,
-      platform: selectedPlatform || null,
-      status: 'available',
+      platform: selectedPlatform === 'none' ? null : selectedPlatform,
+      status: 'available' as const,
       imported_by: user?.user?.id,
       imported_at: new Date().toISOString(),
     }));
@@ -199,7 +202,7 @@ export default function AdminChaves() {
 
   const exportData = () => {
     setExporting(true);
-    const data = keys.map((k) => ({
+    const data = filteredKeys.map((k) => ({
       Codigo: k.key_code,
       Produto: k.product_title || '—',
       Plataforma: k.platform || '—',
@@ -290,14 +293,14 @@ export default function AdminChaves() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {keys.length === 0 ? (
+              {filteredKeys.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="p-0">
                     <EstadoVazio titulo="Nenhuma chave encontrada" />
                   </TableCell>
                 </TableRow>
               ) : (
-                keys.map((k) => (
+                filteredKeys.map((k) => (
                   <TableRow key={k.id}>
                     <TableCell className="font-mono text-sm">{k.key_code}</TableCell>
                     <TableCell className="text-sm">{k.product_title || '—'}</TableCell>
@@ -355,7 +358,7 @@ export default function AdminChaves() {
               <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma</SelectItem>
+                  <SelectItem value="none">Nenhuma</SelectItem>
                   <SelectItem value="Steam">Steam</SelectItem>
                   <SelectItem value="Epic">Epic Games</SelectItem>
                   <SelectItem value="Xbox">Xbox</SelectItem>

@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import EstadoVazio from "@/components/EstadoVazio";
 import { timeAgo } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 interface SavedPost {
   id: string;
@@ -16,13 +17,13 @@ interface SavedPost {
     content: string;
     created_at: string;
     user_id: string;
-    product_id: string;
+    product_id: string | null;
     profiles: {
       display_name: string | null;
-    };
+    } | null;
     produtos: {
       title: string;
-    };
+    } | null;
   };
 }
 
@@ -142,28 +143,30 @@ export default function MSalvos() {
           {savedPosts.map((sp) => {
             const post = sp.post;
             if (!post) return null;
-            const productTitle = (post as any)?.produtos?.title || "Jogo";
-            const authorName = (post as any)?.profiles?.display_name || "Usuário";
+            const productTitle = post.product_id ? post.produtos?.title : null;
+            const authorName = post.profiles?.display_name || "Usuário";
 
             return (
               <div key={sp.id} className="flex items-start gap-3 p-3 bg-card border border-border rounded-xl">
                 <Link to={"/m/forum/post/" + post.id} className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                     <span className="font-semibold text-foreground">{authorName}</span>
-                    <span>em</span>
-                    <span className="text-primary">{productTitle}</span>
+                    {productTitle && <><span>em</span><span className="text-primary">{productTitle}</span></>}
                     <span>·</span>
                     <span>{timeAgo(post.created_at)}</span>
                   </div>
                   <p className="text-sm text-foreground line-clamp-2 mt-1">{post.content}</p>
                 </Link>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => removeSaved(post.id)}
-                  className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                  className="h-8 w-8 hover:bg-destructive/10 text-muted-foreground hover:text-destructive shrink-0"
+                  aria-label="Remover dos salvos"
                   title="Remover dos salvos"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             );
           })}

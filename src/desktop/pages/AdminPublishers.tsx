@@ -15,6 +15,7 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { adminLog, exportCsv } from '../lib/adminLog';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
+import { filterCatalogRecords, paginateCatalogRecords } from '../lib/catalogList';
 
 interface Publisher {
   id: string;
@@ -50,6 +51,8 @@ export default function AdminPublishers() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Publisher | null>(null);
   const [exporting, setExporting] = useState(false);
+  const filteredPublishers = filterCatalogRecords(publishers, search, publisher => publisher.name);
+  const { items: visiblePublishers, currentPage, totalPages } = paginateCatalogRecords(filteredPublishers, page, ITEMS_PER_PAGE);
 
   const [form, setForm] = useState({
     name: '',
@@ -71,14 +74,10 @@ export default function AdminPublishers() {
   const load = async () => {
     setLoading(true);
     try {
-      let query = supabase
+      const query = supabase
         .from('publishers')
         .select('*')
         .order('name');
-      
-      if (search) {
-        query = query.ilike('name', `%${search}%`);
-      }
       
       const { data, error } = await query;
       if (error) throw error;
@@ -110,7 +109,7 @@ export default function AdminPublishers() {
     }
   };
 
-  useEffect(() => { load(); }, [search]);
+  useEffect(() => { load(); }, []);
 
   const generateSlug = (name: string) => {
     return name
@@ -272,7 +271,7 @@ export default function AdminPublishers() {
 
   const exportData = () => {
     setExporting(true);
-    const data = publishers.map(p => ({
+    const data = filteredPublishers.map(p => ({
       Nome: p.name,
       Slug: p.slug,
       País: p.country || '',
@@ -319,7 +318,7 @@ export default function AdminPublishers() {
               className="pl-8"
               placeholder="Buscar publicadora..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); setPage(0); }}
             />
           </div>
         </CardContent>
@@ -338,14 +337,14 @@ export default function AdminPublishers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {publishers.length === 0 ? (
+              {visiblePublishers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="p-0">
                     <EstadoVazio titulo="Nenhuma publicadora encontrada" />
                   </TableCell>
                 </TableRow>
               ) : (
-                publishers.map(p => (
+                visiblePublishers.map(p => (
                   <TableRow key={p.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -382,6 +381,18 @@ export default function AdminPublishers() {
           </Table>
         </CardContent>
       </Card>
+
+      {totalPages > 1 && (
+        <nav aria-label="Paginação de publicadoras" className="flex items-center justify-end gap-3">
+          <span className="text-sm text-muted-foreground">Página {currentPage + 1} de {totalPages}</span>
+          <Button variant="outline" size="icon" aria-label="Página anterior" title="Página anterior" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" aria-label="Próxima página" title="Próxima página" disabled={currentPage === totalPages - 1} onClick={() => setPage(currentPage + 1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </nav>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) setDialogOpen(false); }}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">

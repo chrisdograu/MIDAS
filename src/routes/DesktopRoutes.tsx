@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 import { DesktopAuthProvider } from "@/hooks/useDesktopAuth";
 
 const DesktopLayout = lazy(() => import("@/desktop/DesktopLayout"));
@@ -73,6 +73,7 @@ export const desktopRoutes = (
       <Route path="equipe" element={<AdminTeamMembers />} />
       <Route path="chaves" element={<AdminChaves />} />
       <Route path="publishers" element={<AdminPublishers />} />
+      <Route path="publicadoras" element={<Navigate to="/desktop/publishers" replace />} />
       <Route path="cupons" element={<Cupons />} />
       <Route path="estoque" element={<Estoque />} />
       <Route path="pedidos" element={<PedidosOnline />} />

@@ -24,3 +24,4 @@
 - Game information pages and card prefetch share a product loader that resolves the studio by developer_id and links to its slug or UUID; publisher names must never be used to infer a developer.
 - Tournament forms write explicit live-schema fields, resolve games through product_id, and read registration timestamps as joined_at (waitlists use created_at); this avoids legacy-field failures.
 - Tournament stream history is derived from persisted tournament_live_events rather than a separate assumed history table; public pages never query nonexistent resources.
+- Key search and publisher pagination operate only on records already authorized and loaded by their management screens, using shared catalog-list helpers; navigation aliases redirect to the existing permission-protected canonical route.

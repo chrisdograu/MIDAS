@@ -7,7 +7,7 @@ import {
   Sun, Moon, Settings, Loader2, Ticket, Lightbulb, Trophy, Zap,
   Library, FileText, AlertTriangle, LifeBuoy, Plug, Sparkles, Boxes, Store,
   Search, Command, Wifi, WifiOff,
-  Building2,
+  Building2, Key,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/hooks/useTheme';
@@ -82,6 +82,7 @@ const navSections: {
       { title: 'Fornecedores', url: '/desktop/fornecedores', icon: Truck, route: 'fornecedores' },
       { title: 'Categorias', url: '/desktop/categorias', icon: Tags, route: 'categorias' },
       { title: 'Desenvolvedores', url: '/desktop/desenvolvedores', icon: Building2, route: 'desenvolvedores' },
+      { title: 'Publicadoras', url: '/desktop/publishers', icon: Building2, route: 'publishers' },
       { title: 'Equipe', url: '/desktop/equipe', icon: Users, route: 'equipe' },
     ],
   },
@@ -97,6 +98,7 @@ const navSections: {
     label: 'Jogos',
     items: [
       { title: 'Jogos', url: '/desktop/jogos', icon: Gamepad2, route: 'jogos' },
+      { title: 'Chaves', url: '/desktop/chaves', icon: Key, route: 'chaves' },
       { title: 'Solicitações', url: '/desktop/sugestoes', icon: Lightbulb, route: 'sugestoes', pendingKey: 'sugestoes' },
       { title: 'Criar Jogo', url: '/desktop/jogos/novo', icon: Sparkles, route: 'jogos' },
       { title: 'Catálogo de Tags', url: '/desktop/jogos/catalogo-tags', icon: Gamepad2, route: 'jogos' },

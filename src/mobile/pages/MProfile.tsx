@@ -16,6 +16,7 @@ import {
   Star,
   Newspaper,
   BookMarked,
+  BookmarkCheck,
   Palette,
   Edit2,
   Save,
@@ -37,6 +38,7 @@ import { CosmeticUnlocksCenter } from "@/components/cosmetics/CosmeticUnlocksCen
 import { formatCurrency, formatMonthYear } from "@/lib/format";
 import { dbWrite } from "@/lib/dbWrite";
 import { ReportDialog } from "@/components/ReportDialog";
+import { Button } from "@/components/ui/button";
 
 interface Profile {
   id: string;
@@ -598,6 +600,12 @@ export default function MProfile() {
             <span className="text-base">❤️</span>
             <span className="text-xs font-semibold">Favoritos</span>
           </Link>
+          <Button variant="ghost" asChild className="glass h-auto rounded-xl p-3 flex flex-col items-center gap-1 hover:border-primary/40">
+            <Link to="/m/salvos">
+              <BookmarkCheck className="h-5 w-5 text-primary" />
+              <span className="text-xs font-semibold">Posts salvos</span>
+            </Link>
+          </Button>
           <Link to="/m/amigos" className="glass rounded-xl p-3 flex flex-col items-center gap-1 hover:border-accent/40">
             <Users className="h-5 w-5 text-accent" />
             <span className="text-xs font-semibold">Amigos</span>
