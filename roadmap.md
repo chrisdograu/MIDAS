@@ -1,5 +1,9 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
+- [ ] Corrigir criação, edição, aprovação e exclusão de listas curadas no Desktop com as permissões atuais do banco.
+- [ ] Criar `/meus-tickets` com histórico e respostas, corrigindo o envio e os estados de atendimento associados.
+- [ ] Criar `/lista/novo` com seleção de jogos e gravação completa da lista da comunidade.
+- [ ] Testar os três fluxos e registrar o limite da validação autenticada neste Supabase externo.
 - [ ] Implementar os pontos 1–10 do documento: galeria de pacotes, histórico de pedidos, curtidas, listas salvas/seguidas, auditoria de privacidade, alertas únicos de preço, última atividade, ordenação de categorias, respostas aninhadas e solicitações de exclusão.
 - [ ] Validar os pontos 1–10 com testes e consultas ao banco; registrar os limites da verificação autenticada no Supabase externo.
 - [x] Corrigir Salvos no celular (acesso e posts gerais), Chaves no painel (importação e busca) e Publicadoras (menu, endereço em português e paginação); 99 testes passaram, menus e controles verificados com Chris conectado, post real salvo/reaberto/removido sem alterar o estado original. Nenhuma chave artificial foi importada; paginação com 21 registros coberta por teste isolado.
