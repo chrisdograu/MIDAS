@@ -119,6 +119,7 @@ const navSections: {
     label: 'Biblioteca Social',
     items: [
       { title: 'Biblioteca Social', url: '/desktop/biblioteca-social', icon: Library, route: 'biblioteca-social' },
+      { title: 'Listas Curadas', url: '/desktop/listas-curadas', icon: ClipboardList, route: 'listas-curadas' },
     ],
   },
   {

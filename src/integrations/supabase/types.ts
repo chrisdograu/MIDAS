@@ -8287,6 +8287,10 @@ export type Database = {
         Args: { _key_code: string; _order_id: string }
         Returns: undefined
       }
+      create_community_curated_list: {
+        Args: { _description: string; _product_ids: string[]; _title: string }
+        Returns: string
+      }
       create_order_secure: {
         Args: {
           _client_total: number

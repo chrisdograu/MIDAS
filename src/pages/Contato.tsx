@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, MessageSquare, Send, Phone, Paperclip, X, Loader2, AlertCircle, CheckCircle2, History, Flag } from 'lucide-react';
 import { toast } from 'sonner';
@@ -76,11 +76,12 @@ export default function Contato() {
   const contactPhone = store?.phone;
 
   // GAP-456: Buscar contagem de tickets ao carregar
-  useState(() => {
-    if (user) {
-      getTicketCount(user.id).then(setTicketCount);
-    }
-  });
+  useEffect(() => {
+    let cancelled = false;
+    setTicketCount(null);
+    if (user) getTicketCount(user.id).then(count => { if (!cancelled) setTicketCount(count); });
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   // GAP-455: Upload de anexo
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,7 +167,6 @@ export default function Contato() {
         channel: 'web',
         subject: `${priorityText}${subject}`,
         body,
-        priority: priority,
       })
       .select('id')
       .single();
@@ -201,7 +201,7 @@ export default function Contato() {
       ticket_id: ticket.id,
       sender_id: user.id,
       content: form.mensagem,
-      attachments: attachmentUrls.length > 0 ? attachmentUrls : null,
+      attachments: attachmentUrls,
     });
     
     setSending(false);
@@ -213,7 +213,7 @@ export default function Contato() {
     // GAP-454: Enviar e-mail de confirmação
     await sendConfirmationEmail(form.email, form.nome, ticket.id);
     
-    toast.success('Mensagem enviada com sucesso! Verifique seu e-mail para confirmação.');
+    toast.success('Atendimento aberto! Acompanhe as respostas em Meus tickets.');
     setForm({ nome: '', email: '', assunto: '', mensagem: '' });
     setErrors({});
     setAttachments([]);
@@ -234,13 +234,13 @@ export default function Contato() {
         <p className="text-muted-foreground mt-2">Fale conosco — estamos aqui para ajudar</p>
         
         {/* GAP-456: Link para histórico de tickets */}
-        {user && ticketCount !== null && (
+        {user && (
           <Link 
             to="/meus-tickets" 
             className="inline-flex items-center gap-1.5 mt-3 text-sm text-primary hover:underline"
           >
             <History className="h-4 w-4" />
-            Meus tickets ({ticketCount})
+            Meus tickets {ticketCount !== null ? `(${ticketCount})` : ''}
           </Link>
         )}
       </div>

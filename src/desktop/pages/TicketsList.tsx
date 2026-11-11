@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { AdminPageHeader } from '../components/AdminPageHeader';
 import { adminLog, exportCsv } from '../lib/adminLog';
 import { formatDateTime } from '@/lib/format';
+import { isTicketClosed, TICKET_STATUS_LABELS, type TicketStatus } from '@/lib/ticketSupport';
 
 interface Props { channel: 'mobile' | 'web' }
 
@@ -50,12 +51,14 @@ export default function TicketsList({ channel }: Props) {
         .order('created_at', { ascending: false });
 
       if (status !== 'all') {
-        query = query.eq('status', status);
+        query = query.eq('status', status as TicketStatus);
       }
 
       if (assignedFilter === 'me') {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) query = query.eq('assigned_to', user.id);
+      } else if (assignedFilter === 'unassigned') {
+        query = query.is('assigned_to', null);
       }
 
       const { data, error, count } = await query.range(from, from + ITEMS_PER_PAGE - 1);
@@ -96,7 +99,7 @@ export default function TicketsList({ channel }: Props) {
   // GAP-D276: SLA melhorado
   const slaInfo = (t: any) => {
     const hours = Math.floor((Date.now() - new Date(t.created_at).getTime()) / 3600000);
-    if (t.status === 'closed') return { label: 'Fechado', variant: 'default' as const, urgent: false };
+    if (isTicketClosed(t.status)) return { label: TICKET_STATUS_LABELS[t.status as TicketStatus], variant: 'default' as const, urgent: false };
     if (hours > 48) return { label: `${hours}h (Urgente)`, variant: 'destructive' as const, urgent: true };
     if (hours > 24) return { label: `${hours}h (Atenção)`, variant: 'secondary' as const, urgent: false };
     return { label: `${hours}h`, variant: 'default' as const, urgent: false };
@@ -126,18 +129,6 @@ export default function TicketsList({ channel }: Props) {
   };
 
   // GAP-D273: Notificação ao usuário
-  const notifyUser = async (userId: string, title: string, body: string, refType: string, refId: string) => {
-    if (!userId) return;
-    await supabase.from('notifications').insert({
-      user_id: userId,
-      type: 'system',
-      title,
-      body,
-      reference_type: refType,
-      reference_id: refId,
-    });
-  };
-
   const sendReply = async (t: any) => {
     const text = (reply[t.id] || '').trim(); if (!text) return;
     const { data: { user } } = await supabase.auth.getUser();
@@ -150,8 +141,9 @@ export default function TicketsList({ channel }: Props) {
     } as any);
     if (error) return toast.error(error.message);
 
-    const { error: err } = await supabase.from('tickets').update({ status: 'answered' } as any).eq('id', t.id);
-    if (err) return toast.error(err.message);
+    setReply(previous => ({ ...previous, [t.id]: '' }));
+    const { error: err } = await supabase.from('tickets').update({ status: 'aguardando_usuario' }).eq('id', t.id).select('id').single();
+    if (err) { load(true); return toast.error('Resposta enviada, mas não foi possível atualizar o status.'); }
 
     // GAP-D272: adminLog detalhado
     await adminLog({
@@ -163,26 +155,18 @@ export default function TicketsList({ channel }: Props) {
         channel, 
         subject: t.subject, 
         content: text.slice(0, 100) + (text.length > 100 ? '...' : ''),
-        ticket_status: 'answered'
+        ticket_status: 'aguardando_usuario'
       }
     });
 
-    // GAP-D273: Notificar usuário
-    await notifyUser(
-      t.user_id,
-      '💬 Nova resposta no seu ticket',
-      `O administrador respondeu ao seu ticket "${t.subject}".`,
-      'ticket',
-      t.id    );
-
-    toast.success('Resposta enviada e usuário notificado');
+    toast.success('Resposta enviada');
     setReply({ ...reply, [t.id]: '' });
     load(true);
   };
 
   const close = async (t: any) => {
     const reason = prompt('Motivo do fechamento (opcional):') || '';
-    const { error: errClose } = await supabase.from('tickets').update({ status: 'closed' } as any).eq('id', t.id);
+    const { error: errClose } = await supabase.from('tickets').update({ status: 'fechado' }).eq('id', t.id).select('id').single();
     if (errClose) return toast.error(errClose.message);
 
     // GAP-D272: adminLog
@@ -191,19 +175,10 @@ export default function TicketsList({ channel }: Props) {
       entity: 'ticket',
       entity_id: t.id,
       reason: reason || 'Ticket fechado pelo admin',
-      payload: { channel, subject: t.subject, status: 'closed' }
+      payload: { channel, subject: t.subject, status: 'fechado' }
     });
 
-    // GAP-D273: Notificar usuário
-    await notifyUser(
-      t.user_id,
-      '🔒 Ticket fechado',
-      `O ticket "${t.subject}" foi fechado. ${reason ? `Motivo: ${reason}` : ''}`,
-      'ticket',
-      t.id
-    );
-
-    toast.success('Ticket fechado e usuário notificado');
+    toast.success('Ticket fechado');
     load(true);
   };
 
@@ -227,8 +202,7 @@ export default function TicketsList({ channel }: Props) {
     load(true);
   };
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(0, (page + 1) * ITEMS_PER_PAGE);
+  const paginated = filtered;
 
   if (loading) return <div className="p-6 flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
@@ -265,9 +239,7 @@ export default function TicketsList({ channel }: Props) {
               <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="open">Abertos</SelectItem>
-                <SelectItem value="answered">Respondidos</SelectItem>
-                <SelectItem value="closed">Fechados</SelectItem>
+                {Object.entries(TICKET_STATUS_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -326,8 +298,8 @@ export default function TicketsList({ channel }: Props) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={t.status === 'open' ? 'destructive' : t.status === 'answered' ? 'default' : 'secondary'}>
-                          {t.status}
+                        <Badge variant={t.status === 'aberto' ? 'destructive' : t.status === 'aguardando_usuario' ? 'default' : 'secondary'}>
+                          {TICKET_STATUS_LABELS[t.status as TicketStatus]}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -352,16 +324,16 @@ export default function TicketsList({ channel }: Props) {
                         <div className="space-y-2">
                           <Textarea 
                             rows={2} 
-                            placeholder={t.status === 'closed' ? 'Ticket fechado' : 'Resposta...'} 
+                            placeholder={isTicketClosed(t.status) ? 'Ticket encerrado' : 'Resposta...'}
                             value={reply[t.id] || ''} 
                             onChange={e => setReply({ ...reply, [t.id]: e.target.value })}
-                            disabled={t.status === 'closed'}
+                            disabled={isTicketClosed(t.status)}
                           />
                           <div className="flex gap-2">
                             <Button 
                               size="sm" 
                               onClick={() => sendReply(t)} 
-                              disabled={t.status === 'closed' || !reply[t.id]?.trim()}
+                              disabled={isTicketClosed(t.status) || !reply[t.id]?.trim()}
                             >
                               <MessageSquare className="h-3 w-3 mr-1" />Responder
                             </Button>
@@ -369,7 +341,7 @@ export default function TicketsList({ channel }: Props) {
                               size="sm" 
                               variant="outline" 
                               onClick={() => close(t)} 
-                              disabled={t.status === 'closed'}
+                              disabled={isTicketClosed(t.status)}
                             >
                               Fechar
                             </Button>
@@ -386,18 +358,14 @@ export default function TicketsList({ channel }: Props) {
       </Card>
 
       {/* GAP-D270: Paginação */}
-      {filtered.length > ITEMS_PER_PAGE && (
+      {(hasMore || page > 1) && (
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            Mostrando {Math.min((page + 1) * ITEMS_PER_PAGE, filtered.length)} de {filtered.length}
+            {filtered.length} atendimentos carregados
           </span>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-xs flex items-center px-2">{page + 1} / {totalPages || 1}</span>
-            <Button variant="outline" size="sm" disabled={!hasMore || (page + 1) * ITEMS_PER_PAGE >= filtered.length} onClick={() => setPage(p => p + 1)}>
-              <ChevronRight className="h-4 w-4" />
+            <Button variant="outline" size="sm" disabled={!hasMore || loadingMore} onClick={() => load(false)}>
+              {loadingMore && <Loader2 className="h-4 w-4 animate-spin" />} Carregar mais
             </Button>
           </div>
         </div>

@@ -35,3 +35,5 @@
 - Data deletion requests are durable, idempotent, owner-authenticated workflows completed only by full administrators; the UI must not simulate identity emails or promise automatic erasure.
 - Exposed RPC wrappers use SECURITY INVOKER over permission-checked implementations in app_private; trigger functions are not directly executable by application roles.
 - Forum reactions reuse forum_post_likes with a reaction type and the existing count trigger; changing emoji does not remove and reinsert the user's reaction.
+- Curated-list administration uses typed table writes and verifies returned rows under administrator RLS; community creation uses one security-invoker transaction with owner-scoped policies to prevent partial lists or official-status escalation.
+- Customer support reads owner-scoped tickets and persisted messages on protected web pages; all support screens share the live ticket-status enum, and customer replies never mutate staff-controlled ticket status.

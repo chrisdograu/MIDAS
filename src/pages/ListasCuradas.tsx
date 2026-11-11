@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, List, Plus, Users, Eye } from 'lucide-react';
 import EstadoVazio from '@/components/EstadoVazio';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
 export default function ListasCuradas() {
   const { user } = useAuth();
@@ -52,12 +53,9 @@ export default function ListasCuradas() {
           <span className="text-sm text-muted-foreground">({lists.length})</span>
         </div>
         {user && (
-          <Link
-            to="/lista/novo"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
+          <Button asChild><Link to="/lista/novo">
             <Plus className="h-4 w-4" /> Criar lista
-          </Link>
+          </Link></Button>
         )}
       </div>
 

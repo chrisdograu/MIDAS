@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,27 +18,33 @@ import { AdminPageHeader } from '../components/AdminPageHeader';
 import { adminLog, exportCsv } from '../lib/adminLog';
 import EstadoVazio from '@/components/EstadoVazio';
 import { formatDateTime } from '@/lib/format';
+import { useDesktopAuth } from '@/hooks/useDesktopAuth';
+import { approveCuratedList, deleteCuratedList, generateListSlug, saveAdminCuratedList, type CuratedList } from '@/lib/curatedListManagement';
+import { useQueryClient } from '@tanstack/react-query';
 
 const CATEGORIES = [
   { value: 'recomendados', label: 'Recomendados' },
-  { value: 'classicos', label: 'Classicos' },
+  { value: 'classicos', label: 'Clássicos' },
   { value: 'indie', label: 'Indie' },
   { value: 'oficial', label: 'Oficial MIDIAS' },
   { value: 'comunidade', label: 'Comunidade' },
 ];
 
-const ITEMS_PER_PAGE = 20;
+type ManagedList = CuratedList & { creator_name: string; item_count: number; follow_count: number };
 
 export default function AdminCuratedLists() {
-  const [lists, setLists] = useState([]);
+  const { position } = useDesktopAuth();
+  const queryClient = useQueryClient();
+  const canManage = position === 'admin';
+  const [lists, setLists] = useState<ManagedList[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState<ManagedList | null>(null);
   const [saving, setSaving] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState<ManagedList | null>(null);
   const [exporting, setExporting] = useState(false);
 
   const [form, setForm] = useState({
@@ -61,8 +67,7 @@ export default function AdminCuratedLists() {
         .select(`
           *,
           creator:profiles!created_by(display_name),
-          items:curated_list_items(count),
-          follows:curated_list_follows(count)
+          items:curated_list_items(count)
         `)
         .order('created_at', { ascending: false });
 
@@ -82,12 +87,14 @@ export default function AdminCuratedLists() {
 
       const { data, error } = await query;
       if (error) throw error;
+      const { data: counts, error: countsError } = await supabase.rpc('curated_list_follow_counts', { _list_ids: (data || []).map(item => item.id) });
+      if (countsError) throw countsError;
 
       setLists((data || []).map((item) => ({
         ...item,
         creator_name: item.creator?.display_name || 'Usuario',
         item_count: item.items?.[0]?.count || 0,
-        follow_count: item.follows?.[0]?.count || 0,
+        follow_count: Number(counts?.find(count => count.list_id === item.id)?.follow_count || 0),
       })));
     } catch (error) {
       toast.error('Erro ao carregar listas');
@@ -98,14 +105,7 @@ export default function AdminCuratedLists() {
 
   useEffect(() => { load(); }, [search, categoryFilter, statusFilter]);
 
-  const generateSlug = (title) => {
-    return title
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
+  const generateSlug = generateListSlug;
 
   const resetForm = () => {
     setForm({
@@ -127,7 +127,7 @@ export default function AdminCuratedLists() {
     setDialogOpen(true);
   };
 
-  const openEdit = (list) => {
+  const openEdit = (list: ManagedList) => {
     setEditing(list);
     setForm({
       title: list.title || '',
@@ -144,8 +144,9 @@ export default function AdminCuratedLists() {
   };
 
   const save = async () => {
+    if (!canManage || saving) return;
     if (!form.title.trim()) {
-      toast.error('Titulo é obrigatorio');
+      toast.error('Título é obrigatório');
       return;
     }
 
@@ -167,21 +168,7 @@ export default function AdminCuratedLists() {
 
     try {
       if (editing) {
-        const { error } = await supabase.rpc('admin_update_curated_list', {
-          _id: editing.id,
-          _title: payload.title,
-          _slug: payload.slug,
-          _description: payload.description,
-          _long_description: payload.long_description,
-          _category: payload.category,
-          _is_official: payload.is_official,
-          _is_featured: payload.is_featured,
-          _is_public: true,
-          _cover_image: payload.cover_image,
-          _banner_image: payload.banner_image,
-        });
-
-        if (error) throw error;
+        await saveAdminCuratedList({ ...payload, is_public: editing.is_public ?? true }, editing.id);
 
         await adminLog({
           action: 'update_curated_list',
@@ -193,25 +180,12 @@ export default function AdminCuratedLists() {
 
         toast.success('Lista atualizada!');
       } else {
-        const { data, error } = await supabase.rpc('admin_create_curated_list', {
-          _title: payload.title,
-          _slug: payload.slug,
-          _description: payload.description,
-          _long_description: payload.long_description,
-          _category: payload.category,
-          _is_official: payload.is_official,
-          _is_featured: payload.is_featured,
-          _cover_image: payload.cover_image,
-          _banner_image: payload.banner_image,
-          _items: null,
-        });
-
-        if (error) throw error;
+        const data = await saveAdminCuratedList(payload);
 
         await adminLog({
           action: 'create_curated_list',
           entity: 'curated_lists',
-          entity_id: data,
+          entity_id: data.id,
           reason: `Lista "${payload.title}" criada`,
           payload: { title: payload.title, category: payload.category },
         });
@@ -221,18 +195,21 @@ export default function AdminCuratedLists() {
 
       setDialogOpen(false);
       resetForm();
+      queryClient.invalidateQueries({ queryKey: ['curated-lists'] });
+      queryClient.invalidateQueries({ queryKey: ['curated-list'] });
       load();
     } catch (error) {
-      toast.error(error.message || 'Erro ao salvar lista');
+      toast.error(error instanceof Error ? error.message : 'Erro ao salvar lista');
     } finally {
       setSaving(false);
     }
   };
 
-  const approveList = async (listId) => {
+  const approveList = async (listId: string) => {
+    if (!canManage || saving) return;
+    setSaving(true);
     try {
-      const { error } = await supabase.rpc('admin_approve_curated_list', { _id: listId });
-      if (error) throw error;
+      await approveCuratedList(listId);
 
       await adminLog({
         action: 'approve_curated_list',
@@ -243,22 +220,20 @@ export default function AdminCuratedLists() {
       });
 
       toast.success('Lista aprovada!');
+      queryClient.invalidateQueries({ queryKey: ['curated-lists'] });
       load();
     } catch (error) {
-      toast.error(error.message || 'Erro ao aprovar lista');
+      toast.error(error instanceof Error ? error.message : 'Erro ao aprovar lista');
+    } finally {
+      setSaving(false);
     }
   };
 
   const deleteList = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || !canManage || saving) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('curated_lists')
-        .delete()
-        .eq('id', deleteTarget.id);
-
-      if (error) throw error;
+      await deleteCuratedList(deleteTarget.id);
 
       await adminLog({
         action: 'delete_curated_list',
@@ -270,9 +245,11 @@ export default function AdminCuratedLists() {
 
       toast.success('Lista excluida!');
       setDeleteTarget(null);
+      queryClient.invalidateQueries({ queryKey: ['curated-lists'] });
+      queryClient.invalidateQueries({ queryKey: ['curated-list'] });
       load();
     } catch (error) {
-      toast.error(error.message || 'Erro ao excluir lista');
+      toast.error(error instanceof Error ? error.message : 'Erro ao excluir lista');
     } finally {
       setSaving(false);
     }
@@ -314,9 +291,9 @@ export default function AdminCuratedLists() {
               <Download className="h-4 w-4 mr-1" />
               {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Exportar'}
             </Button>
-            <Button onClick={openCreate}>
+            {canManage && <Button onClick={openCreate}>
               <Plus className="h-4 w-4 mr-1" /> Nova Lista
-            </Button>
+            </Button>}
           </div>
         }
       />
@@ -424,17 +401,17 @@ export default function AdminCuratedLists() {
                       {formatDateTime(l.created_at)}
                     </TableCell>
                     <TableCell className="text-right space-x-1">
-                      {!l.approved_at && (
-                        <Button size="sm" variant="outline" className="text-success" onClick={() => approveList(l.id)}>
+                      {canManage && !l.approved_at && (
+                        <Button aria-label={`Aprovar ${l.title}`} title="Aprovar lista" disabled={saving} size="sm" variant="outline" className="text-success" onClick={() => approveList(l.id)}>
                           <Check className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(l)}>
+                      {canManage && <Button aria-label={`Editar ${l.title}`} title="Editar lista" size="sm" variant="ghost" onClick={() => openEdit(l)}>
                         <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(l)}>
+                      </Button>}
+                      {canManage && <Button aria-label={`Excluir ${l.title}`} title="Excluir lista" size="sm" variant="ghost" onClick={() => setDeleteTarget(l)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      </Button>}
                     </TableCell>
                   </TableRow>
                 ))
@@ -448,11 +425,13 @@ export default function AdminCuratedLists() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? 'Editar Lista' : 'Nova Lista'}</DialogTitle>
+            <DialogDescription>Dados da lista selecionada pela comunidade ou equipe.</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div className="space-y-2 md:col-span-2">
-              <Label>Titulo *</Label>
+              <Label htmlFor="list-title">Título *</Label>
               <Input
+                id="list-title"
                 value={form.title}
                 onChange={(e) => {
                   setForm({ ...form, title: e.target.value });
@@ -463,8 +442,9 @@ export default function AdminCuratedLists() {
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>Slug</Label>
+              <Label htmlFor="list-slug">Endereço da lista</Label>
               <Input
+                id="list-slug"
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
               />
@@ -530,7 +510,7 @@ export default function AdminCuratedLists() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button variant="outline" disabled={saving} onClick={() => setDialogOpen(false)}>Cancelar</Button>
             <Button onClick={save} disabled={saving}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {editing ? 'Atualizar' : 'Criar'}

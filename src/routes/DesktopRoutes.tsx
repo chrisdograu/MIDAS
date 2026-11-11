@@ -58,6 +58,7 @@ const AdminDevelopers = lazy(() => import("@/desktop/pages/AdminDevelopers"));
 const AdminTeamMembers = lazy(() => import("@/desktop/pages/AdminTeamMembers"));
 const AdminChaves = lazy(() => import("@/desktop/pages/AdminChaves"));
 const AdminPublishers = lazy(() => import("@/desktop/pages/AdminPublishers"));
+const AdminCuratedLists = lazy(() => import("@/desktop/pages/AdminCuratedLists"));
 
 export const desktopRoutes = (
   <>
@@ -103,6 +104,7 @@ export const desktopRoutes = (
       <Route path="bundles" element={<BundlesAdmin />} />
       <Route path="trocas-arquivadas" element={<TrocasArquivadas />} />
       <Route path="biblioteca-social" element={<BibliotecaSocialAdmin />} />
+      <Route path="listas-curadas" element={<AdminCuratedLists />} />
       <Route path="tickets/mobile" element={<TicketsList channel="mobile" />} />
       <Route path="tickets/web" element={<TicketsList channel="web" />} />
       <Route path="denuncias" element={<Denuncias />} />
