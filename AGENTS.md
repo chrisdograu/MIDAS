@@ -37,3 +37,4 @@
 - Forum reactions reuse forum_post_likes with a reaction type and the existing count trigger; changing emoji does not remove and reinsert the user's reaction.
 - Curated-list administration uses typed table writes and verifies returned rows under administrator RLS; community creation uses one security-invoker transaction with owner-scoped policies to prevent partial lists or official-status escalation.
 - Customer support reads owner-scoped tickets and persisted messages on protected web pages; all support screens share the live ticket-status enum, and customer replies never mutate staff-controlled ticket status.
+- Match proof URLs remain optional per-side fields; timeline update timestamps use a dedicated invoker trigger and start at event creation time, so existing events are not falsely marked as edited.

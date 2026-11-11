@@ -1,5 +1,7 @@
 - [x] Corrigir a ordem dos provedores que causa `useAuth must be used within AuthProvider`.
 # Correções em andamento
+- [ ] Aplicar somente a primeira etapa atual: `proof_a` e `proof_b` em partidas e `updated_at` com gatilho exclusivo na timeline, preservando dados e permissões.
+- [ ] Verificar a primeira etapa no banco com testes isolados, sem modificar partidas, contas ou histórico reais; as demais etapas ficam fora deste pedido.
 - [x] Corrigir criação, edição, aprovação e exclusão de listas curadas no Desktop com as permissões atuais do banco.
 - [x] Criar `/meus-tickets` com histórico e respostas, corrigindo o envio e os estados de atendimento associados.
 - [x] Criar `/lista/novo` com seleção de jogos e gravação completa da lista da comunidade.
