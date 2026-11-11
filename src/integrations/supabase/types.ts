@@ -3072,6 +3072,7 @@ export type Database = {
           kind: string
           payload: Json | null
           product_id: string
+          updated_at: string | null
           user_id: string
           user_note: string | null
           visibility: string | null
@@ -3082,6 +3083,7 @@ export type Database = {
           kind: string
           payload?: Json | null
           product_id: string
+          updated_at?: string | null
           user_id: string
           user_note?: string | null
           visibility?: string | null
@@ -3092,6 +3094,7 @@ export type Database = {
           kind?: string
           payload?: Json | null
           product_id?: string
+          updated_at?: string | null
           user_id?: string
           user_note?: string | null
           visibility?: string | null
@@ -6394,6 +6397,8 @@ export type Database = {
           player_a: string | null
           player_b: string | null
           position: number
+          proof_a: string | null
+          proof_b: string | null
           reported_at: string | null
           reported_by: string | null
           reported_score_a: number | null
@@ -6421,6 +6426,8 @@ export type Database = {
           player_a?: string | null
           player_b?: string | null
           position?: number
+          proof_a?: string | null
+          proof_b?: string | null
           reported_at?: string | null
           reported_by?: string | null
           reported_score_a?: number | null
@@ -6448,6 +6455,8 @@ export type Database = {
           player_a?: string | null
           player_b?: string | null
           position?: number
+          proof_a?: string | null
+          proof_b?: string | null
           reported_at?: string | null
           reported_by?: string | null
           reported_score_a?: number | null

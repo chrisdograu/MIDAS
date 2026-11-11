@@ -1,7 +1,6 @@
 -- Run as the database owner in a SQL session. Fixtures exist only in pg_temp;
 -- no real accounts, matches, timeline events, or access policies are changed.
--- Any failed assertion aborts the transaction. ROLLBACK removes all fixtures.
-BEGIN;
+-- Any failed assertion aborts this block. Temporary fixtures disappear on commit.
 
 DO $test$
 DECLARE
@@ -72,5 +71,3 @@ BEGIN
   END IF;
 END;
 $test$;
-
-ROLLBACK;
