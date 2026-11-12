@@ -79,8 +79,8 @@ export default function TitulosAdmin() {
     const q = sanitizePgrst(debounced || '');
     if (!q || q.length < 2) { setUserResults([]); return; }
     (async () => {
-      const { data } = await supabase.from('profiles').select('id, display_name, handle')
-        .or(`display_name.ilike.%${q}%,handle.ilike.%${q}%`).limit(8);
+      const { data } = await supabase.from('profiles').select('id, display_name, username')
+        .or(`display_name.ilike.%${q}%,username.ilike.%${q}%`).limit(8);
       setUserResults(data || []);
     })();
   }, [debounced]);
@@ -226,7 +226,7 @@ export default function TitulosAdmin() {
                         {userResults.map(u => (
                           <button key={u.id} type="button" onClick={() => { setForm({ ...form, user_id: u.id }); setUserSearch(u.display_name); setUserResults([]); }}
                             className="w-full text-left p-2 hover:bg-muted text-sm">
-                            {u.display_name} <span className="text-muted-foreground">@{u.handle || '—'}</span>
+                            {u.display_name} <span className="text-muted-foreground">@{u.username || '—'}</span>
                           </button>
                         ))}
                       </div>

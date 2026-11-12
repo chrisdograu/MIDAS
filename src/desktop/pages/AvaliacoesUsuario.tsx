@@ -43,10 +43,10 @@ export default function AvaliacoesUsuario() {
     // GAP-D51: Buscar denúncias
     const reviewIds = data.map(a => a.id);
     const { data: denuncias } = reviewIds.length
-      ? await supabase.from('denuncias').select('entity_id').eq('entity_type', 'avaliacao_usuario').in('entity_id', reviewIds)
+      ? await supabase.from('denuncias').select('target_id').eq('target_type', 'avaliacao_usuario').in('target_id', reviewIds)
       : { data: [] as any[] };
     const denMap = new Map<string, number>();
-    denuncias?.forEach(d => denMap.set(d.entity_id, (denMap.get(d.entity_id) || 0) + 1));
+    denuncias?.forEach(d => denMap.set(d.target_id, (denMap.get(d.target_id) || 0) + 1));
     setDenunciasMap(denMap);
 
     const [{ data: profiles }, { data: anuncios }] = await Promise.all([

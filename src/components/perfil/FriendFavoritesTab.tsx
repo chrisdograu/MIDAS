@@ -55,10 +55,10 @@ export default function FriendFavoritesTab() {
       
       // GAP-FF03: Buscar última mensagem
       const { data: lastMsg } = await supabase
-        .from('messages')
-        .select('conversation_id, created_at, sender_id, receiver_id')
-        .or(`sender_id.in.(${friendIds.join(',')}),receiver_id.in.(${friendIds.join(',')})`)
-        .eq('sender_id', user.id)
+        .from('mensagens')
+        .select('created_at, sender_id, receiver_id')
+        .or(`and(sender_id.eq.${user.id},receiver_id.in.(${friendIds.join(',')})),and(receiver_id.eq.${user.id},sender_id.in.(${friendIds.join(',')}))`)
+        .is('group_id', null)
         .order('created_at', { ascending: false })
         .limit(50);
       

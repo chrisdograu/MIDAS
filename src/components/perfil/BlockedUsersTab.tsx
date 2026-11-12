@@ -47,7 +47,7 @@ export default function BlockedUsersTab() {
     setLoading(true);
     const { data: blocks } = await supabase
       .from('blocked_users')
-      .select('id, blocked_id, scope, created_at, reason')
+      .select('id, blocked_id, scope, created_at')
       .eq('blocker_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -65,7 +65,7 @@ export default function BlockedUsersTab() {
         blocked_id: b.blocked_id,
         scope: (b as any).scope || 'all',
         created_at: b.created_at,
-        reason: (b as any).reason || null,
+        reason: null,
         display_name: p?.display_name || null,
         avatar_url: p?.avatar_url || null,
       };

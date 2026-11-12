@@ -78,10 +78,10 @@ export default function AnunciosAdmin() {
 
     // GAP-D24: Denúncias
     const { data: denuncias } = adIds.length
-      ? await supabase.from('denuncias').select('entity_id').eq('entity_type', 'anuncio').in('entity_id', adIds)
+      ? await supabase.from('denuncias').select('target_id').eq('target_type', 'anuncio').in('target_id', adIds)
       : { data: [] as any[] };
     const denMap = new Map<string, number>();
-    denuncias?.forEach(d => denMap.set(d.entity_id, (denMap.get(d.entity_id) || 0) + 1));
+    denuncias?.forEach(d => denMap.set(d.target_id, (denMap.get(d.target_id) || 0) + 1));
     setDenunciasMap(denMap);
 
     setAnuncios(data.map(a => ({

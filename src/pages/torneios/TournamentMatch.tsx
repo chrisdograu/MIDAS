@@ -89,13 +89,13 @@ export default function TournamentMatch() {
       // H2H
       if (mm.player_a && mm.player_b) {
         const { data: history } = await supabase.from('tournament_matches' as any)
-          .select('id, winner_id, score_a, score_b, ended_at, player_a, player_b, tournament_id')
+          .select('id, winner, score_a, score_b, ended_at, player_a, player_b, tournament_id')
           .or(`and(player_a.eq.${mm.player_a},player_b.eq.${mm.player_b}),and(player_a.eq.${mm.player_b},player_b.eq.${mm.player_a})`)
           .neq('id', matchId).not('ended_at', 'is', null).order('ended_at', { ascending: false });
         const list = (history as any) || [];
         setH2h({
-          a: list.filter((x: any) => x.winner_id === mm.player_a).length,
-          b: list.filter((x: any) => x.winner_id === mm.player_b).length,
+          a: list.filter((x: any) => x.winner === mm.player_a).length,
+          b: list.filter((x: any) => x.winner === mm.player_b).length,
           total: list.length,
           last: list[0],
         });
@@ -157,7 +157,7 @@ export default function TournamentMatch() {
 
   const predict = async (winnerId: string) => {
     if (!user) { toast.error('Entre para prever'); return; }
-    if (m?.winner_id) return;
+    if (m?.winner) return;
     const ok = await dbWrite(supabase.from('tournament_predictions' as any).upsert({
       tournament_id: id, match_id: matchId, user_id: user.id, predicted_winner_id: winnerId,
     } as any, { onConflict: 'match_id,user_id' }), 'Não foi possível registrar sua previsão');
@@ -168,7 +168,7 @@ export default function TournamentMatch() {
 
   const voteMvp = async (forId: string) => {
     if (!user) { toast.error('Entre para votar'); return; }
-    if (!m?.winner_id) { toast.error('Aguarde a partida acabar'); return; }
+    if (!m?.winner) { toast.error('Aguarde a partida acabar'); return; }
     const ok = await dbWrite(supabase.from('tournament_mvp_votes' as any).upsert({
       tournament_id: id, match_id: matchId, voter_id: user.id, voted_for_id: forId,
     } as any, { onConflict: 'match_id,voter_id' }), 'Não foi possível registrar seu voto');
@@ -215,12 +215,12 @@ export default function TournamentMatch() {
           </div>
 
           <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center px-6 py-8">
-            <PlayerCard profile={pa} score={m.score_a} isWinner={m.winner_id === m.player_a} side="left" />
+            <PlayerCard profile={pa} score={m.score_a} isWinner={m.winner === m.player_a} side="left" />
             <div className="text-center">
               <div className="text-6xl md:text-7xl font-bold font-display tabular-nums text-foreground/30">VS</div>
               {m.ended_at && <div className="text-[10px] tracking-widest text-muted-foreground mt-2">FINALIZADA</div>}
             </div>
-            <PlayerCard profile={pb} score={m.score_b} isWinner={m.winner_id === m.player_b} side="right" />
+            <PlayerCard profile={pb} score={m.score_b} isWinner={m.winner === m.player_b} side="right" />
           </div>
 
           {/* GAP-658: Momentum bar com scoreboard em tempo real */}
@@ -255,8 +255,8 @@ export default function TournamentMatch() {
             {/* Predictions */}
             <Section title="Previsões dos espectadores" icon={<Target className="h-4 w-4" />}>
               <div className="space-y-2">
-                <PredBar name={pa?.display_name || 'A'} count={predA} pct={(predA / totalPred) * 100} mine={myPred === m.player_a} onClick={() => predict(m.player_a)} disabled={!!m.winner_id} side="left" />
-                <PredBar name={pb?.display_name || 'B'} count={predB} pct={(predB / totalPred) * 100} mine={myPred === m.player_b} onClick={() => predict(m.player_b)} disabled={!!m.winner_id} side="right" />
+                <PredBar name={pa?.display_name || 'A'} count={predA} pct={(predA / totalPred) * 100} mine={myPred === m.player_a} onClick={() => predict(m.player_a)} disabled={!!m.winner} side="left" />
+                <PredBar name={pb?.display_name || 'B'} count={predB} pct={(predB / totalPred) * 100} mine={myPred === m.player_b} onClick={() => predict(m.player_b)} disabled={!!m.winner} side="right" />
               </div>
             </Section>
 
@@ -319,7 +319,7 @@ export default function TournamentMatch() {
             )}
 
             {/* MVP voting */}
-            {m.winner_id && (
+            {m.winner && (
               <Section title="Vote no MVP" icon={<Crown className="h-4 w-4" />}>
                 <div className="grid grid-cols-2 gap-3">
                   <MvpCard profile={pa} count={mvpA} pct={(mvpA / totalMvp) * 100} mine={myMvp === m.player_a} onClick={() => voteMvp(m.player_a)} />

@@ -55,11 +55,11 @@ async function fetchOfficialTournaments(friendIds: string[]): Promise<Tournament
   
   const { data } = await supabase
     .from('tournament_participants')
-    .select('id, user_id, tournament_id, created_at, tournaments!inner(title, is_official), profiles!inner(display_name, avatar_url, is_private)')
+    .select('id, user_id, tournament_id, joined_at, tournaments!inner(title, is_official), profiles!inner(display_name, avatar_url, is_private)')
     .in('user_id', friendIds)
     .eq('tournaments.is_official', true)
     .eq('tournaments.event_state', 'finished')
-    .order('created_at', { ascending: false })
+    .order('joined_at', { ascending: false })
     .limit(20);
   
   return ((data || []) as any[])
@@ -70,7 +70,7 @@ async function fetchOfficialTournaments(friendIds: string[]): Promise<Tournament
       tournament_id: r.tournament_id,
       tournament_name: r.tournaments?.title || 'Torneio',
       is_official: r.tournaments?.is_official || false,
-      created_at: r.created_at,
+      created_at: r.joined_at,
       profiles: r.profiles,
     }));
 }
@@ -129,11 +129,11 @@ export default function SocialLibrary() {
             .in('user_id', friendIds).order('created_at', { ascending: false }).limit(60),
           // GAP-604: Torneios oficiais
           supabase.from('tournament_participants')
-            .select('id, user_id, tournament_id, created_at, tournaments!inner(title, is_official), profiles!inner(display_name, avatar_url, is_private)')
+            .select('id, user_id, tournament_id, joined_at, tournaments!inner(title, is_official), profiles!inner(display_name, avatar_url, is_private)')
             .in('user_id', friendIds)
             .eq('tournaments.is_official', true)
             .eq('tournaments.event_state', 'finished')
-            .order('created_at', { ascending: false }).limit(20),
+            .order('joined_at', { ascending: false }).limit(20),
         ]);
 
         const lib: FriendActivityItem[] = (((libRes.data as any[]) || []).filter(r => !r.profiles?.is_private)).map(r => ({
@@ -161,7 +161,7 @@ export default function SocialLibrary() {
           friend_name: r.profiles?.display_name, friend_avatar: r.profiles?.avatar_url,
           product_id: null, product_title: r.tournaments?.title, product_image: null,
           content: `participou do torneio oficial ${r.tournaments?.title}`,
-          created_at: r.created_at, state: 'new' as ActivityState,
+          created_at: r.joined_at, state: 'new' as ActivityState,
           is_official: true,
         }));
 

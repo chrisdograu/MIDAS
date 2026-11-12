@@ -49,7 +49,7 @@ interface UserTitle {
 
 interface UserBadge {
   id: string; user_id: string; badge_id: string;
-  assigned_by?: string | null; assigned_at: string;
+  assigned_by?: string | null; awarded_at: string;
   user_name?: string;
 }
 
@@ -88,7 +88,7 @@ export default function BadgesAdmin() {
     ] = await Promise.all([
       supabase.from('badge_catalog').select('*').order('category').order('id'),
       supabase.from('user_titles').select('*').order('awarded_at', { ascending: false }).limit(100),
-      supabase.from('user_badges').select('*, assigned_by').order('assigned_at', { ascending: false }).limit(200),
+      supabase.from('user_badges').select('*, assigned_by').order('awarded_at', { ascending: false }).limit(200),
     ]);
 
     // GAP-D28: Contar atribuições por badge
@@ -245,7 +245,7 @@ export default function BadgesAdmin() {
       .from('user_badges')
       .select('*, profiles:user_id(display_name)')
       .eq('badge_id', badgeId)
-      .order('assigned_at', { ascending: false })
+      .order('awarded_at', { ascending: false })
       .limit(50);
     return data || [];
   };
@@ -614,7 +614,7 @@ export default function BadgesAdmin() {
                     <div className="flex-1">
                       <p className="font-semibold text-sm">{badge?.name || ub.badge_id}</p>
                       <p className="text-xs text-muted-foreground">
-                        Usuário: {ub.user_id.slice(0, 8)} · {formatDate(ub.assigned_at)}
+                        Usuário: {ub.user_id.slice(0, 8)} · {formatDate(ub.awarded_at)}
                         {ub.assigned_by && <span className="ml-2">Atribuído por admin</span>}
                       </p>
                     </div>

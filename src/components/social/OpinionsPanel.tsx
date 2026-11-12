@@ -182,10 +182,12 @@ export function OpinionsPanel({ productId }: { productId: string }) {
       return;
     }
     setReporting(true);
-    const { error } = await supabase.from("opinion_reports").insert({
-      opinion_id: reportDialog.opinionId,
-      user_id: user!.id,
+    const { error } = await supabase.from("denuncias").insert({
+      target_type: "opiniao",
+      target_id: reportDialog.opinionId,
+      reporter_id: user!.id,
       reason: reportDialog.reason.trim(),
+      category: "opiniao",
     });
     setReporting(false);
     if (error) { toast.error("Erro ao enviar denúncia"); return; }

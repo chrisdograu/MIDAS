@@ -35,13 +35,13 @@ export default function RecompensasAdmin() {
         { count: cupons },
         { data: xpData },
       ] = await Promise.all([
-        supabase.from('badges').select('*', { count: 'exact', head: true }),
-        supabase.from('titles').select('*', { count: 'exact', head: true }),
+        supabase.from('badge_catalog').select('*', { count: 'exact', head: true }),
+        supabase.from('user_titles').select('*', { count: 'exact', head: true }),
         supabase.from('cupons').select('*', { count: 'exact', head: true }),
-        supabase.from('user_xp').select('xp, user_id'),
+        supabase.from('user_xp_totals').select('total_xp, user_id'),
       ]);
 
-      const totalXp = (xpData || []).reduce((acc, curr) => acc + (curr.xp || 0), 0);
+      const totalXp = (xpData || []).reduce((acc, curr) => acc + (curr.total_xp || 0), 0);
       const usuariosComXp = new Set((xpData || []).map(u => u.user_id)).size;
 
       setStats({

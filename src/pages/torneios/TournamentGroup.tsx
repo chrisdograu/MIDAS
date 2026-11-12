@@ -164,20 +164,26 @@ export default function TournamentGroup() {
     }
   }, [messages]);
 
+  const loadReactions = async (messageIds: string[]) => {
+    const reactMap: Record<string, Record<string, string>> = {};
+    if (messageIds.length) {
+      const { data: rows } = await supabase.from('message_reactions')
+        .select('message_id, user_id, emoji').in('message_id', messageIds);
+      (rows || []).forEach((r: any) => {
+        reactMap[r.message_id] = { ...(reactMap[r.message_id] || {}), [r.user_id]: r.emoji };
+      });
+    }
+    setReactions(reactMap);
+  };
+
   const loadMessages = async () => {
     const { data } = await supabase.from('mensagens')
-      .select('id, sender_id, content, created_at, reactions, image_url')
+      .select('id, sender_id, content, created_at, image_url')
       .eq('tournament_id', id!).order('created_at', { ascending: true }).limit(200);
     const msgs = (data as any) || [];
     setMessages(msgs);
     // Carregar reações
-    const reactMap: Record<string, Record<string, string>> = {};
-    msgs.forEach((m: any) => {
-      if (m.reactions) {
-        reactMap[m.id] = m.reactions;
-      }
-    });
-    setReactions(reactMap);
+    await loadReactions(msgs.map((m: any) => m.id));
     const ids = [...new Set(msgs.map((m: any) => m.sender_id))];
     if (ids.length) {
       const { data: profs } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', ids as any);
@@ -221,21 +227,13 @@ export default function TournamentGroup() {
   // GAP-1119: Adicionar reação
   const addReaction = async (messageId: string, emoji: ReactionType) => {
     if (!user) return;
-    const current = reactions[messageId] || {};
-    const userReaction = current[user.id];
-    let newReactions = { ...current };
-    if (userReaction === emoji) {
-      delete newReactions[user.id];
-    } else {
-      newReactions[user.id] = emoji;
+    const previous = reactions[messageId]?.[user.id];
+    if (previous && previous !== emoji) {
+      await supabase.rpc('toggle_message_reaction', { p_message_id: messageId, p_emoji: previous });
     }
-    const { error } = await supabase
-      .from('mensagens')
-      .update({ reactions: newReactions })
-      .eq('id', messageId);
-    if (!error) {
-      setReactions(prev => ({ ...prev, [messageId]: newReactions }));
-    }
+    const { error } = await supabase.rpc('toggle_message_reaction', { p_message_id: messageId, p_emoji: emoji });
+    if (error) { toast.error('Não foi possível reagir'); return; }
+    await loadReactions(messages.map(m => m.id));
   };
 
   // GAP-1120: Upload de imagem

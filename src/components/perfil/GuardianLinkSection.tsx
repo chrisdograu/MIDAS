@@ -54,13 +54,13 @@ export default function GuardianLinkSection() {
     });
     
     // GAP-GL03: Buscar status do pedido
-    (supabase as any).from('guardian_link_requests').select('id, status, created_at, admin_notes')
+    (supabase as any).from('guardian_link_requests').select('id, status, created_at, reason')
       .eq('minor_id', user.id).order('created_at', { ascending: false }).limit(1)
       .then(({ data }: any) => {
         const req = data?.[0];
         if (req) {
           setStatus(req.status);
-          setStatusMessage(req.admin_notes || null);
+          setStatusMessage(req.reason || null);
           setSubmittedAt(req.created_at);
         }
       });

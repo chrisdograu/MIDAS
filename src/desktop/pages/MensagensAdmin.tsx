@@ -28,7 +28,7 @@ import { adminLog } from '../lib/adminLog';
 
 interface Message {
   id: string;
-  conversation_id: string;
+  conversation_id?: string;
   sender_id: string;
   content: string;
   created_at: string;
@@ -120,7 +120,7 @@ export default function MensagensAdmin() {
       let query = supabase
         .from('conversas')
         .select('*, participant_1_profile:profiles!participant_1(display_name), participant_2_profile:profiles!participant_2(display_name)')
-        .order('updated_at', { ascending: false });
+        .order('last_message_at', { ascending: false, nullsFirst: false });
 
       if (channel !== 'all') {
         query = query.eq('channel', channel);
@@ -145,7 +145,8 @@ export default function MensagensAdmin() {
           const { data: lastMsg } = await supabase
             .from('mensagens')
             .select('content, created_at')
-            .eq('conversation_id', c.id)
+            .or(`and(sender_id.eq.${c.participant_1},receiver_id.eq.${c.participant_2}),and(sender_id.eq.${c.participant_2},receiver_id.eq.${c.participant_1})`)
+            .is('group_id', null).is('tournament_id', null)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -153,7 +154,8 @@ export default function MensagensAdmin() {
           const { count } = await supabase
             .from('mensagens')
             .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', c.id);
+            .or(`and(sender_id.eq.${c.participant_1},receiver_id.eq.${c.participant_2}),and(sender_id.eq.${c.participant_2},receiver_id.eq.${c.participant_1})`)
+            .is('group_id', null).is('tournament_id', null);
 
           return {
             ...c,
@@ -212,7 +214,8 @@ export default function MensagensAdmin() {
     const { data } = await supabase
       .from('mensagens')
       .select('*, sender:profiles!sender_id(display_name, avatar_url)')
-      .eq('conversation_id', selectedConv.id)
+      .or(`and(sender_id.eq.${(selectedConv as any).participant_1},receiver_id.eq.${(selectedConv as any).participant_2}),and(sender_id.eq.${(selectedConv as any).participant_2},receiver_id.eq.${(selectedConv as any).participant_1})`)
+      .is('group_id', null).is('tournament_id', null)
       .order('created_at', { ascending: true });
 
     setMessages(data || []);

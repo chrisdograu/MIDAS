@@ -71,10 +71,10 @@ export default function Relatorios() {
       // GAP-D283: Usuários ativos (últimos 7 dias)
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
       const { data: activeUsers } = await supabase
-        .from('profiles')
-        .select('id, last_login')
-        .gte('last_login', weekAgo);
-      const ativos = activeUsers?.filter(u => u.last_login)?.length || 0;
+        .from('login_history')
+        .select('user_id')
+        .gte('logged_in_at', weekAgo);
+      const ativos = new Set((activeUsers || []).map(u => u.user_id)).size;
 
       // Status distribution
       const statusMap = new Map<string, number>();
@@ -139,7 +139,7 @@ export default function Relatorios() {
       const { data: visitantes } = await supabase
         .from('product_views')
         .select('user_id')
-        .gte('created_at', since);
+        .gte('viewed_at', since);
       const visitantesUnicos = new Set(visitantes?.map(v => v.user_id).filter(Boolean)).size || 1;
       const taxaConversao = valid.length / visitantesUnicos;
 

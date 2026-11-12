@@ -103,10 +103,10 @@ export default function AvaliacoesJogos() {
     // GAP-D06: Buscar denúncias
     const reviewIds = compArr.map(c => c.id);
     const { data: denuncias } = reviewIds.length
-      ? await supabase.from('denuncias').select('entity_id, status').eq('entity_type', 'review_completa').in('entity_id', reviewIds)
+      ? await supabase.from('denuncias').select('target_id, status').eq('target_type', 'review_completa').in('target_id', reviewIds)
       : { data: [] as any[] };
     const denMap = new Map<string, number>();
-    denuncias?.forEach(d => denMap.set(d.entity_id, (denMap.get(d.entity_id) || 0) + 1));
+    denuncias?.forEach(d => denMap.set(d.target_id, (denMap.get(d.target_id) || 0) + 1));
     setDenunciasMap(denMap);
 
     setNotas(notasArr.map(n => ({

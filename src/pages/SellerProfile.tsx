@@ -37,18 +37,21 @@ type Seller = {
 async function getAverageResponseTime(sellerId: string): Promise<number | null> {
   const { data: conversations } = await supabase
     .from('conversas')
-    .select('id')
+    .select('id, participant_1, participant_2')
     .or(`participant_1.eq.${sellerId},participant_2.eq.${sellerId}`)
     .eq('channel', 'seller')
     .limit(50);
   
   if (!conversations || conversations.length === 0) return null;
   
-  const convIds = conversations.map(c => c.id);
+  const pairFilter = conversations
+    .map((c: any) => `and(sender_id.eq.${c.participant_1},receiver_id.eq.${c.participant_2}),and(sender_id.eq.${c.participant_2},receiver_id.eq.${c.participant_1})`)
+    .join(',');
   const { data: messages } = await supabase
     .from('mensagens')
-    .select('conversation_id, sender_id, created_at')
-    .in('conversation_id', convIds)
+    .select('sender_id, receiver_id, created_at')
+    .or(pairFilter)
+    .is('group_id', null)
     .order('created_at', { ascending: true });
   
   if (!messages || messages.length < 2) return null;
@@ -86,9 +89,10 @@ async function getSellerReviews(sellerId: string) {
 // GAP-600: Buscar histórico de vendas (últimas 5)
 async function getSellerSalesHistory(sellerId: string) {
   const { data } = await supabase
-    .from('pedidos')
-    .select('id, created_at, total, status')
+    .from('anuncios')
+    .select('id, created_at, total:price, status')
     .eq('seller_id', sellerId)
+    .in('status', ['sold', 'traded'])
     .order('created_at', { ascending: false })
     .limit(5);
   return data || [];

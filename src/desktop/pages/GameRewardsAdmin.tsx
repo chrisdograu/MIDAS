@@ -230,14 +230,9 @@ export default function GameRewardsAdmin() {
     const inserts = userIds.map(userId => ({
       user_id: userId,
       reward_id: bulkReward.id,
-      assigned_by: user?.id,
-      assigned_at: new Date().toISOString(),
-      notes: bulkReason,
-      // GAP-D128: Adicionar XP se configurado
-      xp_awarded: (bulkReward as any).xp_reward || 0,
     }));
     
-    const { error } = await supabase.from('user_rewards').insert(inserts);
+    const { error } = await supabase.from('user_game_rewards').insert(inserts);
     setBulkLoading(false);
     
     if (error) { toast.error('Erro ao atribuir: ' + error.message); return; }

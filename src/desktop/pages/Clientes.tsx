@@ -47,12 +47,12 @@ export default function Clientes() {
   // GAP-D76: Último acesso
   const fetchLastLogin = async (userId: string) => {
     const { data } = await supabase
-      .from('sessions')
-      .select('created_at')
+      .from('login_history')
+      .select('logged_in_at')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('logged_in_at', { ascending: false })
       .limit(1);
-    return data?.[0]?.created_at || null;
+    return data?.[0]?.logged_in_at || null;
   };
 
   useEffect(() => {
