@@ -3072,7 +3072,7 @@ export type Database = {
           kind: string
           payload: Json | null
           product_id: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
           user_note: string | null
           visibility: string | null
@@ -3083,7 +3083,7 @@ export type Database = {
           kind: string
           payload?: Json | null
           product_id: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
           user_note?: string | null
           visibility?: string | null
@@ -3094,7 +3094,7 @@ export type Database = {
           kind?: string
           payload?: Json | null
           product_id?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
           user_note?: string | null
           visibility?: string | null
