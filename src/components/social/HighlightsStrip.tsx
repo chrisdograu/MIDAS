@@ -82,13 +82,13 @@ export default function HighlightsStrip({ userId, limit = 6, showEdit = false, c
 
       const gameIds = rows.filter(r => r.type === 'game').map(r => r.ref_id);
       if (gameIds.length) {
-        const { data: prods } = await supabase.from('produtos').select('id, title, image').in('id', gameIds);
+        const { data: prods } = await supabase.from('produtos').select('id, title, image_url').in('id', gameIds);
         const m = new Map((prods || []).map((p: any) => [p.id, p]));
         rows.forEach(r => {
           if (r.type === 'game') {
             const p: any = m.get(r.ref_id);
             r.label = p?.title || 'Jogo';
-            r.image = p?.image || null;
+            r.image = p?.image_url || null;
             r.href = `/jogo/${r.ref_id}`;
           }
         });

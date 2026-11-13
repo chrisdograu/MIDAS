@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ScrollText, Menu, FileText, History, CheckCircle2, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import SelectSimples from '@/components/SelectSimples';
 
@@ -107,39 +106,10 @@ export default function TermosDeUso() {
   const [currentVersion, setCurrentVersion] = useState<string | null>(null);
   const [showVersionSelector, setShowVersionSelector] = useState(false);
 
-  // GAP-609: Carregar termos do banco
+  // Termos vêm do conteúdo oficial do site; não há tabela de termos no banco.
   useEffect(() => {
-    async function loadTerms() {
-      setLoading(true);
-      try {
-        // Buscar versão ativa
-        const { data: active } = await supabase
-          .from('terms')
-          .select('sections, version')
-          .eq('is_active', true)
-          .maybeSingle();
-
-        if (active) {
-          setSections(active.sections || FALLBACK_SECTIONS);
-          setCurrentVersion(active.version || '1.0');
-        }
-
-        // GAP-611: Buscar histórico de versões
-        const { data: allVersions } = await supabase
-          .from('terms')
-          .select('id, version, created_at, sections')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (allVersions) {
-          setVersions(allVersions as TermsVersion[]);
-        }
-      } catch {
-        setSections(FALLBACK_SECTIONS);
-      }
-      setLoading(false);
-    }
-    loadTerms();
+    setSections(FALLBACK_SECTIONS);
+    setLoading(false);
   }, []);
 
   // GAP-611: Mudar versão

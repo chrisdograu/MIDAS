@@ -156,10 +156,10 @@ export default function CriarVendedor({ mode = 'create' }: { mode?: 'create' | '
     setUploadingBanner(true);
     const file = await stripImageExif(raw);
     const ext = file.name.split('.').pop();
-    const path = `${user.id}/banner.${ext}`;
-    const { error } = await supabase.storage.from('banners').upload(path, file, { upsert: true });
+    const path = `${user.id}/seller-banner.${ext}`;
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (error) { toast.error('Erro ao enviar banner'); setUploadingBanner(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from('banners').getPublicUrl(path);
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
     setBannerUrl(publicUrl + `?t=${Date.now()}`);
     setUploadingBanner(false);
   };
