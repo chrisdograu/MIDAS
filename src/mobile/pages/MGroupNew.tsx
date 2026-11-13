@@ -124,7 +124,7 @@ export default function MGroupNew() {
     let coverUrlFinal = null;
     if (coverFile) {
       const ext = coverFile.name.split(".").pop();
-      const path = `group-covers/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { error: uploadError } = await supabase.storage.from("group-covers").upload(path, coverFile);
       if (!uploadError) {
         const {
