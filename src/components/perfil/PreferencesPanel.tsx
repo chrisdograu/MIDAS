@@ -121,8 +121,10 @@ export default function PreferencesPanel() {
   // GAP-PP03: Validar código em tempo real
   const validateCode = async (code: string) => {
     if (code.length < 4) { setCodeValid(null); return; }
-    const { data } = await (supabase as any).rpc('validate_referral_code', { _code: code });
-    setCodeValid(data?.valid || false);
+    if (!user) { setCodeValid(null); return; }
+    const { data } = await supabase.from('profiles').select('id')
+      .eq('referral_code', code.trim().toUpperCase()).neq('id', user.id).maybeSingle();
+    setCodeValid(Boolean(data));
   };
 
   const redeem = async () => {

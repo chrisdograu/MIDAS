@@ -65,6 +65,9 @@ export default function BuscaInput({
   const [debouncedValue, setDebouncedValue] = useState(value);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [localHistory, setLocalHistory] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('searchHistory') || '[]'); } catch { return []; }
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -155,10 +158,10 @@ export default function BuscaInput({
   // GAP-BI04: Salvar histórico
   const handleSubmit = useCallback((val: string) => {
     if (saveHistory && val.trim()) {
-      // TODO: Salvar no localStorage ou backend
       const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
       const newHistory = [val, ...history.filter((h: string) => h !== val)].slice(0, 10);
       localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+      setLocalHistory(newHistory);
     }
     onDebouncedChange?.(val);
   }, [saveHistory, onDebouncedChange]);
@@ -172,7 +175,8 @@ export default function BuscaInput({
     : [];
 
   // GAP-BI04: Histórico
-  const displayHistory = searchHistory.length > 0 && !value && isFocused;
+  const shownHistory = searchHistory.length > 0 ? searchHistory : localHistory;
+  const displayHistory = shownHistory.length > 0 && !value && isFocused;
 
   const hasSuggestions = filteredSuggestions.length > 0 || suggestionsLoading;
 
@@ -193,7 +197,7 @@ export default function BuscaInput({
           }}
           onFocus={() => {
             setIsFocused(true);
-            if (!value && saveHistory && searchHistory.length > 0) {
+            if (!value && saveHistory && shownHistory.length > 0) {
               setShowHistory(true);
             }
           }}
@@ -257,7 +261,7 @@ export default function BuscaInput({
                   </button>
                 )}
               </div>
-              {searchHistory.slice(0, 8).map((item) => (
+              {shownHistory.slice(0, 8).map((item) => (
                 <button
                   key={item}
                   onClick={() => {

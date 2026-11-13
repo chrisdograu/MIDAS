@@ -182,16 +182,16 @@ export default function BibliotecaJogo() {
     try {
       const processedFile = await stripImageExif(file);
       const ext = processedFile.name.split('.').pop();
-      const path = `${user.id}/${productId}/screenshot-${Date.now()}.${ext}`;
+      const path = `screenshots/${user.id}/${productId}/screenshot-${Date.now()}.${ext}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('screenshots')
+        .from('product-images')
         .upload(path, processedFile);
       
       if (uploadError) throw uploadError;
       
       const { data: { publicUrl } } = supabase.storage
-        .from('screenshots')
+        .from('product-images')
         .getPublicUrl(path);
       
       setScreenshots(prev => [...prev, publicUrl]);

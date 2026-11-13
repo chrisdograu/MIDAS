@@ -144,7 +144,7 @@ async function revertAction(
         // Restaurar post do fórum
         const { error } = await supabase
           .from('forum_posts')
-          .update({ is_hidden: false, hidden_at: null })
+          .update({ visibility: 'public' } as any)
           .eq('id', entityId);
         if (!error) success = true;
         break;
@@ -154,7 +154,7 @@ async function revertAction(
         // Restaurar review
         const { error } = await supabase
           .from('avaliacoes')
-          .update({ is_hidden: false })
+          .update({ is_approved: true } as any)
           .eq('id', entityId);
         if (!error) success = true;
         break;

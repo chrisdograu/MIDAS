@@ -56,12 +56,13 @@ interface ActiveTitleSelectorProps {
 export default function ActiveTitleSelector({ 
   userId, 
   sortBy = 'recent',
-  filterBy = 'all',
+  filterBy: initialFilter = 'all',
   showPreview = true,
   allowMultiple = false,
   previewSize = 'md',
 }: ActiveTitleSelectorProps) {
   const [titles, setTitles] = useState<TitleRow[]>([]);
+  const [filterBy, setFilterBy] = useState<FilterBy>(initialFilter);
   const [allowed, setAllowed] = useState<Record<string, boolean>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -252,7 +253,7 @@ export default function ActiveTitleSelector({
           {Object.entries(categoryLabels).map(([key, { label, icon: Icon }]) => (
             <button
               key={key}
-              onClick={() => {/* TODO: Implementar filtro */}}
+              onClick={() => setFilterBy(key as FilterBy)}
               className={cn(
                 "px-2 py-1 rounded-md text-xs font-medium transition-colors",
                 filterBy === key

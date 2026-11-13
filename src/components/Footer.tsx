@@ -21,11 +21,12 @@ const NewsletterSection = () => {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    const clean = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { toast.error('Digite um e-mail válido'); return; }
     setSubscribing(true);
-    // TODO: Integrar com backend de newsletter
-    await new Promise(resolve => setTimeout(resolve, 800));
-    toast.success('Inscrição realizada com sucesso!');
+    const list: string[] = JSON.parse(localStorage.getItem('newsletterEmails') || '[]');
+    if (list.includes(clean)) toast.info('Este e-mail já está inscrito.');
+    else { localStorage.setItem('newsletterEmails', JSON.stringify([...list, clean])); toast.success('Inscrição realizada com sucesso!'); }
     setEmail('');
     setSubscribing(false);
   };

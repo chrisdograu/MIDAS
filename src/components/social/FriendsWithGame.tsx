@@ -104,13 +104,21 @@ export default function FriendsWithGame({ productId, onInvite }: Props) {
         .eq('user_id', user.id);
       const favSet = new Set((favs || []).map((f: any) => f.friend_id));
       
+      // 5) Presença real (respeita privacidade via RPC)
+      const onlineSet = new Set<string>();
+      await Promise.all(rows.map(async (r: any) => {
+        const { data } = await supabase.rpc('get_user_presence', { _user_id: r.user_id });
+        const p: any = data?.[0];
+        if (p?.is_online || (p?.last_seen_at && Date.now() - new Date(p.last_seen_at).getTime() < 5 * 60_000)) onlineSet.add(r.user_id);
+      }));
+
       const merged: FriendWithGame[] = rows.map(r => ({
         user_id: r.user_id,
         status: r.status,
         display_name: pmap.get(r.user_id)?.display_name ?? null,
         avatar_url: pmap.get(r.user_id)?.avatar_url ?? null,
         is_favorite: favSet.has(r.user_id),
-        is_online: false, // TODO: integração com presença real
+        is_online: onlineSet.has(r.user_id),
       })).sort((a, b) => {
         const order = ['jogando','zerado','pausado','ja_joguei','abandonado','quero_jogar'];
         return order.indexOf(a.status) - order.indexOf(b.status);

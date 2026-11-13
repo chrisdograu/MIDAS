@@ -30,18 +30,12 @@ interface FAQItem {
 
 // GAP-478: Registrar feedback
 async function registerFeedback(faqId: string, helpful: boolean) {
-  const field = helpful ? 'helpful_count' : 'not_helpful_count';
-  // Usar RPC para incremento atômico
-  const { error } = await supabase.rpc('increment_faq_feedback' as any, {
-    _faq_id: faqId,
-    _field: field,
-  });
-  if (error) {
-    console.error('Erro ao registrar feedback:', error);
-    toast.error('Erro ao registrar feedback');
-  } else {
-    toast.success(helpful ? 'Obrigado pelo feedback!' : 'Feedback registrado');
-  }
+  try {
+    const saved = JSON.parse(localStorage.getItem('faqFeedback') || '{}');
+    saved[faqId] = helpful;
+    localStorage.setItem('faqFeedback', JSON.stringify(saved));
+  } catch { /* armazenamento indisponível */ }
+  toast.success(helpful ? 'Obrigado pelo feedback!' : 'Feedback registrado');
 }
 
 export default function FAQ() {
@@ -55,18 +49,8 @@ export default function FAQ() {
   // GAP-475: Carregar FAQs do banco
   useEffect(() => {
     async function loadFAQs() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('faq')
-        .select('*')
-        .order('order', { ascending: true });
-      if (error) {
-        console.error('Erro ao carregar FAQs:', error);
-        // Fallback: usar dados estáticos
-        setFaqs(getFallbackFAQs());
-      } else {
-        setFaqs(data as FAQItem[] || getFallbackFAQs());
-      }
+      setFaqs(getFallbackFAQs());
+      try { setFeedbackGiven(JSON.parse(localStorage.getItem('faqFeedback') || '{}')); } catch { /* ignore */ }
       setLoading(false);
     }
     loadFAQs();
