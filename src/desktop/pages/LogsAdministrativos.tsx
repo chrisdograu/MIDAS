@@ -163,8 +163,8 @@ async function revertAction(
       case 'remove_screenshot': {
         // Restaurar screenshot (se possível)
         const { error } = await supabase
-          .from('screenshots')
-          .update({ is_hidden: false })
+          .from('game_screenshots')
+          .update({ visibility: 'public' })
           .eq('id', entityId);
         if (!error) success = true;
         break;
@@ -174,7 +174,7 @@ async function revertAction(
         // Restaurar opinião
         const { error } = await supabase
           .from('game_opinions')
-          .update({ is_hidden: false })
+          .update({ visibility: 'public' })
           .eq('id', entityId);
         if (!error) success = true;
         break;

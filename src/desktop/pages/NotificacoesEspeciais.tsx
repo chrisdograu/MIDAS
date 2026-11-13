@@ -321,15 +321,6 @@ export default function NotificacoesEspeciais() {
     toast.success('Notificação duplicada! Edite e envie.');
   };
 
-  // GAP-D197: Atualizar estatísticas (simulado)
-  const updateStats = async (notifId: string, type: 'view' | 'click') => {
-    const field = type === 'view' ? 'views' : 'clicks';
-    await supabase
-      .from('special_notifications' as any)
-      .update({ [field]: supabase.rpc('increment', { row_id: notifId, field }) })
-      .eq('id', notifId);
-  };
-
   const filteredHistory = useMemo(() => {
     let result = history;
     if (historyFilter !== 'all') {

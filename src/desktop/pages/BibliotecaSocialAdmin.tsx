@@ -136,8 +136,8 @@ export default function BibliotecaSocialAdmin() {
     ] = await Promise.all([
       supabase.from('avaliacoes').select('*').eq('user_id', u.id).limit(20),
       supabase.from('reviews_completas').select('*').eq('user_id', u.id).limit(20),
-      supabase.from('screenshots').select('*').eq('user_id', u.id).limit(20),
-      supabase.from('opinions').select('*').eq('user_id', u.id).limit(20),
+      supabase.from('game_screenshots').select('*').eq('user_id', u.id).limit(20),
+      supabase.from('game_opinions').select('*').eq('user_id', u.id).limit(20),
     ]);
 
     setSocialContent([
@@ -520,7 +520,7 @@ export default function BibliotecaSocialAdmin() {
                         {item.type === 'opinion' && '💬 Opinião'}
                       </Badge>
                       <span className="text-sm text-muted-foreground flex-1 truncate">
-                        {item.comment || item.analise || item.content || '—'}
+                        {item.comment || item.analise || item.content || item.caption || item.text || '—'}
                       </span>
                       <span className="text-xs text-muted-foreground">{formatDate(item.created_at)}</span>
                     </div>
